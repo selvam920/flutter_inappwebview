@@ -206,133 +206,133 @@ namespace flutter_inappwebview_plugin
       return;
     }
 
-    failedLog(webView->add_NavigationStarting(
-      Callback<ICoreWebView2NavigationStartingEventHandler>(
-        [this](ICoreWebView2* sender, ICoreWebView2NavigationStartingEventArgs* args)
-        {
-          isLoading_ = true;
+    // failedLog(webView->add_NavigationStarting(
+    //   Callback<ICoreWebView2NavigationStartingEventHandler>(
+    //     [this](ICoreWebView2* sender, ICoreWebView2NavigationStartingEventArgs* args)
+    //     {
+    //       isLoading_ = true;
 
-          if (!channelDelegate) {
-            args->put_Cancel(false);
-            return S_OK;
-          }
+    //       if (!channelDelegate) {
+    //         args->put_Cancel(false);
+    //         return S_OK;
+    //       }
 
-          wil::unique_cotaskmem_string uri = nullptr;
-          std::optional<std::string> url = SUCCEEDED(args->get_Uri(&uri)) ? wide_to_utf8(uri.get()) : std::optional<std::string>{};
+    //       wil::unique_cotaskmem_string uri = nullptr;
+    //       std::optional<std::string> url = SUCCEEDED(args->get_Uri(&uri)) ? wide_to_utf8(uri.get()) : std::optional<std::string>{};
 
-          wil::unique_cotaskmem_string requestMethod = nullptr;
-          wil::com_ptr<ICoreWebView2HttpRequestHeaders> requestHeaders = nullptr;
-          std::optional<std::map<std::string, std::string>> headers = std::optional<std::map<std::string, std::string>>{};
-          if (SUCCEEDED(args->get_RequestHeaders(&requestHeaders))) {
-            headers = std::make_optional<std::map<std::string, std::string>>({});
-            wil::com_ptr<ICoreWebView2HttpHeadersCollectionIterator> iterator;
-            requestHeaders->GetIterator(&iterator);
-            BOOL hasCurrent = FALSE;
-            while (SUCCEEDED(iterator->get_HasCurrentHeader(&hasCurrent)) && hasCurrent) {
-              wil::unique_cotaskmem_string name;
-              wil::unique_cotaskmem_string value;
+    //       wil::unique_cotaskmem_string requestMethod = nullptr;
+    //       wil::com_ptr<ICoreWebView2HttpRequestHeaders> requestHeaders = nullptr;
+    //       std::optional<std::map<std::string, std::string>> headers = std::optional<std::map<std::string, std::string>>{};
+    //       if (SUCCEEDED(args->get_RequestHeaders(&requestHeaders))) {
+    //         headers = std::make_optional<std::map<std::string, std::string>>({});
+    //         wil::com_ptr<ICoreWebView2HttpHeadersCollectionIterator> iterator;
+    //         requestHeaders->GetIterator(&iterator);
+    //         BOOL hasCurrent = FALSE;
+    //         while (SUCCEEDED(iterator->get_HasCurrentHeader(&hasCurrent)) && hasCurrent) {
+    //           wil::unique_cotaskmem_string name;
+    //           wil::unique_cotaskmem_string value;
 
-              if (SUCCEEDED(iterator->GetCurrentHeader(&name, &value))) {
-                headers->insert({ wide_to_utf8(name.get()), wide_to_utf8(value.get()) });
-              }
+    //           if (SUCCEEDED(iterator->GetCurrentHeader(&name, &value))) {
+    //             headers->insert({ wide_to_utf8(name.get()), wide_to_utf8(value.get()) });
+    //           }
 
-              BOOL hasNext = FALSE;
-              iterator->MoveNext(&hasNext);
-            }
+    //           BOOL hasNext = FALSE;
+    //           iterator->MoveNext(&hasNext);
+    //         }
 
-            requestHeaders->GetHeader(L"Flutter-InAppWebView-Request-Method", &requestMethod);
-            requestHeaders->RemoveHeader(L"Flutter-InAppWebView-Request-Method");
-          }
+    //         requestHeaders->GetHeader(L"Flutter-InAppWebView-Request-Method", &requestMethod);
+    //         requestHeaders->RemoveHeader(L"Flutter-InAppWebView-Request-Method");
+    //       }
 
-          std::optional<std::string> method = requestMethod ? wide_to_utf8(requestMethod.get()) : std::optional<std::string>{};
+    //       std::optional<std::string> method = requestMethod ? wide_to_utf8(requestMethod.get()) : std::optional<std::string>{};
 
-          BOOL isUserInitiated;
-          if (FAILED(args->get_IsUserInitiated(&isUserInitiated))) {
-            isUserInitiated = FALSE;
-          }
+    //       BOOL isUserInitiated;
+    //       if (FAILED(args->get_IsUserInitiated(&isUserInitiated))) {
+    //         isUserInitiated = FALSE;
+    //       }
 
-          BOOL isRedirect;
-          if (FAILED(args->get_IsRedirected(&isRedirect))) {
-            isRedirect = FALSE;
-          }
+    //       BOOL isRedirect;
+    //       if (FAILED(args->get_IsRedirected(&isRedirect))) {
+    //         isRedirect = FALSE;
+    //       }
 
-          std::optional<NavigationActionType> navigationType = std::nullopt;
-          wil::com_ptr<ICoreWebView2NavigationStartingEventArgs3> args3;
-          if (SUCCEEDED(args->QueryInterface(IID_PPV_ARGS(&args3)))) {
-            COREWEBVIEW2_NAVIGATION_KIND navigationKind;
-            if (SUCCEEDED(args3->get_NavigationKind(&navigationKind))) {
-              switch (navigationKind) {
-              case COREWEBVIEW2_NAVIGATION_KIND_RELOAD:
-                navigationType = NavigationActionType::reload;
-                break;
-              case COREWEBVIEW2_NAVIGATION_KIND_BACK_OR_FORWARD:
-                navigationType = NavigationActionType::backForward;
-                break;
-              case COREWEBVIEW2_NAVIGATION_KIND_NEW_DOCUMENT:
-                if (isUserInitiated && !isRedirect) {
-                  navigationType = NavigationActionType::linkActivated;
-                }
-                else {
-                  navigationType = NavigationActionType::other;
-                }
-                break;
-              default:
-                navigationType = NavigationActionType::other;
-              }
-            }
-          }
+    //       std::optional<NavigationActionType> navigationType = std::nullopt;
+    //       wil::com_ptr<ICoreWebView2NavigationStartingEventArgs3> args3;
+    //       if (SUCCEEDED(args->QueryInterface(IID_PPV_ARGS(&args3)))) {
+    //         COREWEBVIEW2_NAVIGATION_KIND navigationKind;
+    //         if (SUCCEEDED(args3->get_NavigationKind(&navigationKind))) {
+    //           switch (navigationKind) {
+    //           case COREWEBVIEW2_NAVIGATION_KIND_RELOAD:
+    //             navigationType = NavigationActionType::reload;
+    //             break;
+    //           case COREWEBVIEW2_NAVIGATION_KIND_BACK_OR_FORWARD:
+    //             navigationType = NavigationActionType::backForward;
+    //             break;
+    //           case COREWEBVIEW2_NAVIGATION_KIND_NEW_DOCUMENT:
+    //             if (isUserInitiated && !isRedirect) {
+    //               navigationType = NavigationActionType::linkActivated;
+    //             }
+    //             else {
+    //               navigationType = NavigationActionType::other;
+    //             }
+    //             break;
+    //           default:
+    //             navigationType = NavigationActionType::other;
+    //           }
+    //         }
+    //       }
 
-          auto urlRequest = std::make_shared<URLRequest>(url, method, headers, std::nullopt);
-          auto navigationAction = std::make_shared<NavigationAction>(
-            urlRequest,
-            true,
-            isRedirect,
-            navigationType
-          );
+    //       auto urlRequest = std::make_shared<URLRequest>(url, method, headers, std::nullopt);
+    //       auto navigationAction = std::make_shared<NavigationAction>(
+    //         urlRequest,
+    //         true,
+    //         isRedirect,
+    //         navigationType
+    //       );
 
-          lastNavigationAction_ = navigationAction;
+    //       lastNavigationAction_ = navigationAction;
 
-          UINT64 navigationId;
-          if (SUCCEEDED(args->get_NavigationId(&navigationId))) {
-            navigationActions_.insert({ navigationId, navigationAction });
-          }
+    //       UINT64 navigationId;
+    //       if (SUCCEEDED(args->get_NavigationId(&navigationId))) {
+    //         navigationActions_.insert({ navigationId, navigationAction });
+    //       }
 
-          if (settings->useShouldOverrideUrlLoading && callShouldOverrideUrlLoading_ && requestMethod == nullptr) {
-            // for some reason, we can't cancel and load an URL with other HTTP methods than GET,
-            // so ignore the shouldOverrideUrlLoading event.
+    //       if (settings->useShouldOverrideUrlLoading && callShouldOverrideUrlLoading_ && requestMethod == nullptr) {
+    //         // for some reason, we can't cancel and load an URL with other HTTP methods than GET,
+    //         // so ignore the shouldOverrideUrlLoading event.
 
-            auto callback = std::make_unique<WebViewChannelDelegate::ShouldOverrideUrlLoadingCallback>();
-            callback->nonNullSuccess = [this, urlRequest](const NavigationActionPolicy actionPolicy)
-              {
-                callShouldOverrideUrlLoading_ = false;
-                if (actionPolicy == NavigationActionPolicy::allow) {
-                  loadUrl(urlRequest);
-                }
-                return false;
-              };
-            auto defaultBehaviour = [this, urlRequest](const std::optional<const NavigationActionPolicy> actionPolicy)
-              {
-                callShouldOverrideUrlLoading_ = false;
-                loadUrl(urlRequest);
-              };
-            callback->defaultBehaviour = defaultBehaviour;
-            callback->error = [defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
-              {
-                debugLog(error_code + ", " + error_message);
-                defaultBehaviour(std::nullopt);
-              };
-            channelDelegate->shouldOverrideUrlLoading(std::move(navigationAction), std::move(callback));
-            args->put_Cancel(true);
-          }
-          else {
-            callShouldOverrideUrlLoading_ = true;
-            channelDelegate->onLoadStart(url);
-            args->put_Cancel(false);
-          }
+    //         auto callback = std::make_unique<WebViewChannelDelegate::ShouldOverrideUrlLoadingCallback>();
+    //         callback->nonNullSuccess = [this, urlRequest](const NavigationActionPolicy actionPolicy)
+    //           {
+    //             callShouldOverrideUrlLoading_ = false;
+    //             if (actionPolicy == NavigationActionPolicy::allow) {
+    //               loadUrl(urlRequest);
+    //             }
+    //             return false;
+    //           };
+    //         auto defaultBehaviour = [this, urlRequest](const std::optional<const NavigationActionPolicy> actionPolicy)
+    //           {
+    //             callShouldOverrideUrlLoading_ = false;
+    //             loadUrl(urlRequest);
+    //           };
+    //         callback->defaultBehaviour = defaultBehaviour;
+    //         callback->error = [defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
+    //           {
+    //             debugLog(error_code + ", " + error_message);
+    //             defaultBehaviour(std::nullopt);
+    //           };
+    //         channelDelegate->shouldOverrideUrlLoading(std::move(navigationAction), std::move(callback));
+    //         args->put_Cancel(true);
+    //       }
+    //       else {
+    //         callShouldOverrideUrlLoading_ = true;
+    //         channelDelegate->onLoadStart(url);
+    //         args->put_Cancel(false);
+    //       }
 
-          return S_OK;
-        }
-    ).Get(), nullptr));
+    //       return S_OK;
+    //     }
+    // ).Get(), nullptr));
 
     failedLog(webView->add_NavigationCompleted(
       Callback<ICoreWebView2NavigationCompletedEventHandler>(
@@ -982,6 +982,11 @@ namespace flutter_inappwebview_plugin
   void InAppWebView::setSettings(const std::shared_ptr<InAppWebViewSettings> newSettings, const flutter::EncodableMap& newSettingsMap)
   {
     wil::com_ptr<ICoreWebView2Settings> webView2Settings;
+    // webView->get_Settings(&webView2Settings);
+    // webView2Settings->put_IsScriptEnabled(TRUE);
+    // webView2Settings->put_AreDefaultScriptDialogsEnabled(TRUE);
+    // webView2Settings->put_IsWebMessageEnabled(TRUE);
+
     if (succeededOrLog(webView->get_Settings(&webView2Settings))) {
       if (fl_map_contains_not_null(newSettingsMap, "javaScriptEnabled") && settings->javaScriptEnabled != newSettings->javaScriptEnabled) {
         webView2Settings->put_IsScriptEnabled(newSettings->javaScriptEnabled);

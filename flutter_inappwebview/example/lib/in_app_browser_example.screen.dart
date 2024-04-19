@@ -15,10 +15,11 @@ class MyInAppBrowser extends InAppBrowser {
       UnmodifiableListView<UserScript>? initialUserScripts,
       PullToRefreshController? pullToRefreshController})
       : super(
-            windowId: windowId,
-            initialUserScripts: initialUserScripts,
-            pullToRefreshController: pullToRefreshController,
-            webViewEnvironment: webViewEnvironment,);
+          windowId: windowId,
+          initialUserScripts: initialUserScripts,
+          pullToRefreshController: pullToRefreshController,
+          webViewEnvironment: webViewEnvironment,
+        );
 
   @override
   Future onBrowserCreated() async {
@@ -118,14 +119,16 @@ class _InAppBrowserExampleScreenState extends State<InAppBrowserExampleScreen> {
               ElevatedButton(
                   onPressed: () async {
                     await browser.openUrlRequest(
-                      urlRequest:
-                          URLRequest(url: WebUri("https://flutter.dev")),
+                      urlRequest: URLRequest(
+                          url: WebUri(
+                              "https://sms.tccl.co.in/index.php/lco_portal/")),
                       settings: InAppBrowserClassSettings(
                         browserSettings: InAppBrowserSettings(
                             toolbarTopBackgroundColor: Colors.blue,
                             presentationStyle: ModalPresentationStyle.POPOVER),
                         webViewSettings: InAppWebViewSettings(
                           isInspectable: kDebugMode,
+                          sharedCookiesEnabled: true,
                           useShouldOverrideUrlLoading: true,
                           useOnLoadResource: true,
                         ),
@@ -137,7 +140,8 @@ class _InAppBrowserExampleScreenState extends State<InAppBrowserExampleScreen> {
               ElevatedButton(
                   onPressed: () async {
                     await InAppBrowser.openWithSystemBrowser(
-                        url: WebUri("https://flutter.dev/"));
+                        url: WebUri(
+                            "https://sms.tccl.co.in/index.php/lco_portal/Home/dashboard"));
                   },
                   child: Text("Open System Browser")),
             ])));

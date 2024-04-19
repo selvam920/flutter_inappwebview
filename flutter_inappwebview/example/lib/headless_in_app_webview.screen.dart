@@ -20,7 +20,7 @@ class _HeadlessInAppWebViewExampleScreenState
     super.initState();
 
     var url = !kIsWeb
-        ? WebUri("https://flutter.dev")
+        ? WebUri("https://sms.tccl.co.in/index.php/lco_portal/Home/dashboard")
         : WebUri("http://localhost:${Uri.base.port}/page.html");
 
     headlessWebView = HeadlessInAppWebView(
