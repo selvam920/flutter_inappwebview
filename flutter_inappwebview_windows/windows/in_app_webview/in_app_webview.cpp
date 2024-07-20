@@ -145,6 +145,7 @@ namespace flutter_inappwebview_plugin
       webView2Settings->put_IsZoomControlEnabled(settings->supportZoom);
       webView2Settings->put_AreDevToolsEnabled(settings->isInspectable);
       webView2Settings->put_AreDefaultContextMenusEnabled(!settings->disableContextMenu);
+      webView2Settings->put_IsInPrivateModeEnabled(settings->incognito);
 
       wil::com_ptr<ICoreWebView2Settings2> webView2Settings2;
       if (succeededOrLog(webView2Settings->QueryInterface(IID_PPV_ARGS(&webView2Settings2)))) {
@@ -990,6 +991,10 @@ namespace flutter_inappwebview_plugin
     if (succeededOrLog(webView->get_Settings(&webView2Settings))) {
       if (fl_map_contains_not_null(newSettingsMap, "javaScriptEnabled") && settings->javaScriptEnabled != newSettings->javaScriptEnabled) {
         webView2Settings->put_IsScriptEnabled(newSettings->javaScriptEnabled);
+      }
+
+      if (fl_map_contains_not_null(newSettingsMap, "incognito") && settings->incognito != newSettings->incognito) {
+        webView2Settings->put_IsInPrivateModeEnabled(newSettings->incognito);
       }
 
       if (fl_map_contains_not_null(newSettingsMap, "supportZoom") && settings->supportZoom != newSettings->supportZoom) {
