@@ -16,12 +16,14 @@ namespace flutter_inappwebview_plugin
     useOnLoadResource = get_fl_map_value(encodableMap, "useOnLoadResource", useOnLoadResource);
     useOnDownloadStart = get_fl_map_value(encodableMap, "useOnDownloadStart", useOnDownloadStart);
     userAgent = get_fl_map_value(encodableMap, "userAgent", userAgent);
+    incognito = get_fl_map_value(encodableMap, "incognito", incognito);
     javaScriptEnabled = get_fl_map_value(encodableMap, "javaScriptEnabled", javaScriptEnabled);
     resourceCustomSchemes = get_fl_map_value(encodableMap, "resourceCustomSchemes", resourceCustomSchemes);
     transparentBackground = get_fl_map_value(encodableMap, "transparentBackground", transparentBackground);
     supportZoom = get_fl_map_value(encodableMap, "supportZoom", supportZoom);
     isInspectable = get_fl_map_value(encodableMap, "isInspectable", isInspectable);
     disableContextMenu = get_fl_map_value(encodableMap, "disableContextMenu", disableContextMenu);
+    incognito = get_fl_map_value(encodableMap, "incognito", incognito);
   }
 
   flutter::EncodableMap InAppWebViewSettings::toEncodableMap() const
@@ -31,6 +33,7 @@ namespace flutter_inappwebview_plugin
       {"useOnLoadResource", useOnLoadResource},
       {"useOnDownloadStart", useOnDownloadStart},
       {"userAgent", userAgent},
+      {"incognito", incognito},
       {"javaScriptEnabled", javaScriptEnabled},
       {"resourceCustomSchemes", make_fl_value(resourceCustomSchemes)},
       {"transparentBackground", transparentBackground},
@@ -48,6 +51,7 @@ namespace flutter_inappwebview_plugin
       if (SUCCEEDED(settings->get_IsScriptEnabled(&realJavaScriptEnabled))) {
         settingsMap["javaScriptEnabled"] = (bool)realJavaScriptEnabled;
       }
+      
       BOOL realSupportZoom;
       if (SUCCEEDED(settings->get_IsZoomControlEnabled(&realSupportZoom))) {
         settingsMap["supportZoom"] = (bool)realSupportZoom;
