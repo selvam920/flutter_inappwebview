@@ -119,9 +119,8 @@ class _InAppBrowserExampleScreenState extends State<InAppBrowserExampleScreen> {
               ElevatedButton(
                   onPressed: () async {
                     await browser.openUrlRequest(
-                      urlRequest: URLRequest(
-                          url: WebUri(
-                              "https://sms.tccl.co.in/index.php/lco_portal/")),
+                      urlRequest:
+                          URLRequest(url: WebUri("https://web.whatsapp.com/")),
                       settings: InAppBrowserClassSettings(
                         browserSettings: InAppBrowserSettings(
                             toolbarTopBackgroundColor: Colors.blue,

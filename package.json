@@ -1,6 +1,6 @@
 {
   "name": "flutter_inappwebview",
-  "version": "1.0.0",
+  "version": "6.0.0",
   "directories": {
     "example": "flutter_inappwebview/example",
     "lib": "flutter_inappwebview/lib"

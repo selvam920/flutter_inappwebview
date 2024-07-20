@@ -20,14 +20,25 @@ class _HeadlessInAppWebViewExampleScreenState
     super.initState();
 
     var url = !kIsWeb
-        ? WebUri("https://sms.tccl.co.in/index.php/lco_portal/Home/dashboard")
+        ? WebUri("https://web.whatsapp.com/")
         : WebUri("http://localhost:${Uri.base.port}/page.html");
 
     headlessWebView = HeadlessInAppWebView(
       webViewEnvironment: webViewEnvironment,
-      initialUrlRequest: URLRequest(url: url),
+      initialUrlRequest: URLRequest(
+        url: WebUri.uri(
+          Uri.parse('web.whatsapp.com//'),
+        ),
+      ),
       initialSettings: InAppWebViewSettings(
         isInspectable: kDebugMode,
+        preferredContentMode: UserPreferredContentMode.DESKTOP,
+        userAgent:
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+        javaScriptEnabled: true,
+        incognito: false,
+        clearCache: false,
+        cacheEnabled: true,
       ),
       onWebViewCreated: (controller) {
         print('HeadlessInAppWebView created!');
