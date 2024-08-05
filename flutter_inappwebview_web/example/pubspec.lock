@@ -86,8 +86,8 @@ packages:
   flutter_inappwebview_platform_interface:
     dependency: transitive
     description:
-      path: "E:\\flutter_inappwebview\\flutter_inappwebview_platform_interface"
-      relative: false
+      path: "../../flutter_inappwebview_platform_interface"
+      relative: true
     source: path
     version: "1.0.11"
   flutter_inappwebview_web:
@@ -185,10 +185,10 @@ packages:
     dependency: transitive
     description:
       name: meta
-      sha256: "25dfcaf170a0190f47ca6355bdd4552cb8924b430512ff0cafb8db9bd41fe33b"
+      sha256: bdb68674043280c3428e9ec998512fb681678676b3c54e773629ffe74419f8c7
       url: "https://pub.dev"
     source: hosted
-    version: "1.14.0"
+    version: "1.15.0"
   path:
     dependency: transitive
     description:
