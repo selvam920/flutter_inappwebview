@@ -1,9 +1,11 @@
+#include <algorithm>
 #include <cstring>
 #include <filesystem>
 #include <nlohmann/json.hpp>
 #include <limits>
 #include <regex>
 #include <set>
+#include <shlobj.h>
 #include <Shlwapi.h>
 #include <flutter/encodable_value.h>
 #include <wil/wrl.h>
@@ -62,6 +64,21 @@ namespace flutter_inappwebview_plugin
     webViewEnv(std::move(webViewEnv)), webViewController(std::move(webViewController)), webViewCompositionController(std::move(webViewCompositionController)),
     settings(params.initialSettings), userContentController(std::make_unique<UserContentController>(this))
   {
+    // Compute the scale factor to convert Flutter scroll pixel deltas back to
+    // WHEEL_DELTA units for WebView2's SendMouseInput.
+    // Flutter's Windows embedder converts WM_MOUSEWHEEL WHEEL_DELTA to pixels:
+    //   flutter_delta = (wheel_delta / WHEEL_DELTA) * (lines * 100.0 / 3.0)
+    // Inverting: wheel_delta = flutter_delta * WHEEL_DELTA * 3.0 / (lines * 100.0)
+    {
+      UINT scrollLinesPerNotch = 3;
+      SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &scrollLinesPerNotch, 0);
+      if (scrollLinesPerNotch == 0 || scrollLinesPerNotch == WHEEL_PAGESCROLL) {
+        scrollLinesPerNotch = 3;
+      }
+      flutterToWheelDeltaScale_ = static_cast<double>(WHEEL_DELTA) * 3.0
+        / (static_cast<double>(scrollLinesPerNotch) * 100.0);
+    }
+
     if (failedAndLog(this->webViewController->get_CoreWebView2(webView.put()))) {
       std::cerr << "Cannot create CoreWebView2." << std::endl;
     }
@@ -197,8 +214,16 @@ namespace flutter_inappwebview_plugin
       hr = callback(S_OK, webViewEnvironment->getEnvironment());
     }
     else {
+      // If appCachePath is set in settings, use it as the user data folder.
+      std::wstring userDataFolder;
+      if (initialSettings && initialSettings->appCachePath.has_value() && !initialSettings->appCachePath.value().empty()) {
+        userDataFolder = utf8_to_wide(initialSettings->appCachePath.value());
+      }
+
       hr = CreateCoreWebView2EnvironmentWithOptions(
-        nullptr, nullptr, nullptr,
+        nullptr,
+        userDataFolder.empty() ? nullptr : userDataFolder.c_str(),
+        nullptr,
         Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(callback).Get());
     }
 
@@ -2653,21 +2678,21 @@ namespace flutter_inappwebview_plugin
     webMessageChannels_.erase(channelId);
   }
 
-  void InAppWebView::addWebNotificationController(const std::string& id, std::shared_ptr<WebNotificationController> controller)
+  void InAppWebView::addWebNotificationController(const std::string& controllerId, std::shared_ptr<WebNotificationController> controller)
   {
-    if (id.empty() || !controller) return;
-    webNotificationControllers_[id] = std::move(controller);
+    if (controllerId.empty() || !controller) return;
+    webNotificationControllers_[controllerId] = std::move(controller);
   }
 
-  WebNotificationController* InAppWebView::getWebNotificationController(const std::string& id) const
+  WebNotificationController* InAppWebView::getWebNotificationController(const std::string& controllerId) const
   {
-    auto it = webNotificationControllers_.find(id);
+    auto it = webNotificationControllers_.find(controllerId);
     return it != webNotificationControllers_.end() ? it->second.get() : nullptr;
   }
 
-  void InAppWebView::eraseWebNotificationController(const std::string& id)
+  void InAppWebView::eraseWebNotificationController(const std::string& controllerId)
   {
-    webNotificationControllers_.erase(id);
+    webNotificationControllers_.erase(controllerId);
   }
 
   void InAppWebView::disposeAllWebNotificationControllers()
@@ -2688,21 +2713,21 @@ namespace flutter_inappwebview_plugin
     webNotificationControllers_.clear();
   }
 
-  void InAppWebView::addPrintJobController(const std::string& id, std::shared_ptr<PrintJobController> controller)
+  void InAppWebView::addPrintJobController(const std::string& controllerId, std::shared_ptr<PrintJobController> controller)
   {
-    if (id.empty() || !controller) return;
-    printJobControllers_[id] = std::move(controller);
+    if (controllerId.empty() || !controller) return;
+    printJobControllers_[controllerId] = std::move(controller);
   }
 
-  PrintJobController* InAppWebView::getPrintJobController(const std::string& id) const
+  PrintJobController* InAppWebView::getPrintJobController(const std::string& controllerId) const
   {
-    auto it = printJobControllers_.find(id);
+    auto it = printJobControllers_.find(controllerId);
     return it != printJobControllers_.end() ? it->second.get() : nullptr;
   }
 
-  void InAppWebView::erasePrintJobController(const std::string& id)
+  void InAppWebView::erasePrintJobController(const std::string& controllerId)
   {
-    printJobControllers_.erase(id);
+    printJobControllers_.erase(controllerId);
   }
 
   void InAppWebView::disposeAllPrintJobControllers()
@@ -2723,7 +2748,7 @@ namespace flutter_inappwebview_plugin
     printJobControllers_.clear();
   }
 
-  void InAppWebView::printCurrentPage(std::shared_ptr<PrintJobSettings> settings,
+  void InAppWebView::printCurrentPage(std::shared_ptr<PrintJobSettings> jobSettings,
     const std::function<void(const std::optional<std::string>&)> completionHandler)
   {
     if (!webView || !webViewEnv) {
@@ -2742,13 +2767,13 @@ namespace flutter_inappwebview_plugin
     }
 
     // Check if showUI is true - use ShowPrintUI instead of Print
-    bool showUI = settings && settings->showUI.value_or(true);
+    bool showUI = jobSettings && jobSettings->showUI.value_or(true);
     
     if (showUI) {
       // Use ShowPrintUI to display the print dialog
       COREWEBVIEW2_PRINT_DIALOG_KIND dialogKind = COREWEBVIEW2_PRINT_DIALOG_KIND_BROWSER;
-      if (settings && settings->printDialogKind.has_value()) {
-        dialogKind = static_cast<COREWEBVIEW2_PRINT_DIALOG_KIND>(settings->printDialogKind.value());
+      if (jobSettings && jobSettings->printDialogKind.has_value()) {
+        dialogKind = static_cast<COREWEBVIEW2_PRINT_DIALOG_KIND>(jobSettings->printDialogKind.value());
       }
       
       if (failedAndLog(webView16->ShowPrintUI(dialogKind))) {
@@ -2767,7 +2792,7 @@ namespace flutter_inappwebview_plugin
 
     // Generate print job ID if handledByClient is true
     std::optional<std::string> printJobId = std::nullopt;
-    if (settings && settings->handledByClient.value_or(false)) {
+    if (jobSettings && jobSettings->handledByClient.value_or(false)) {
       printJobId = get_uuid();
     }
 
@@ -2780,18 +2805,18 @@ namespace flutter_inappwebview_plugin
       return;
     }
 
-    wil::com_ptr<ICoreWebView2PrintSettings> printSettings;
-    if (settings) {
-      printSettings = settings->createPrintSettings(environment6.get());
+    wil::com_ptr<ICoreWebView2PrintSettings> wv2PrintSettings;
+    if (jobSettings) {
+      wv2PrintSettings = jobSettings->createPrintSettings(environment6.get());
     }
     else {
       // Create default print settings if no settings provided
-      if (failedAndLog(environment6->CreatePrintSettings(&printSettings))) {
-        printSettings = nullptr;
+      if (failedAndLog(environment6->CreatePrintSettings(&wv2PrintSettings))) {
+        wv2PrintSettings = nullptr;
       }
     }
 
-    if (!printSettings) {
+    if (!wv2PrintSettings) {
       if (completionHandler) {
         completionHandler(std::nullopt);
       }
@@ -2801,7 +2826,7 @@ namespace flutter_inappwebview_plugin
     // Create PrintJobController if handledByClient
     std::shared_ptr<PrintJobController> printJobController = nullptr;
     if (printJobId.has_value() && printJobManager) {
-      printJobController = printJobManager->createPrintJobController(printJobId.value(), settings);
+      printJobController = printJobManager->createPrintJobController(printJobId.value(), jobSettings);
       if (printJobController) {
         addPrintJobController(printJobId.value(), printJobController);
       }
@@ -2810,7 +2835,7 @@ namespace flutter_inappwebview_plugin
     // Capture for the async callback
     auto printJobControllerCapture = printJobController;
 
-    HRESULT printHr = webView16->Print(printSettings.get(), Callback<ICoreWebView2PrintCompletedHandler>(
+    HRESULT printHr = webView16->Print(wv2PrintSettings.get(), Callback<ICoreWebView2PrintCompletedHandler>(
       [this, printJobId, printJobControllerCapture](HRESULT errorCode, COREWEBVIEW2_PRINT_STATUS printStatus) -> HRESULT
       {
         bool success = SUCCEEDED(errorCode) && printStatus == COREWEBVIEW2_PRINT_STATUS_SUCCEEDED;
@@ -2852,7 +2877,7 @@ namespace flutter_inappwebview_plugin
     }
   }
 
-  void InAppWebView::createPdf(std::shared_ptr<PrintJobSettings> settings,
+  void InAppWebView::createPdf(std::shared_ptr<PrintJobSettings> jobSettings,
     const std::function<void(const std::optional<std::vector<uint8_t>>&)> completionHandler)
   {
     if (!webView || !webViewEnv) {
@@ -2879,18 +2904,18 @@ namespace flutter_inappwebview_plugin
       return;
     }
 
-    wil::com_ptr<ICoreWebView2PrintSettings> printSettings;
-    if (settings) {
-      printSettings = settings->createPrintSettings(environment6.get());
+    wil::com_ptr<ICoreWebView2PrintSettings> wv2PrintSettings;
+    if (jobSettings) {
+      wv2PrintSettings = jobSettings->createPrintSettings(environment6.get());
     }
     else {
       // Create default print settings if no settings provided
-      if (failedAndLog(environment6->CreatePrintSettings(&printSettings))) {
-        printSettings = nullptr;
+      if (failedAndLog(environment6->CreatePrintSettings(&wv2PrintSettings))) {
+        wv2PrintSettings = nullptr;
       }
     }
 
-    if (!printSettings) {
+    if (!wv2PrintSettings) {
       if (completionHandler) {
         completionHandler(std::nullopt);
       }
@@ -2900,7 +2925,7 @@ namespace flutter_inappwebview_plugin
     // Perform the PrintToPdfStream operation
     auto completionHandlerCapture = completionHandler;
 
-    webView16->PrintToPdfStream(printSettings.get(), Callback<ICoreWebView2PrintToPdfStreamCompletedHandler>(
+    webView16->PrintToPdfStream(wv2PrintSettings.get(), Callback<ICoreWebView2PrintToPdfStreamCompletedHandler>(
       [completionHandlerCapture](HRESULT errorCode, IStream* pdfStream) -> HRESULT
       {
         if (FAILED(errorCode) || !pdfStream) {
@@ -3803,7 +3828,7 @@ namespace flutter_inappwebview_plugin
       return;
     }
 
-    auto offset = static_cast<short>(delta * settings->scrollMultiplier);
+    auto offset = static_cast<short>(delta * flutterToWheelDeltaScale_ * settings->scrollMultiplier);
 
     if (horizontal) {
       webViewCompositionController->SendMouseInput(
@@ -3817,17 +3842,48 @@ namespace flutter_inappwebview_plugin
     }
   }
 
-  void InAppWebView::setScrollDelta(double delta_x, double delta_y)
+  void InAppWebView::setScrollDelta(double delta_x, double delta_y, bool isPan)
   {
     if (!webViewCompositionController) {
       return;
     }
 
-    if (delta_x != 0.0) {
-      sendScroll(delta_x, true);
+    double scale;
+    if (isPan) {
+      // Touchpad pan gestures: panDelta is in raw logical pixels from
+      // DirectManipulation, NOT scaled by Flutter's scroll_offset_multiplier.
+      // Convert pixels to WHEEL_DELTA units directly.
+      // WHEEL_DELTA (120) typically scrolls ~3 lines * ~20px = ~60px of content.
+      scale = static_cast<double>(WHEEL_DELTA) / 60.0;
     }
-    if (delta_y != 0.0) {
-      sendScroll(delta_y, false);
+    else {
+      // Mouse wheel: Flutter's Windows embedder scales WM_MOUSEWHEEL WHEEL_DELTA
+      // into logical pixels using (lines * 100 / 3). We reverse that conversion
+      // so WebView2 receives the correct WHEEL_DELTA value.
+      scale = flutterToWheelDeltaScale_;
+    }
+
+    // Accumulate converted deltas to handle small/fractional values from
+    // precision touchpad gestures. Without accumulation, sub-pixel deltas
+    // are truncated to 0 by the cast to short, causing scroll to not work.
+    scrollDeltaAccumulatorX_ += delta_x * scale;
+    scrollDeltaAccumulatorY_ += delta_y * scale;
+
+    const double multiplier = static_cast<double>((std::max)(settings->scrollMultiplier, static_cast<int64_t>(1)));
+    auto scrollX = static_cast<short>(scrollDeltaAccumulatorX_ * multiplier);
+    auto scrollY = static_cast<short>(scrollDeltaAccumulatorY_ * multiplier);
+
+    if (scrollX != 0) {
+      webViewCompositionController->SendMouseInput(
+        COREWEBVIEW2_MOUSE_EVENT_KIND_HORIZONTAL_WHEEL, virtualKeys_.state(),
+        scrollX, lastCursorPos_);
+      scrollDeltaAccumulatorX_ -= static_cast<double>(scrollX) / multiplier;
+    }
+    if (scrollY != 0) {
+      webViewCompositionController->SendMouseInput(
+        COREWEBVIEW2_MOUSE_EVENT_KIND_WHEEL, virtualKeys_.state(),
+        scrollY, lastCursorPos_);
+      scrollDeltaAccumulatorY_ -= static_cast<double>(scrollY) / multiplier;
     }
   }
 
@@ -4136,7 +4192,7 @@ namespace flutter_inappwebview_plugin
     if (webViewController) {
       failedLog(webViewController->Close());
     }
-    for (auto& [id, channel] : webMessageChannels_) {
+    for (auto& [channelId, channel] : webMessageChannels_) {
       if (channel) {
         channel->dispose();
       }

@@ -268,12 +268,22 @@ namespace flutter_inappwebview_plugin
       return result->Error(kErrorInvalidArgs);
     }
 
-    // setScrollDelta: [double dx, double dy]
+    // setScrollDelta: [double dx, double dy, bool isPan]
     if (method_name.compare(kMethodSetScrollDelta) == 0) {
-      const auto delta = GetPointFromArgs(method_call.arguments());
-      if (delta && view) {
-        view->setScrollDelta(delta->first, delta->second);
-        return result->Success();
+      const flutter::EncodableList* list =
+        std::get_if<flutter::EncodableList>(method_call.arguments());
+      if (list && list->size() >= 2 && view) {
+        const auto dx = std::get_if<double>(&(*list)[0]);
+        const auto dy = std::get_if<double>(&(*list)[1]);
+        bool isPan = false;
+        if (list->size() >= 3) {
+          const auto isPanVal = std::get_if<bool>(&(*list)[2]);
+          if (isPanVal) isPan = *isPanVal;
+        }
+        if (dx && dy) {
+          view->setScrollDelta(*dx, *dy, isPan);
+          return result->Success();
+        }
       }
       return result->Error(kErrorInvalidArgs);
     }

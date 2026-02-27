@@ -25,7 +25,7 @@ class _MyAppState extends State<MyApp> {
   late WindowsFindInteractionController findInteractionController;
 
   final TextEditingController urlController = TextEditingController(
-    text: 'https://flutter.dev',
+    text: 'https://sms.tccl.co.in/index.php/lco_portal/Home/dashboard',
   );
   final TextEditingController webMessageController = TextEditingController(
     text: 'Hello from Flutter',

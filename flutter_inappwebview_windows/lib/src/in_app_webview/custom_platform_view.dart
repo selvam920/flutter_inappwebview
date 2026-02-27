@@ -230,12 +230,13 @@ class CustomPlatformViewController
   }
 
   /// Sets the horizontal and vertical scroll delta.
-  Future<void> _setScrollDelta(double dx, double dy) async {
+  /// [isPan] indicates if this is from a touchpad pan gesture (true) or mouse wheel (false).
+  Future<void> _setScrollDelta(double dx, double dy, {bool isPan = false}) async {
     if (_isDisposed) {
       return;
     }
     assert(value.isInitialized);
-    return _methodChannel.invokeMethod('setScrollDelta', [dx, dy]);
+    return _methodChannel.invokeMethod('setScrollDelta', [dx, dy, isPan]);
   }
 
   /// Sets the surface size to the provided [size].
@@ -297,6 +298,12 @@ class _CustomPlatformViewState extends State<CustomPlatformView>
     with PlatformUtilListener {
   final GlobalKey _key = GlobalKey();
   final _downButtons = <int, PointerButton>{};
+
+  /// Fixed pointer ID for simulated touch events from trackpad pan gestures.
+  static const int _panTouchPointerId = 999999;
+
+  /// Tracks the simulated touch position during trackpad pan scrolling.
+  Offset _panTouchPosition = Offset.zero;
 
   PointerDeviceKind _pointerKind = PointerDeviceKind.unknown;
 
@@ -470,8 +477,38 @@ class _CustomPlatformViewState extends State<CustomPlatformView>
                     );
                   }
                 },
+                onPointerPanZoomStart: (ev) {
+                  // Begin simulated touch at the pointer's local position.
+                  // WebView2 handles touch scrolling with pixel-perfect
+                  // precision, unlike WHEEL events which trigger Chrome's
+                  // smooth-scroll animation and feel laggy with rapid input.
+                  _panTouchPosition = ev.localPosition;
+                  _controller._setPointerUpdate(
+                    InAppWebViewPointerEventKind.down,
+                    _panTouchPointerId,
+                    _panTouchPosition,
+                    20.0,
+                    0.5,
+                  );
+                },
                 onPointerPanZoomUpdate: (ev) {
-                  _controller._setScrollDelta(ev.panDelta.dx, ev.panDelta.dy);
+                  _panTouchPosition += ev.panDelta;
+                  _controller._setPointerUpdate(
+                    InAppWebViewPointerEventKind.update,
+                    _panTouchPointerId,
+                    _panTouchPosition,
+                    20.0,
+                    0.5,
+                  );
+                },
+                onPointerPanZoomEnd: (ev) {
+                  _controller._setPointerUpdate(
+                    InAppWebViewPointerEventKind.up,
+                    _panTouchPointerId,
+                    _panTouchPosition,
+                    20.0,
+                    0.0,
+                  );
                 },
                 child: MouseRegion(
                   cursor: _cursor,

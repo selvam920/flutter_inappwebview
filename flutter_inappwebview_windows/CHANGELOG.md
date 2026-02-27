@@ -1,7 +1,10 @@
 ## 0.7.0-beta.3
 
 - Updated flutter_inappwebview_platform_interface version to ^1.4.0-beta.3
-- Updated Microsoft.Web.WebView2 SDK version from `1.0.2849.39` to `1.0.3650.58`
+- Updated Microsoft.Web.WebView2 SDK version from `1.0.3650.58` to `1.0.3800.47`
+- Updated Microsoft.Windows.ImplementationLibrary version from `1.0.250325.1` to `1.0.260126.7`
+- Fixed touchpad and mouse scroll not working in WebView2 composition mode by accumulating fractional scroll deltas
+- Fixed cookies and browsing data not persisting across app restarts by using a persistent user data folder in LocalAppData when no WebViewEnvironment is provided
 - Implemented `getFrameId`, `getFavicon`, `showSaveAsUI`, `getMemoryUsageTargetLevel`, `setMemoryUsageTargetLevel` InAppWebViewController method
 - Added support for `onEnterFullscreen`, `onExitFullscreen`, `onContentLoading`, `onDOMContentLoaded`,  `onLaunchingExternalUriScheme`, `onFaviconChanged`, `onNotificationReceived`, `onSaveAsUIShowing`, `onSaveFileSecurityCheckStarting`, `onScreenCaptureStarting` WebView events.
 - Added native FindInteractionController implementation using WebView2 `ICoreWebView2Find`.

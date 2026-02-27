@@ -30,6 +30,7 @@ namespace flutter_inappwebview_plugin
     std::optional<bool> javaScriptBridgeForMainFrameOnly = std::optional<bool>{};
     std::optional<std::vector<std::string>> pluginScriptsOriginAllowList = std::optional<std::vector<std::string>>{};
     bool pluginScriptsForMainFrameOnly = false;
+    std::optional<std::string> appCachePath = std::optional<std::string>{};
     int64_t scrollMultiplier = 1;
     bool disableDefaultErrorPage = false;
     bool statusBarEnabled = true;

@@ -716,8 +716,20 @@ because there isn't any way to make the website data store non-persistent for th
 
   ///Sets the path to the Application Caches files. In order for the Application Caches API to be enabled, this option must be set a path to which the application can write.
   ///This option is used one time: repeated calls are ignored.
+  ///
+  ///On Windows, this path is used as the `userDataFolder` for the WebView2 environment,
+  ///allowing cookies, cache, and other browsing data to persist across app restarts.
+  ///If not set, a default folder under `%LOCALAPPDATA%\flutter_inappwebview` is used.
+  ///This setting is only used when no explicit [WebViewEnvironment] is provided.
   @SupportedPlatforms(
-    platforms: [AndroidPlatform(apiName: "WebSettings.setAppCachePath")],
+    platforms: [
+      AndroidPlatform(apiName: "WebSettings.setAppCachePath"),
+      WindowsPlatform(
+        apiName: "CreateCoreWebView2EnvironmentWithOptions.userDataFolder",
+        apiUrl:
+            'https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/webview2-idl?view=webview2-1.0.2210.55#createcorewebview2environmentwithoptions',
+      ),
+    ],
   )
   String? appCachePath;
 

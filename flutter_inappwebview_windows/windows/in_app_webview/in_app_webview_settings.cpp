@@ -39,6 +39,9 @@ namespace flutter_inappwebview_plugin
       pluginScriptsOriginAllowList = get_optional_fl_map_value<std::vector<std::string>>(encodableMap, "pluginScriptsOriginAllowList");
     }
     pluginScriptsForMainFrameOnly = get_fl_map_value(encodableMap, "pluginScriptsForMainFrameOnly", pluginScriptsForMainFrameOnly);
+    if (fl_map_contains_not_null(encodableMap, "appCachePath")) {
+      appCachePath = get_optional_fl_map_value<std::string>(encodableMap, "appCachePath");
+    }
     scrollMultiplier = get_fl_map_value(encodableMap, "scrollMultiplier", scrollMultiplier);
     disableDefaultErrorPage = get_fl_map_value(encodableMap, "disableDefaultErrorPage", disableDefaultErrorPage);
     statusBarEnabled = get_fl_map_value(encodableMap, "statusBarEnabled", statusBarEnabled);
@@ -74,6 +77,7 @@ namespace flutter_inappwebview_plugin
       {"javaScriptBridgeForMainFrameOnly", make_fl_value(javaScriptBridgeForMainFrameOnly)},
       {"pluginScriptsOriginAllowList", make_fl_value(pluginScriptsOriginAllowList)},
       {"pluginScriptsForMainFrameOnly", pluginScriptsForMainFrameOnly},
+      {"appCachePath", make_fl_value(appCachePath)},
       {"scrollMultiplier", scrollMultiplier},
       {"disableDefaultErrorPage", disableDefaultErrorPage},
       {"statusBarEnabled", statusBarEnabled},
