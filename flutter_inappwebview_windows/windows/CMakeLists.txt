@@ -289,7 +289,7 @@ endif()
 # So, creating here a custom function to apply the standard settings without the /WX flag.
 # Also, added /bigobj flag.
 function(FLUTTER_INAPPWEBVIEW_WINDOWS_APPLY_STANDARD_SETTINGS TARGET)
-  target_compile_features(${TARGET} PUBLIC cxx_std_17)
+  target_compile_features(${TARGET} PUBLIC cxx_std_20)
   target_compile_options(${TARGET} PRIVATE /W4 /wd"4100" /wd"4458" /wd"4244")
   target_compile_options(${TARGET} PRIVATE /EHsc)
   target_compile_options(${TARGET} PRIVATE /bigobj)
