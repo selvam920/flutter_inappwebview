@@ -318,7 +318,7 @@ class _ParameterDialogState extends State<ParameterDialog> {
   }
 
   Future<void> _pickBytes(List<Object> path) async {
-    final result = await FilePicker.platform.pickFiles(withData: true);
+    final result = await FilePicker.pickFiles(withData: true);
     if (result == null || result.files.isEmpty) return;
 
     final bytes = result.files.first.bytes;
