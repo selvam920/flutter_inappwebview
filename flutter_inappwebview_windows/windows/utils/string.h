@@ -118,7 +118,7 @@ namespace flutter_inappwebview_plugin
       std::accumulate( /* otherwise, accumulate */
         ++vec.begin(), vec.end(), /* the range 2nd to after-last */
         *vec.begin(), /* and start accumulating with the first item */
-        [delim](auto& a, auto& b) { return a + delim + b; });
+        [delim](const auto& a, const auto& b) { return a + delim + b; });
   }
 
   template <typename T>
@@ -145,7 +145,7 @@ namespace flutter_inappwebview_plugin
   }
 
   template <typename T>
-  void to_lowercase(const std::basic_string<T>& s)
+  void to_lowercase(std::basic_string<T>& s)
   {
     std::transform(s.begin(), s.end(), s.begin(),
       [](const T v) { return static_cast<T>(std::tolower(v)); });
@@ -161,11 +161,10 @@ namespace flutter_inappwebview_plugin
   }
 
   template <typename T>
-  void to_uppercase(const std::basic_string<T>& s)
+  void to_uppercase(std::basic_string<T>& s)
   {
     std::transform(s.begin(), s.end(), s.begin(),
       [](const T v) { return static_cast<T>(std::toupper(v)); });
-    return s2;
   }
 
   template <typename T>
