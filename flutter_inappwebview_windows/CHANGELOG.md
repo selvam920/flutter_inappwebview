@@ -1,6 +1,7 @@
 ## 0.7.0-beta.3
 
 - Updated flutter_inappwebview_platform_interface version to ^1.4.0-beta.3
+- Updated Microsoft.Web.WebView2 SDK version from `1.0.3967.48` to `1.0.4078.44`
 - Updated Microsoft.Web.WebView2 SDK version from `1.0.3650.58` to `1.0.3800.47`
 - Updated Microsoft.Windows.ImplementationLibrary version from `1.0.250325.1` to `1.0.260126.7`
 - Fixed touchpad and mouse scroll not working in WebView2 composition mode by accumulating fractional scroll deltas
