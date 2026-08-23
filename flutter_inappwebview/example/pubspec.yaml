@@ -24,7 +24,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_downloader: ^1.12.0
   path_provider: ^2.1.5
-  permission_handler: ^12.0.1
+  permission_handler: ^13.0.1
   url_launcher: ^6.3.2
   pointer_interceptor: ^0.10.1+2
   shared_preferences: ^2.5.4
@@ -36,6 +36,7 @@ dependencies:
   flutter_inappwebview:
     path: ../
 
+  material_ui: any
 dependency_overrides:
   flutter_inappwebview_platform_interface:
     path: ../../flutter_inappwebview_platform_interface
@@ -70,6 +71,8 @@ dev_dependencies:
 # following page: https://www.dartlang.org/tools/pub/pubspec
 
 # The following section is specific to Flutter.
+  flutter_inappwebview_platform_interface: any
+  plugin_platform_interface: any
 flutter:
 
   # The following line ensures that the Material Icons font is
