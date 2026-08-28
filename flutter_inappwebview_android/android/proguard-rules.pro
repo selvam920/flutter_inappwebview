@@ -17,6 +17,10 @@
 -keep class com.pichillilorenzo.flutter_inappwebview_android.** { *; }
 
 -dontwarn android.window.BackEvent
-# AGP 9.1.0: R8 now repackages classes into the unnamed package by default.
-# Opt out to keep pre-9.1 package structure.
--dontrepackage
+# Note: AGP 9.1.0 changed R8's default to repackage classes into the unnamed
+# package. -dontrepackage would opt out of that, but it's a global option and
+# AGP 9 now rejects global options set from a library's *consumer* proguard
+# file ("mergeDebugConsumerProguardFiles" fails with "should not be used in a
+# consumer configuration file"). If a consuming app is minifying and needs to
+# opt out of repackaging, add -dontrepackage to that app's own
+# android/app/proguard-rules.pro instead — it can't be shipped from here.
