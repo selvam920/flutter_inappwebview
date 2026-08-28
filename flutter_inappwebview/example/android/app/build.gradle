@@ -29,7 +29,9 @@ android {
         targetCompatibility JavaVersion.VERSION_21
     }
 
-    compileSdkVersion flutter.compileSdkVersion
+    // permission_handler_android now requires compileSdk 37; flutter.compileSdkVersion
+    // (currently 36) is backward-compatible with this override for minSdk/targetSdk.
+    compileSdk 37
     ndkVersion flutter.ndkVersion
 
     defaultConfig {
