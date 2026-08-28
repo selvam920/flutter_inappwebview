@@ -5,7 +5,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 set(WIL_VERSION "1.0.260126.7")
-set(WEBVIEW_VERSION "1.0.4078.44")
+set(WEBVIEW_VERSION "1.0.4129.50")
 set(NLOHMANN_JSON_VERSION "3.12.0")
 set(CPP_WINRT_VERSION "2.0.250303.1")
 
@@ -293,6 +293,11 @@ function(FLUTTER_INAPPWEBVIEW_WINDOWS_APPLY_STANDARD_SETTINGS TARGET)
   target_compile_options(${TARGET} PRIVATE /W4 /wd"4100" /wd"4458" /wd"4244")
   target_compile_options(${TARGET} PRIVATE /EHsc)
   target_compile_options(${TARGET} PRIVATE /bigobj)
+  # Compile this target's ~90 translation units across multiple cores instead
+  # of serially — MSBuild's own /m only parallelizes across projects/targets,
+  # not the .cpp files within one, so without this the whole plugin compiles
+  # on a single core.
+  target_compile_options(${TARGET} PRIVATE /MP)
   target_compile_definitions(${TARGET} PRIVATE "_HAS_EXCEPTIONS=0")
   target_compile_definitions(${TARGET} PRIVATE "_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS")
   target_compile_definitions(${TARGET} PRIVATE "$<$<CONFIG:Debug>:_DEBUG>")
