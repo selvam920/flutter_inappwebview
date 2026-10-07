@@ -50,7 +50,7 @@ export interface InAppWebView {
 }
 
 export interface InAppWebViewPlugin {
-  createFlutterInAppWebView: (viewId: number | string, iframe: HTMLIFrameElement, iframeContainer: HTMLDivElement, bridgeSecret: string) => InAppWebView,
+  createDragoInAppWebView: (viewId: number | string, iframe: HTMLIFrameElement, iframeContainer: HTMLDivElement, bridgeSecret: string) => InAppWebView,
   getCookieExpirationDate: (timestamp: number) => string,
   nativeAsyncCommunication: (method: string, viewId: number | string, args?: any[]) => Promise<string>,
   nativeSyncCommunication: (method: string, viewId: number | string, args?: any[]) => string,

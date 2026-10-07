@@ -1,0 +1,1 @@
+Internal annotations used by the generator of [drago_inappwebview](https://github.com/pichillilorenzo/flutter_inappwebview) plugin.

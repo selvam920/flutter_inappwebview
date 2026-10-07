@@ -9,8 +9,8 @@ import {
 
 declare global {
   interface Window {
-    flutter_inappwebview_plugin: InAppWebViewPlugin;
-    flutter_inappwebview?: JavaScriptBridgeHandler | null;
+    drago_inappwebview_plugin: InAppWebViewPlugin;
+    drago_inappwebview?: JavaScriptBridgeHandler | null;
     console: Console;
 
     eval(x: string): any;
@@ -22,8 +22,8 @@ declare global {
   let _Array_slice = window.Array.prototype.slice;
   _Array_slice.call = window.Function.prototype.call;
 
-  window.flutter_inappwebview_plugin = {
-    createFlutterInAppWebView: function (viewId: number | string, iframe: HTMLIFrameElement, iframeContainer: HTMLDivElement, bridgeSecret: string) {
+  window.drago_inappwebview_plugin = {
+    createDragoInAppWebView: function (viewId: number | string, iframe: HTMLIFrameElement, iframeContainer: HTMLDivElement, bridgeSecret: string) {
       const iframeId = iframe.id;
       const webView: InAppWebView = {
         viewId: viewId,
@@ -341,7 +341,7 @@ declare global {
               _nativeCommunication('onLoadStop', viewId, [url]);
 
               try {
-                iframe.contentWindow.dispatchEvent(new Event('flutterInAppWebViewPlatformReady'));
+                iframe.contentWindow.dispatchEvent(new Event('dragoInAppWebViewPlatformReady'));
               } catch (e) {
                 console.log(e);
               }
@@ -739,11 +739,11 @@ declare global {
     },
     nativeCommunication: function (method: string, viewId: number | string, args?: any[]) {
       try {
-        const result = window.flutter_inappwebview_plugin.nativeSyncCommunication(method, viewId, args);
+        const result = window.drago_inappwebview_plugin.nativeSyncCommunication(method, viewId, args);
         return result != null ? JSON.parse(result) : null;
       } catch (e1) {
         try {
-          const promise = window.flutter_inappwebview_plugin.nativeAsyncCommunication(method, viewId, args);
+          const promise = window.drago_inappwebview_plugin.nativeAsyncCommunication(method, viewId, args);
           return promise.then(function (result) {
             return result != null ? JSON.parse(result) : null;
           });
@@ -754,5 +754,5 @@ declare global {
     },
   };
 
-  let _nativeCommunication = window.flutter_inappwebview_plugin.nativeCommunication;
+  let _nativeCommunication = window.drago_inappwebview_plugin.nativeCommunication;
 })();
