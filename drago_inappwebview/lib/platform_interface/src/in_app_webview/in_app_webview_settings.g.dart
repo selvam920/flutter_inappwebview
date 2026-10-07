@@ -1840,7 +1840,8 @@ class InAppWebViewSettings {
   ///- macOS WKWebView 11.3+ ([Official API - WKWebViewConfiguration.upgradeKnownHostsToHTTPS](https://developer.apple.com/documentation/webkit/wkwebviewconfiguration/3752243-upgradeknownhoststohttps))
   bool? upgradeKnownHostsToHTTPS;
 
-  ///Set to `false` to disable Flutter Hybrid Composition. The default value is `true`.
+  ///Set to `true` to enable Flutter Hybrid Composition. The default value is `false` (texture layer).
+  ///Set it to `true` when SurfaceView-backed video or DRM playback is needed.
   ///Hybrid Composition is supported starting with Flutter v1.20+.
   ///
   ///**Officially Supported Platforms/Implementations**:
@@ -2140,7 +2141,7 @@ class InAppWebViewSettings {
     this.supportMultipleWindows = false,
     this.regexToCancelSubFramesLoading,
     this.regexToAllowSyncUrlLoading,
-    this.useHybridComposition = true,
+    this.useHybridComposition = false,
     this.useShouldInterceptRequest,
     this.useOnRenderProcessGone,
     this.overScrollMode = OverScrollMode.IF_CONTENT_SCROLLS,

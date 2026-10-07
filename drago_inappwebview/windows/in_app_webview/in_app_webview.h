@@ -93,6 +93,8 @@ namespace drago_inappwebview_plugin
     const std::variant<std::string, int64_t> id;
     const std::shared_ptr<InAppWebViewSettings> initialSettings;
     const std::optional<std::vector<std::shared_ptr<UserScript>>> initialUserScripts;
+    // ContextMenu.toMap() from Dart (menuItems + settings), empty map = none
+    const std::optional<flutter::EncodableMap> contextMenu = std::nullopt;
   };
 
   class InAppWebView
@@ -206,6 +208,14 @@ namespace drago_inappwebview_plugin
     void isSecureContext(const std::function<void(const bool)> completionHandler) const;
     void injectCSSCode(const std::string& source) const;
     void injectCSSFileFromUrl(const std::string& urlFile) const;
+    void setContextMenu(const std::optional<flutter::EncodableMap>& contextMenu);
+    void setMuted(const bool& muted) const;
+    bool isMuted() const;
+    bool isPlayingAudio() const;
+    bool zoomIn() const;
+    bool zoomOut() const;
+    bool requestFocus() const;
+    void clearFocus() const;
 
     void addWebMessageListener(const std::string& jsObjectName,
       const std::vector<std::string>& allowedOriginRules,
@@ -265,6 +275,10 @@ namespace drago_inappwebview_plugin
     std::map<std::string, std::pair<wil::com_ptr<ICoreWebView2DevToolsProtocolEventReceiver>, EventRegistrationToken>> devToolsProtocolEventListener_ = {};
     int64_t previousAuthRequestFailureCount = 0;
     double zoomScaleFactor_ = 1.0;
+    // custom context menu set from Dart (nullopt = WebView2 default menu, no events)
+    std::optional<flutter::EncodableMap> contextMenu_;
+    // true while Fetch.enable (Document, Request stage) is active for shouldOverrideUrlLoading
+    bool fetchInterceptionEnabled_ = false;
     int64_t progress_ = 0;
     std::map<std::string, std::unique_ptr<WebMessageChannel>> webMessageChannels_;
     std::map<std::string, std::unique_ptr<WebMessageListener>> webMessageListeners_;
@@ -306,6 +320,8 @@ namespace drago_inappwebview_plugin
 
     void registerEventHandlers();
     void registerSurfaceEventHandlers();
+    void updateFetchInterception();
+    bool setZoomFactorClamped(const double& factor) const;
     HRESULT onCallJsHandler(const bool& isMainFrame, ICoreWebView2WebMessageReceivedEventArgs* args);
   };
 }

@@ -71,6 +71,23 @@ class WindowsInAppWebViewController extends PlatformInAppWebViewController
 
   WindowsInAppBrowser? _inAppBrowser;
 
+  // set by setContextMenu: replaces the widget/browser ContextMenu
+  bool _contextMenuOverridden = false;
+  ContextMenu? _contextMenuOverride;
+
+  ContextMenu? _currentContextMenu() {
+    if (_contextMenuOverridden) {
+      return _contextMenuOverride;
+    }
+    if (webviewParams != null && webviewParams!.contextMenu != null) {
+      return webviewParams!.contextMenu;
+    }
+    if (_inAppBrowserEventHandler != null) {
+      return _inAppBrowser?.contextMenu;
+    }
+    return null;
+  }
+
   PlatformInAppBrowserEvents? get _inAppBrowserEventHandler =>
       _inAppBrowser?.eventHandler;
 
@@ -1447,13 +1464,7 @@ class WindowsInAppWebViewController extends PlatformInAppWebViewController
         }
         break;
       case "onCreateContextMenu":
-        ContextMenu? contextMenu;
-        if (webviewParams != null && webviewParams!.contextMenu != null) {
-          contextMenu = webviewParams!.contextMenu;
-        } else if (_inAppBrowserEventHandler != null &&
-            _inAppBrowser!.contextMenu != null) {
-          contextMenu = _inAppBrowser!.contextMenu;
-        }
+        ContextMenu? contextMenu = _currentContextMenu();
 
         if (contextMenu != null && contextMenu.onCreateContextMenu != null) {
           Map<String, dynamic> arguments = call.arguments
@@ -1465,26 +1476,14 @@ class WindowsInAppWebViewController extends PlatformInAppWebViewController
         }
         break;
       case "onHideContextMenu":
-        ContextMenu? contextMenu;
-        if (webviewParams != null && webviewParams!.contextMenu != null) {
-          contextMenu = webviewParams!.contextMenu;
-        } else if (_inAppBrowserEventHandler != null &&
-            _inAppBrowser!.contextMenu != null) {
-          contextMenu = _inAppBrowser!.contextMenu;
-        }
+        ContextMenu? contextMenu = _currentContextMenu();
 
         if (contextMenu != null && contextMenu.onHideContextMenu != null) {
           contextMenu.onHideContextMenu!();
         }
         break;
       case "onContextMenuActionItemClicked":
-        ContextMenu? contextMenu;
-        if (webviewParams != null && webviewParams!.contextMenu != null) {
-          contextMenu = webviewParams!.contextMenu;
-        } else if (_inAppBrowserEventHandler != null &&
-            _inAppBrowser!.contextMenu != null) {
-          contextMenu = _inAppBrowser!.contextMenu;
-        }
+        ContextMenu? contextMenu = _currentContextMenu();
 
         if (contextMenu != null) {
           int? androidId = call.arguments["androidId"];
@@ -2865,6 +2864,62 @@ class WindowsInAppWebViewController extends PlatformInAppWebViewController
   @Deprecated('Use getZoomScale instead')
   Future<double?> getScale() async {
     return await getZoomScale();
+  }
+
+  @override
+  Future<bool> zoomIn() async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    return await channel?.invokeMethod<bool>('zoomIn', args) ?? false;
+  }
+
+  @override
+  Future<bool> zoomOut() async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    return await channel?.invokeMethod<bool>('zoomOut', args) ?? false;
+  }
+
+  @override
+  Future<bool?> requestFocus({
+    FocusDirection? direction,
+    InAppWebViewRect? previouslyFocusedRect,
+  }) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    return await channel?.invokeMethod<bool>('requestFocus', args);
+  }
+
+  @override
+  Future<void> clearFocus() async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    await channel?.invokeMethod('clearFocus', args);
+  }
+
+  @override
+  Future<void> setContextMenu(ContextMenu? contextMenu) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent("contextMenu", () => contextMenu?.toMap());
+    await channel?.invokeMethod('setContextMenu', args);
+    _contextMenuOverridden = true;
+    _contextMenuOverride = contextMenu;
+    _inAppBrowser?.setContextMenu(contextMenu);
+  }
+
+  @override
+  Future<bool> isPlayingAudio() async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    return await channel?.invokeMethod<bool>('isPlayingAudio', args) ?? false;
+  }
+
+  @override
+  Future<bool> isMuted() async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    return await channel?.invokeMethod<bool>('isMuted', args) ?? false;
+  }
+
+  @override
+  Future<void> setMuted({required bool muted}) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent('muted', () => muted);
+    await channel?.invokeMethod('setMuted', args);
   }
 
   @override

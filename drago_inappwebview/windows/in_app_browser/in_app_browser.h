@@ -24,6 +24,7 @@ namespace drago_inappwebview_plugin
     const std::shared_ptr<InAppWebViewSettings> initialWebViewSettings;
     const std::optional<std::vector<std::shared_ptr<UserScript>>> initialUserScripts;
     const std::optional<std::string> webViewEnvironmentId;
+    const std::optional<flutter::EncodableMap> contextMenu = std::nullopt;
   };
 
   class InAppBrowser {

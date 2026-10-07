@@ -5,6 +5,7 @@ import static android.app.Activity.RESULT_OK;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -1303,7 +1304,7 @@ public class InAppWebViewChromeClient extends WebChromeClient implements PluginR
               case 1:
                 String[] resources = new String[response.getResources().size()];
                 resources = response.getResources().toArray(resources);
-                request.grant(resources);
+                grantWithRuntimePermissions(request, resources);
                 break;
               case 0:
               default:
@@ -1333,6 +1334,84 @@ public class InAppWebViewChromeClient extends WebChromeClient implements PluginR
         callback.defaultBehaviour(null);
       }
     }
+  }
+
+  private static int permissionRequestCodeSeq = 0x5D20;
+
+  /**
+   * Grants the WebView resources Dart allowed, making sure the app holds the matching
+   * runtime permission (CAMERA for VIDEO_CAPTURE, RECORD_AUDIO for AUDIO_CAPTURE).
+   */
+  @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+  private void grantWithRuntimePermissions(final PermissionRequest request, final String[] resources) {
+    final Context context = inAppWebView != null ? inAppWebView.getContext() : null;
+    if (context == null) {
+      request.grant(resources);
+      return;
+    }
+    final java.util.List<String> missing = new java.util.ArrayList<>();
+    for (String r : resources) {
+      String perm = androidPermissionFor(r);
+      if (perm != null && !missing.contains(perm)
+              && androidx.core.content.ContextCompat.checkSelfPermission(context, perm)
+              != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+        missing.add(perm);
+      }
+    }
+    if (missing.isEmpty()) {
+      request.grant(resources);
+      return;
+    }
+    final Activity activity = getActivity();
+    final io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding binding =
+            plugin != null ? plugin.activityPluginBinding : null;
+    if (activity == null || binding == null) {
+      grantAllowed(request, resources, context);
+      return;
+    }
+    final int requestCode = permissionRequestCodeSeq++;
+    binding.addRequestPermissionsResultListener(new io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener() {
+      @Override
+      public boolean onRequestPermissionsResult(int code, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (code != requestCode) return false;
+        final io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener self = this;
+        // remove after the dispatch loop finishes iterating the listener set
+        new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
+          @Override
+          public void run() {
+            binding.removeRequestPermissionsResultListener(self);
+          }
+        });
+        grantAllowed(request, resources, context);
+        return true;
+      }
+    });
+    androidx.core.app.ActivityCompat.requestPermissions(activity, missing.toArray(new String[0]), requestCode);
+  }
+
+  @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+  private static void grantAllowed(PermissionRequest request, String[] resources, Context context) {
+    java.util.List<String> allowed = new java.util.ArrayList<>();
+    for (String r : resources) {
+      String perm = androidPermissionFor(r);
+      if (perm == null || androidx.core.content.ContextCompat.checkSelfPermission(context, perm)
+              == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+        allowed.add(r);
+      }
+    }
+    if (allowed.isEmpty()) {
+      request.deny();
+    } else {
+      request.grant(allowed.toArray(new String[0]));
+    }
+  }
+
+  @Nullable
+  @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+  private static String androidPermissionFor(String resource) {
+    if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(resource)) return android.Manifest.permission.CAMERA;
+    if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(resource)) return android.Manifest.permission.RECORD_AUDIO;
+    return null;
   }
 
   @Override

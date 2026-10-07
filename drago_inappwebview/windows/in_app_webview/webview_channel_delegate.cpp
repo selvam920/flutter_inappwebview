@@ -409,6 +409,34 @@ namespace drago_inappwebview_plugin
     else if (string_equals(methodName, "getZoomScale")) {
       result->Success(webView->getZoomScale());
     }
+    else if (string_equals(methodName, "zoomIn")) {
+      result->Success(webView->zoomIn());
+    }
+    else if (string_equals(methodName, "zoomOut")) {
+      result->Success(webView->zoomOut());
+    }
+    else if (string_equals(methodName, "setMuted")) {
+      auto muted = get_fl_map_value<bool>(arguments, "muted");
+      webView->setMuted(muted);
+      result->Success(true);
+    }
+    else if (string_equals(methodName, "isMuted")) {
+      result->Success(webView->isMuted());
+    }
+    else if (string_equals(methodName, "isPlayingAudio")) {
+      result->Success(webView->isPlayingAudio());
+    }
+    else if (string_equals(methodName, "requestFocus")) {
+      result->Success(webView->requestFocus());
+    }
+    else if (string_equals(methodName, "clearFocus")) {
+      webView->clearFocus();
+      result->Success(true);
+    }
+    else if (string_equals(methodName, "setContextMenu")) {
+      webView->setContextMenu(get_optional_fl_map_value<flutter::EncodableMap>(arguments, "contextMenu"));
+      result->Success(true);
+    }
     else if (string_equals(methodName, "getProgress")) {
       result->Success(webView->getProgress());
     }
@@ -739,6 +767,42 @@ namespace drago_inappwebview_plugin
 
     auto arguments = std::make_unique<flutter::EncodableValue>();
     channel->InvokeMethod("onCloseWindow", std::move(arguments));
+  }
+
+  void WebViewChannelDelegate::onCreateContextMenu(const int64_t& hitTestType, const std::optional<std::string>& extra) const
+  {
+    if (!channel) {
+      return;
+    }
+
+    auto arguments = std::make_unique<flutter::EncodableValue>(flutter::EncodableMap{
+      {"type", hitTestType},
+      {"extra", make_fl_value(extra)},
+      });
+    channel->InvokeMethod("onCreateContextMenu", std::move(arguments));
+  }
+
+  void WebViewChannelDelegate::onHideContextMenu() const
+  {
+    if (!channel) {
+      return;
+    }
+
+    auto arguments = std::make_unique<flutter::EncodableValue>(flutter::EncodableMap{});
+    channel->InvokeMethod("onHideContextMenu", std::move(arguments));
+  }
+
+  void WebViewChannelDelegate::onContextMenuActionItemClicked(const flutter::EncodableValue& id, const std::string& title) const
+  {
+    if (!channel) {
+      return;
+    }
+
+    auto arguments = std::make_unique<flutter::EncodableValue>(flutter::EncodableMap{
+      {"id", id},
+      {"title", title},
+      });
+    channel->InvokeMethod("onContextMenuActionItemClicked", std::move(arguments));
   }
 
   void WebViewChannelDelegate::onPermissionRequest(const std::string& origin, const std::vector<int64_t>& resources, std::unique_ptr<PermissionRequestCallback> callback) const

@@ -37,9 +37,32 @@ class DownloadStartResponseAction {
     },
   );
 
+  ///Download the file natively (no app-side download code needed),
+  ///to [DownloadStartResponse_.resultFilePath] or, when that is `null`,
+  ///to the default Downloads folder with the suggested file name.
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView
+  ///- iOS WKWebView
+  ///- macOS WKWebView
+  static final SAVE = DownloadStartResponseAction._internalMultiPlatform(1, () {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return 1;
+      case TargetPlatform.iOS:
+        return 1;
+      case TargetPlatform.macOS:
+        return 1;
+      default:
+        break;
+    }
+    return null;
+  });
+
   ///Set of all values of [DownloadStartResponseAction].
   static final Set<DownloadStartResponseAction> values = [
     DownloadStartResponseAction.CANCEL,
+    DownloadStartResponseAction.SAVE,
   ].toSet();
 
   ///Gets a possible [DownloadStartResponseAction] instance from [int] value.
@@ -113,6 +136,8 @@ class DownloadStartResponseAction {
     switch (_value) {
       case 0:
         return 'CANCEL';
+      case 1:
+        return 'SAVE';
     }
     return _value.toString();
   }

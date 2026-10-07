@@ -22,6 +22,7 @@ class PDFConfiguration {
   ///If not specified, default print settings will be used.
   ///
   ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView
   ///- Windows WebView2
   PrintJobSettings? settings;
   PDFConfiguration({this.rect, this.settings});

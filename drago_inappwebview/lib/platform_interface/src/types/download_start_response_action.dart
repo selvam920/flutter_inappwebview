@@ -17,4 +17,16 @@ class DownloadStartResponseAction_ {
     platforms: [EnumWindowsPlatform(value: 0), EnumLinuxPlatform(value: 0)],
   )
   static const CANCEL = const DownloadStartResponseAction_._internal(0);
+
+  ///Download the file natively (no app-side download code needed),
+  ///to [DownloadStartResponse_.resultFilePath] or, when that is `null`,
+  ///to the default Downloads folder with the suggested file name.
+  @EnumSupportedPlatforms(
+    platforms: [
+      EnumAndroidPlatform(value: 1),
+      EnumIOSPlatform(value: 1),
+      EnumMacOSPlatform(value: 1),
+    ],
+  )
+  static const SAVE = const DownloadStartResponseAction_._internal(1);
 }

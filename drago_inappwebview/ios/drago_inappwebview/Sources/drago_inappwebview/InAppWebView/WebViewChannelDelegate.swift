@@ -1128,6 +1128,27 @@ public class WebViewChannelDelegate: ChannelDelegate {
         channel?.invokeMethod("onCallJsHandler", arguments: arguments, callback: callback)
     }
     
+    public class DownloadStartingCallback: BaseCallbackResult<[String: Any?]> {
+        override init() {
+            super.init()
+            self.decodeResult = { (obj: Any?) in
+                return obj as? [String: Any?]
+            }
+        }
+        
+        deinit {
+            self.defaultBehaviour(nil)
+        }
+    }
+    
+    public func onDownloadStarting(request: DownloadStartRequest, callback: DownloadStartingCallback) {
+        if channel == nil {
+            callback.defaultBehaviour(nil)
+            return
+        }
+        channel?.invokeMethod("onDownloadStarting", arguments: request.toMap(), callback: callback)
+    }
+    
     public class NavigationResponseCallback: BaseCallbackResult<WKNavigationResponsePolicy> {
         override init() {
             super.init()

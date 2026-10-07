@@ -254,6 +254,7 @@ enum PlatformWebViewCreationParamsProperty {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView
   ///- iOS WKWebView
+  ///- Windows WebView2 ([Official API - ICoreWebView2_11.add_ContextMenuRequested](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2_11#add_contextmenurequested))
   ///
   ///Use the [PlatformWebViewCreationParams.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
@@ -1805,6 +1806,7 @@ extension _PlatformWebViewCreationParamsPropertySupported
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformWebViewCreationParamsProperty.findInteractionController:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

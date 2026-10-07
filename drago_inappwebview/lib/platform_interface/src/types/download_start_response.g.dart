@@ -12,7 +12,13 @@ class DownloadStartResponse {
   ///
   ///If canceled, the download save dialog is not displayed regardless of the [handled] property.
   ///
+  ///Use [DownloadStartResponseAction_.SAVE] on Android, iOS and macOS to download
+  ///the file natively to [resultFilePath] (or to the default Downloads folder when it is `null`).
+  ///
   ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView
+  ///- iOS WKWebView
+  ///- macOS WKWebView
   ///- Windows WebView2
   DownloadStartResponseAction? action;
 
@@ -20,7 +26,13 @@ class DownloadStartResponse {
   ///
   ///The download will progress as normal if it is not canceled, there will just be no default UI shown.
   ///
+  ///On Android, iOS and macOS, `handled: true` without an [action] means the app
+  ///takes care of the download itself and the native side does nothing.
+  ///
   ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView
+  ///- iOS WKWebView
+  ///- macOS WKWebView
   ///- Windows WebView2
   bool handled;
 
@@ -31,7 +43,13 @@ class DownloadStartResponse {
   ///If the path points to an existing file, the file will be overwritten.
   ///If the directory does not exist, it is created.
   ///
+  ///On Android, iOS and macOS it is used only with [DownloadStartResponseAction_.SAVE];
+  ///when `null` the file is saved to the default Downloads folder using the suggested file name.
+  ///
   ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView
+  ///- iOS WKWebView
+  ///- macOS WKWebView
   ///- Windows WebView2
   String? resultFilePath;
   DownloadStartResponse({

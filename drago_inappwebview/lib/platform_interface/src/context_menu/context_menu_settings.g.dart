@@ -9,6 +9,11 @@ part of 'context_menu_settings.dart';
 ///Class that represents available settings used by [ContextMenu].
 class ContextMenuSettings {
   ///Whether all the default system context menu items should be hidden or not. The default value is `false`.
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView
+  ///- iOS WKWebView
+  ///- Windows WebView2 ([Official API - ICoreWebView2Environment9.CreateContextMenuItem](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2environment9#createcontextmenuitem))
   bool hideDefaultSystemContextMenuItems;
   ContextMenuSettings({this.hideDefaultSystemContextMenuItems = false});
 

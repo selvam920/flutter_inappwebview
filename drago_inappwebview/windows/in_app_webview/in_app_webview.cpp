@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <filesystem>
 #include <nlohmann/json.hpp>
@@ -282,6 +283,7 @@ namespace drago_inappwebview_plugin
     }
 
     javaScriptBridgeEnabled = settings->javaScriptBridgeEnabled;
+    setContextMenu(params.contextMenu);
 
     wil::com_ptr<ICoreWebView2Settings> webView2Settings;
     auto hrWebView2Settings = webView->get_Settings(&webView2Settings);
@@ -371,17 +373,9 @@ namespace drago_inappwebview_plugin
       }
     ).Get()));
 
-    // required to use Fetch domain and implement the shouldOverrideUrlLoading event correctly
-    failedLog(webView->CallDevToolsProtocolMethod(L"Fetch.enable", L"{\"patterns\": [{\"resourceType\": \"Document\", \"requestStage\": \"Request\"}]}", Callback<ICoreWebView2CallDevToolsProtocolMethodCompletedHandler>(
-      [this, alive = alive_](HRESULT errorCode, LPCWSTR returnObjectAsJson)
-      {
-        if (!*alive) {
-          return S_OK;
-        }
-        failedLog(errorCode);
-        return S_OK;
-      }
-    ).Get()));
+    // the Fetch domain is only needed to implement shouldOverrideUrlLoading:
+    // enabling it pauses every main-frame navigation until Dart answers
+    updateFetchInterception();
 
     failedLog(webView->CallDevToolsProtocolMethod(L"Page.getFrameTree", L"{}", Callback<ICoreWebView2CallDevToolsProtocolMethodCompletedHandler>(
       [this, alive = alive_](HRESULT errorCode, LPCWSTR returnObjectAsJson)
@@ -2097,6 +2091,135 @@ namespace drago_inappwebview_plugin
       failedLog(add_ScreenCaptureStarting_HResult);
     }
 
+    if (auto webView11 = webView.try_query<ICoreWebView2_11>()) {
+      auto add_ContextMenuRequested_HResult = webView11->add_ContextMenuRequested(
+        Callback<ICoreWebView2ContextMenuRequestedEventHandler>(
+          [this](ICoreWebView2* sender, ICoreWebView2ContextMenuRequestedEventArgs* args)
+          {
+            // no Dart ContextMenu: keep the WebView2 default menu untouched
+            if (!channelDelegate || !contextMenu_.has_value()) {
+              return S_OK;
+            }
+
+            int64_t hitTestType = 0; // UNKNOWN_TYPE
+            std::optional<std::string> hitTestExtra;
+            wil::com_ptr<ICoreWebView2ContextMenuTarget> target;
+            if (succeededOrLog(args->get_ContextMenuTarget(&target))) {
+              COREWEBVIEW2_CONTEXT_MENU_TARGET_KIND kind = COREWEBVIEW2_CONTEXT_MENU_TARGET_KIND_PAGE;
+              failedLog(target->get_Kind(&kind));
+              BOOL isEditable = FALSE, hasLinkUri = FALSE, hasSourceUri = FALSE;
+              failedLog(target->get_IsEditable(&isEditable));
+              failedLog(target->get_HasLinkUri(&hasLinkUri));
+              failedLog(target->get_HasSourceUri(&hasSourceUri));
+              std::optional<std::string> linkUri, sourceUri;
+              if (hasLinkUri) {
+                wil::unique_cotaskmem_string uri;
+                if (SUCCEEDED(target->get_LinkUri(&uri))) {
+                  linkUri = wide_to_utf8(uri.get());
+                }
+              }
+              if (hasSourceUri) {
+                wil::unique_cotaskmem_string uri;
+                if (SUCCEEDED(target->get_SourceUri(&uri))) {
+                  sourceUri = wide_to_utf8(uri.get());
+                }
+              }
+
+              if (isEditable) {
+                hitTestType = 9; // EDIT_TEXT_TYPE
+              }
+              else if (kind == COREWEBVIEW2_CONTEXT_MENU_TARGET_KIND_IMAGE) {
+                hitTestType = linkUri.has_value() ? 8 : 5; // SRC_IMAGE_ANCHOR_TYPE : IMAGE_TYPE
+                hitTestExtra = sourceUri.has_value() ? sourceUri : linkUri;
+              }
+              else if (linkUri.has_value()) {
+                const auto& link = linkUri.value();
+                if (starts_with(link, std::string{ "mailto:" })) {
+                  hitTestType = 4; // EMAIL_TYPE
+                  hitTestExtra = link.substr(7);
+                }
+                else if (starts_with(link, std::string{ "tel:" })) {
+                  hitTestType = 2; // PHONE_TYPE
+                  hitTestExtra = link.substr(4);
+                }
+                else if (starts_with(link, std::string{ "geo:" })) {
+                  hitTestType = 3; // GEO_TYPE
+                  hitTestExtra = link.substr(4);
+                }
+                else {
+                  hitTestType = 7; // SRC_ANCHOR_TYPE
+                  hitTestExtra = link;
+                }
+              }
+            }
+
+            const auto& contextMenu = contextMenu_.value();
+            auto contextMenuSettings = get_optional_fl_map_value<flutter::EncodableMap>(contextMenu, "settings");
+            auto hideDefaultItems = contextMenuSettings.has_value() && get_fl_map_value<bool>(contextMenuSettings.value(), "hideDefaultSystemContextMenuItems", false);
+            auto menuItems = get_optional_fl_map_value<flutter::EncodableList>(contextMenu, "menuItems");
+
+            wil::com_ptr<ICoreWebView2ContextMenuItemCollection> items;
+            if (succeededOrLog(args->get_MenuItems(&items))) {
+              if (hideDefaultItems) {
+                UINT32 count = 0;
+                if (succeededOrLog(items->get_Count(&count))) {
+                  for (UINT32 i = count; i > 0; i--) {
+                    failedLog(items->RemoveValueAtIndex(i - 1));
+                  }
+                }
+              }
+
+              auto env9 = webViewEnv ? webViewEnv.try_query<ICoreWebView2Environment9>() : nullptr;
+              if (env9 && menuItems.has_value() && !menuItems.value().empty()) {
+                UINT32 count = 0;
+                failedLog(items->get_Count(&count));
+                if (count > 0) {
+                  wil::com_ptr<ICoreWebView2ContextMenuItem> separator;
+                  if (SUCCEEDED(env9->CreateContextMenuItem(L"", nullptr, COREWEBVIEW2_CONTEXT_MENU_ITEM_KIND_SEPARATOR, &separator))) {
+                    failedLog(items->InsertValueAtIndex(count++, separator.get()));
+                  }
+                }
+                for (const auto& itemValue : menuItems.value()) {
+                  if (!std::holds_alternative<flutter::EncodableMap>(itemValue)) {
+                    continue;
+                  }
+                  const auto& itemMap = std::get<flutter::EncodableMap>(itemValue);
+                  auto title = get_fl_map_value<std::string>(itemMap, "title", "");
+                  auto idIt = itemMap.find(flutter::EncodableValue("id"));
+                  auto itemId = idIt != itemMap.end() ? idIt->second : flutter::EncodableValue();
+
+                  wil::com_ptr<ICoreWebView2ContextMenuItem> newItem;
+                  if (!succeededOrLog(env9->CreateContextMenuItem(utf8_to_wide(title).c_str(), nullptr, COREWEBVIEW2_CONTEXT_MENU_ITEM_KIND_COMMAND, &newItem))) {
+                    continue;
+                  }
+                  // the item only lives as long as this menu: its token is not tracked,
+                  // the alive guard makes a late selection a no-op
+                  EventRegistrationToken itemToken;
+                  failedLog(newItem->add_CustomItemSelected(
+                    Callback<ICoreWebView2CustomItemSelectedEventHandler>(
+                      [this, alive = alive_, itemId, title](ICoreWebView2ContextMenuItem* sender, IUnknown* args)
+                      {
+                        if (!*alive || !channelDelegate) {
+                          return S_OK;
+                        }
+                        channelDelegate->onContextMenuActionItemClicked(itemId, title);
+                        // WebView2 has no "menu closed" event: a custom item selection closes it
+                        channelDelegate->onHideContextMenu();
+                        return S_OK;
+                      }
+                    ).Get(), &itemToken));
+                  failedLog(items->InsertValueAtIndex(count++, newItem.get()));
+                }
+              }
+            }
+
+            channelDelegate->onCreateContextMenu(hitTestType, hitTestExtra);
+            return S_OK;
+          }
+        ).Get(), trackEventToken(webView11, [](auto* o, EventRegistrationToken t) { return o->remove_ContextMenuRequested(t); }));
+      failedLog(add_ContextMenuRequested_HResult);
+    }
+
     if (userContentController) {
       userContentController->registerEventHandlers();
     }
@@ -3259,6 +3382,7 @@ namespace drago_inappwebview_plugin
     }
 
     settings = newSettings;
+    updateFetchInterception();
   }
 
   flutter::EncodableValue InAppWebView::getSettings() const
@@ -4367,6 +4491,130 @@ namespace drago_inappwebview_plugin
     }
 
     return S_OK;
+  }
+
+  void InAppWebView::updateFetchInterception()
+  {
+    if (!webView || !settings) {
+      return;
+    }
+
+    // shouldOverrideUrlLoading is the only native consumer of Fetch.requestPaused
+    auto needed = settings->useShouldOverrideUrlLoading;
+    if (needed == fetchInterceptionEnabled_) {
+      return;
+    }
+    // the app listens to Fetch.requestPaused itself through the DevTools API: leave it enabled
+    if (!needed && map_contains(devToolsProtocolEventListener_, std::string("Fetch.requestPaused"))) {
+      return;
+    }
+
+    fetchInterceptionEnabled_ = needed;
+    failedLog(webView->CallDevToolsProtocolMethod(needed ? L"Fetch.enable" : L"Fetch.disable",
+      needed ? L"{\"patterns\": [{\"resourceType\": \"Document\", \"requestStage\": \"Request\"}]}" : L"{}",
+      Callback<ICoreWebView2CallDevToolsProtocolMethodCompletedHandler>(
+        [this, alive = alive_](HRESULT errorCode, LPCWSTR returnObjectAsJson)
+        {
+          if (!*alive) {
+            return S_OK;
+          }
+          failedLog(errorCode);
+          return S_OK;
+        }
+      ).Get()));
+  }
+
+  void InAppWebView::setContextMenu(const std::optional<flutter::EncodableMap>& contextMenu)
+  {
+    // Dart sends an empty map when there is no ContextMenu
+    if (contextMenu.has_value() && !contextMenu.value().empty()) {
+      contextMenu_ = contextMenu;
+    }
+    else {
+      contextMenu_ = std::nullopt;
+    }
+  }
+
+  void InAppWebView::setMuted(const bool& muted) const
+  {
+    if (!webView) {
+      return;
+    }
+    if (auto webView8 = webView.try_query<ICoreWebView2_8>()) {
+      failedLog(webView8->put_IsMuted(muted));
+    }
+  }
+
+  bool InAppWebView::isMuted() const
+  {
+    BOOL muted = FALSE;
+    if (webView) {
+      if (auto webView8 = webView.try_query<ICoreWebView2_8>()) {
+        failedLog(webView8->get_IsMuted(&muted));
+      }
+    }
+    return muted == TRUE;
+  }
+
+  bool InAppWebView::isPlayingAudio() const
+  {
+    BOOL playing = FALSE;
+    if (webView) {
+      if (auto webView8 = webView.try_query<ICoreWebView2_8>()) {
+        failedLog(webView8->get_IsDocumentPlayingAudio(&playing));
+      }
+    }
+    return playing == TRUE;
+  }
+
+  bool InAppWebView::setZoomFactorClamped(const double& factor) const
+  {
+    if (!webViewController) {
+      return false;
+    }
+    // same bounds as Chromium's page zoom
+    auto clamped = std::clamp(factor, 0.25, 5.0);
+    double current = 1.0;
+    if (!succeededOrLog(webViewController->get_ZoomFactor(&current))) {
+      return false;
+    }
+    if (std::abs(clamped - current) < 0.0001) {
+      return false;
+    }
+    // ZoomFactorChanged updates zoomScaleFactor_ and notifies Dart
+    return succeededOrLog(webViewController->put_ZoomFactor(clamped));
+  }
+
+  bool InAppWebView::zoomIn() const
+  {
+    return setZoomFactorClamped(zoomScaleFactor_ * 1.1);
+  }
+
+  bool InAppWebView::zoomOut() const
+  {
+    return setZoomFactorClamped(zoomScaleFactor_ / 1.1);
+  }
+
+  bool InAppWebView::requestFocus() const
+  {
+    if (!webViewController) {
+      return false;
+    }
+    return succeededOrLog(webViewController->MoveFocus(COREWEBVIEW2_MOVE_FOCUS_REASON_PROGRAMMATIC));
+  }
+
+  void InAppWebView::clearFocus() const
+  {
+    if (!webView) {
+      return;
+    }
+    // blur the focused element, then hand keyboard focus back to the Flutter window
+    failedLog(webView->ExecuteScript(L"(function(){var e=document.activeElement;if(e&&e.blur){e.blur();}})();", nullptr));
+    if (!inAppBrowser && plugin && plugin->registrar) {
+      if (auto view = plugin->registrar->GetView()) {
+        SetFocus(view->GetNativeWindow());
+      }
+    }
   }
 
   InAppWebView::~InAppWebView()

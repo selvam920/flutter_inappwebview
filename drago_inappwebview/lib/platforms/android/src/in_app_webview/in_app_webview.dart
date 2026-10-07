@@ -324,7 +324,8 @@ class AndroidInAppWebViewWidget extends PlatformInAppWebViewWidget {
         (params.initialSettings != null
             ? initialSettings.useHybridComposition
             : params.initialOptions?.android.useHybridComposition) ??
-        true;
+        // Texture layer (virtual display / TLHC) is faster than hybrid composition.
+        false;
 
     return PlatformViewLink(
       key: params.key,

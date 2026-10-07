@@ -2330,6 +2330,18 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
   }
 
   @override
+  Future<Uint8List?> createPdf({
+    @Deprecated("Use pdfConfiguration instead")
+    // ignore: deprecated_member_use_from_same_package
+    IOSWKPDFConfiguration? iosWKPdfConfiguration,
+    PDFConfiguration? pdfConfiguration,
+  }) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent('pdfConfiguration', () => pdfConfiguration?.toMap());
+    return await channel?.invokeMethod<Uint8List?>('createPdf', args);
+  }
+
+  @override
   @Deprecated('Use setSettings instead')
   Future<void> setOptions({required InAppWebViewGroupOptions options}) async {
     InAppWebViewSettings settings =

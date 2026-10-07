@@ -18,7 +18,7 @@ class PDFConfiguration_ {
   ///The print settings to use when generating the PDF.
   ///These settings control page size, orientation, margins, and other printing options.
   ///If not specified, default print settings will be used.
-  @SupportedPlatforms(platforms: [WindowsPlatform()])
+  @SupportedPlatforms(platforms: [AndroidPlatform(), WindowsPlatform()])
   PrintJobSettings_? settings;
 
   PDFConfiguration_({this.rect, this.settings});

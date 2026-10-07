@@ -68,7 +68,8 @@ namespace drago_inappwebview_plugin
     InAppWebViewCreationParams webViewParams = {
       id,
       params.initialWebViewSettings,
-      params.initialUserScripts
+      params.initialUserScripts,
+      params.contextMenu
     };
 
     auto webViewEnvironment = params.webViewEnvironmentId.has_value() && map_contains(plugin->webViewEnvironmentManager->webViewEnvironments, params.webViewEnvironmentId.value())

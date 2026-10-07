@@ -1484,7 +1484,28 @@ final public class InAppWebView extends InputAwareWebView implements InAppWebVie
               URLUtil.guessFileName(url, contentDisposition, mimeType),
               null
       );
-      if (channelDelegate != null) channelDelegate.onDownloadStarting(downloadStartRequest);
+      final DownloadStartRequest request = downloadStartRequest;
+      if (channelDelegate != null) channelDelegate.onDownloadStarting(downloadStartRequest, new MethodChannel.Result() {
+        @Override
+        public void success(@Nullable Object response) {
+          if (!(response instanceof Map)) return;
+          Map<String, Object> map = (Map<String, Object>) response;
+          Object action = map.get("action");
+          // action null => legacy behaviour (app handles it); 0 = CANCEL; 1 = SAVE
+          if (action instanceof Number && ((Number) action).intValue() == 1) {
+            DownloadPdfHelper.save(InAppWebView.this, request, (String) map.get("resultFilePath"));
+          }
+        }
+
+        @Override
+        public void error(@NonNull String errorCode, @Nullable String errorMessage, @Nullable Object errorDetails) {
+          Log.e(LOG_TAG, errorCode + ", " + ((errorMessage != null) ? errorMessage : ""));
+        }
+
+        @Override
+        public void notImplemented() {
+        }
+      });
     }
   }
 

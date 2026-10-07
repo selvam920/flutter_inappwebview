@@ -217,6 +217,15 @@ public class WebViewChannelDelegate extends ChannelDelegateImpl {
         } else
           result.success(null);
         break;
+      case createPdf:
+        if (webView instanceof com.pichillilorenzo.drago_inappwebview.webview.in_app_webview.InAppWebView) {
+          Map<String, Object> pdfConfiguration = (Map<String, Object>) call.argument("pdfConfiguration");
+          com.pichillilorenzo.drago_inappwebview.webview.in_app_webview.DownloadPdfHelper.createPdf(
+                  (com.pichillilorenzo.drago_inappwebview.webview.in_app_webview.InAppWebView) webView,
+                  pdfConfiguration, result);
+        } else
+          result.success(null);
+        break;
       case setSettings:
         if (webView != null && webView.getInAppBrowserDelegate() instanceof InAppBrowserActivity) {
           InAppBrowserActivity inAppBrowserActivity = (InAppBrowserActivity) webView.getInAppBrowserDelegate();
@@ -760,9 +769,13 @@ public class WebViewChannelDelegate extends ChannelDelegateImpl {
   }
 
   public void onDownloadStarting(DownloadStartRequest downloadStartRequest) {
+    onDownloadStarting(downloadStartRequest, null);
+  }
+
+  public void onDownloadStarting(DownloadStartRequest downloadStartRequest, @Nullable MethodChannel.Result result) {
     MethodChannel channel = getChannel();
     if (channel == null) return;
-    channel.invokeMethod("onDownloadStarting", downloadStartRequest.toMap());
+    channel.invokeMethod("onDownloadStarting", downloadStartRequest.toMap(), result);
   }
 
   public void onCreateContextMenu(HitTestResult hitTestResult) {

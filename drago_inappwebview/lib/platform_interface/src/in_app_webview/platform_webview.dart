@@ -2562,7 +2562,17 @@ In that case, after the `window.addEventListener("dragoInAppWebViewPlatformReady
   ///{@endtemplate}
   ///
   ///{@macro drago_inappwebview.PlatformWebViewCreationParams.contextMenu.supported_platforms}
-  @SupportedPlatforms(platforms: [AndroidPlatform(), IOSPlatform()])
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(),
+      IOSPlatform(),
+      WindowsPlatform(
+        apiName: 'ICoreWebView2_11.add_ContextMenuRequested',
+        apiUrl:
+            'https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2_11#add_contextmenurequested',
+      ),
+    ],
+  )
   final ContextMenu? contextMenu;
 
   ///{@template drago_inappwebview.PlatformWebViewCreationParams.initialUserScripts}

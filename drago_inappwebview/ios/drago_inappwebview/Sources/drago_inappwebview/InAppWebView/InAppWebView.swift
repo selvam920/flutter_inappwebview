@@ -1975,35 +1975,99 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     
     @available(iOS 14.5, *)
     public func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping (URL?) -> Void) {
-        if let url = response.url, let useOnDownloadStart = settings?.useOnDownloadStart, useOnDownloadStart {
-            let downloadStartRequest = DownloadStartRequest(url: url.absoluteString,
-                                                            userAgent: nil,
-                                                            contentDisposition: nil,
-                                                            mimeType: response.mimeType,
-                                                            contentLength: response.expectedContentLength,
-                                                            suggestedFilename: suggestedFilename,
-                                                            textEncodingName: response.textEncodingName)
-            channelDelegate?.onDownloadStarting(request: downloadStartRequest)
+        guard let url = response.url, let useOnDownloadStart = settings?.useOnDownloadStart, useOnDownloadStart,
+              let channelDelegate = channelDelegate else {
+            // cancel the download
+            completionHandler(nil)
+            return
         }
-        download.delegate = nil
-        // cancel the download
-        completionHandler(nil)
+        let downloadStartRequest = DownloadStartRequest(url: url.absoluteString,
+                                                        userAgent: nil,
+                                                        contentDisposition: nil,
+                                                        mimeType: response.mimeType,
+                                                        contentLength: response.expectedContentLength,
+                                                        suggestedFilename: suggestedFilename,
+                                                        textEncodingName: response.textEncodingName)
+        var completionHandlerCalled = false
+        let callback = WebViewChannelDelegate.DownloadStartingCallback()
+        callback.nonNullSuccess = { [weak self] (result: [String: Any?]) in
+            if !completionHandlerCalled {
+                completionHandlerCalled = true
+                completionHandler(self?.downloadDestination(result: result, suggestedFilename: suggestedFilename))
+            }
+            return false
+        }
+        callback.defaultBehaviour = { (result: [String: Any?]?) in
+            if !completionHandlerCalled {
+                completionHandlerCalled = true
+                // no answer: keep the old behaviour and cancel the download
+                completionHandler(nil)
+            }
+        }
+        callback.error = { [weak callback] (code: String, message: String?, details: Any?) in
+            print(code + ", " + (message ?? ""))
+            callback?.defaultBehaviour(nil)
+        }
+        channelDelegate.onDownloadStarting(request: downloadStartRequest, callback: callback)
+    }
+    
+    /// Destination for a native download from the Dart answer:
+    /// {"action": int?, "handled": bool, "resultFilePath": String?}. nil cancels.
+    private func downloadDestination(result: [String: Any?], suggestedFilename: String) -> URL? {
+        guard let action = result["action"] as? Int, action == 1 else {
+            // null => old behaviour (cancel), 0 => cancel
+            return nil
+        }
+        let fileManager = FileManager.default
+        if let path = result["resultFilePath"] as? String, !path.isEmpty {
+            let fileUrl = URL(fileURLWithPath: path)
+            do {
+                try fileManager.createDirectory(at: fileUrl.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
+                if fileManager.fileExists(atPath: fileUrl.path) {
+                    try fileManager.removeItem(at: fileUrl)
+                }
+            } catch {
+                print("onDownloadStarting: cannot prepare \(path): \(error.localizedDescription)")
+                return nil
+            }
+            return fileUrl
+        }
+        guard let directory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            return nil
+        }
+        try? fileManager.createDirectory(at: directory, withIntermediateDirectories: true, attributes: nil)
+        let fileName = suggestedFilename.isEmpty ? "download" : suggestedFilename
+        let baseName = (fileName as NSString).deletingPathExtension
+        let fileExtension = (fileName as NSString).pathExtension
+        var candidate = directory.appendingPathComponent(fileName)
+        var index = 1
+        while fileManager.fileExists(atPath: candidate.path) {
+            let name = fileExtension.isEmpty ? "\(baseName) (\(index))" : "\(baseName) (\(index)).\(fileExtension)"
+            candidate = directory.appendingPathComponent(name)
+            index += 1
+        }
+        return candidate
+    }
+    
+    @available(iOS 14.5, *)
+    public func downloadDidFinish(_ download: WKDownload) {
+        print("onDownloadStarting: download finished \(download.originalRequest?.url?.absoluteString ?? "")")
+    }
+    
+    @available(iOS 14.5, *)
+    public func download(_ download: WKDownload, didFailWithError error: Error, resumeData: Data?) {
+        print("onDownloadStarting: download failed \(download.originalRequest?.url?.absoluteString ?? ""): \(error.localizedDescription)")
     }
     
     @available(iOS 14.5, *)
     public func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) {
-        let response = navigationResponse.response
-        if let url = response.url, let useOnDownloadStart = settings?.useOnDownloadStart, useOnDownloadStart {
-            let downloadStartRequest = DownloadStartRequest(url: url.absoluteString,
-                                                            userAgent: nil,
-                                                            contentDisposition: nil,
-                                                            mimeType: response.mimeType,
-                                                            contentLength: response.expectedContentLength,
-                                                            suggestedFilename: response.suggestedFilename,
-                                                            textEncodingName: response.textEncodingName)
-            channelDelegate?.onDownloadStarting(request: downloadStartRequest)
-        }
-        download.delegate = nil
+        // onDownloadStarting is sent from download(_:decideDestinationUsing:...)
+        download.delegate = self
+    }
+    
+    @available(iOS 14.5, *)
+    public func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
+        download.delegate = self
     }
     
     public func webView(_ webView: WKWebView,

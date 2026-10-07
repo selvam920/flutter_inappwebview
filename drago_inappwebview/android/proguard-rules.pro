@@ -24,3 +24,5 @@
 # consumer configuration file"). If a consuming app is minifying and needs to
 # opt out of repackaging, add -dontrepackage to that app's own
 # android/app/proguard-rules.pro instead — it can't be shipped from here.
+-keep class android.print.DragoPdfPrinter { *; }
+-keep class android.print.DragoPdfPrinter$* { *; }

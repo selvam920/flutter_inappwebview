@@ -398,6 +398,7 @@ enum PlatformInAppWebViewControllerMethod {
   ///- macOS WKWebView ([Official API - NSWindow.makeFirstResponder](https://developer.apple.com/documentation/appkit/nswindow/1419366-makefirstresponder))
   ///- Linux WPE WebKit ([Official API - wpe_view_backend_remove_activity_state](https://wpewebkit.org/reference/stable/wpe-platform-2.0/func.view_backend_remove_activity_state.html)):
   ///    - Removes focused state from WPE backend and blurs active element via JavaScript
+  ///- Windows WebView2
   ///
   ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
@@ -470,6 +471,8 @@ enum PlatformInAppWebViewControllerMethod {
   ///{@template drago_inappwebview.PlatformInAppWebViewController.createPdf.supported_platforms}
   ///
   ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView ([Official API - WebView.createPrintDocumentAdapter](https://developer.android.com/reference/android/webkit/WebView#createPrintDocumentAdapter(java.lang.String))):
+  ///    - Rendered through PrintDocumentAdapter to a temporary PDF file, returned as bytes.
   ///- iOS WKWebView 14.0+ ([Official API - WKWebView.createPdf](https://developer.apple.com/documentation/webkit/wkwebview/3650490-createpdf))
   ///- macOS WKWebView 11.0+ ([Official API - WKWebView.createPdf](https://developer.apple.com/documentation/webkit/wkwebview/3650490-createpdf))
   ///- Windows WebView2 ([Official API - ICoreWebView2_16.PrintToPdfStream](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2_16#printtopdfstream))
@@ -1503,6 +1506,7 @@ enum PlatformInAppWebViewControllerMethod {
   ///
   ///**Officially Supported Platforms/Implementations**:
   ///- Linux WPE WebKit 2.30+ ([Official API - webkit_web_view_get_is_muted](https://wpewebkit.org/reference/stable/wpe-webkit-2.0/method.WebView.get_is_muted.html))
+  ///- Windows WebView2 ([Official API - ICoreWebView2_8.get_IsMuted](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2_8#get_ismuted))
   ///
   ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
@@ -1514,6 +1518,7 @@ enum PlatformInAppWebViewControllerMethod {
   ///
   ///**Officially Supported Platforms/Implementations**:
   ///- Linux WPE WebKit 2.8+ ([Official API - webkit_web_view_is_playing_audio](https://wpewebkit.org/reference/stable/wpe-webkit-2.0/method.WebView.is_playing_audio.html))
+  ///- Windows WebView2 ([Official API - ICoreWebView2_8.get_IsDocumentPlayingAudio](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2_8#get_isdocumentplayingaudio))
   ///
   ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
@@ -1975,6 +1980,7 @@ enum PlatformInAppWebViewControllerMethod {
   ///- macOS WKWebView ([Official API - NSWindow.makeFirstResponder](https://developer.apple.com/documentation/appkit/nswindow/1419366-makefirstresponder))
   ///- Linux WPE WebKit ([Official API - wpe_view_backend_add_activity_state](https://wpewebkit.org/reference/stable/wpe-platform-2.0/func.view_backend_add_activity_state.html)):
   ///    - Adds focused state to WPE backend
+  ///- Windows WebView2 ([Official API - ICoreWebView2Controller.MoveFocus](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2controller#movefocus))
   ///
   ///**Parameters - Officially Supported Platforms/Implementations**:
   ///- [direction]:
@@ -2217,6 +2223,7 @@ enum PlatformInAppWebViewControllerMethod {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView
   ///- iOS WKWebView
+  ///- Windows WebView2 ([Official API - ICoreWebView2_11.add_ContextMenuRequested](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2_11#add_contextmenurequested))
   ///
   ///**Parameters - Officially Supported Platforms/Implementations**:
   ///- [contextMenu]: all platforms
@@ -2295,6 +2302,7 @@ enum PlatformInAppWebViewControllerMethod {
   ///
   ///**Officially Supported Platforms/Implementations**:
   ///- Linux WPE WebKit 2.30+ ([Official API - webkit_web_view_set_is_muted](https://wpewebkit.org/reference/stable/wpe-webkit-2.0/method.WebView.set_is_muted.html))
+  ///- Windows WebView2 ([Official API - ICoreWebView2_8.put_IsMuted](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2_8#put_ismuted))
   ///
   ///**Parameters - Officially Supported Platforms/Implementations**:
   ///- [muted]: all platforms
@@ -2531,6 +2539,7 @@ enum PlatformInAppWebViewControllerMethod {
   ///
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView ([Official API - WebView.zoomIn](https://developer.android.com/reference/android/webkit/WebView#zoomIn()))
+  ///- Windows WebView2 ([Official API - ICoreWebView2Controller.put_ZoomFactor](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2controller#put_zoomfactor))
   ///
   ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
@@ -2542,6 +2551,7 @@ enum PlatformInAppWebViewControllerMethod {
   ///
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView ([Official API - WebView.zoomOut](https://developer.android.com/reference/android/webkit/WebView#zoomOut()))
+  ///- Windows WebView2 ([Official API - ICoreWebView2Controller.put_ZoomFactor](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2controller#put_zoomfactor))
   ///
   ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
@@ -2690,6 +2700,7 @@ extension _PlatformInAppWebViewControllerMethodSupported
               TargetPlatform.iOS,
               TargetPlatform.macOS,
               TargetPlatform.linux,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.clearFormData:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
@@ -2724,6 +2735,7 @@ extension _PlatformInAppWebViewControllerMethodSupported
       case PlatformInAppWebViewControllerMethod.createPdf:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
+              TargetPlatform.android,
               TargetPlatform.iOS,
               TargetPlatform.macOS,
               TargetPlatform.windows,
@@ -3275,10 +3287,16 @@ extension _PlatformInAppWebViewControllerMethodSupported
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.isMuted:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
-            [TargetPlatform.linux].contains(platform ?? defaultTargetPlatform);
+            [
+              TargetPlatform.linux,
+              TargetPlatform.windows,
+            ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.isPlayingAudio:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
-            [TargetPlatform.linux].contains(platform ?? defaultTargetPlatform);
+            [
+              TargetPlatform.linux,
+              TargetPlatform.windows,
+            ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.isSecureContext:
         return kIsWeb && platform == null
             ? true
@@ -3488,6 +3506,7 @@ extension _PlatformInAppWebViewControllerMethodSupported
               TargetPlatform.iOS,
               TargetPlatform.macOS,
               TargetPlatform.linux,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.requestFocusNodeHref:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
@@ -3592,6 +3611,7 @@ extension _PlatformInAppWebViewControllerMethodSupported
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.setInputMethodEnabled:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
@@ -3621,7 +3641,10 @@ extension _PlatformInAppWebViewControllerMethodSupported
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.setMuted:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
-            [TargetPlatform.linux].contains(platform ?? defaultTargetPlatform);
+            [
+              TargetPlatform.linux,
+              TargetPlatform.windows,
+            ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.setOptions:
         return kIsWeb && platform == null
             ? true
@@ -3716,11 +3739,13 @@ extension _PlatformInAppWebViewControllerMethodSupported
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.zoomOut:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
     }
   }

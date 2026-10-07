@@ -5,7 +5,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 set(WIL_VERSION "1.0.260126.7")
-set(WEBVIEW_VERSION "1.0.4129.50")
+set(WEBVIEW_VERSION "1.0.4258.31")
 set(NLOHMANN_JSON_VERSION "3.12.0")
 set(CPP_WINRT_VERSION "2.0.250303.1")
 
@@ -31,7 +31,16 @@ endif()
 # Install the NuGet packages once, at configure time (not on every build).
 # A package is downloaded again only when its folder is missing.
 function(drago_inappwebview_nuget_install PACKAGE_NAME PACKAGE_VERSION)
-  if(NOT EXISTS "${CMAKE_BINARY_DIR}/packages/${PACKAGE_NAME}")
+  # The folder has no version in its name (-ExcludeVersion), so a stamp file
+  # records which version is installed; a version change reinstalls.
+  set(PACKAGE_DIR "${CMAKE_BINARY_DIR}/packages/${PACKAGE_NAME}")
+  set(PACKAGE_STAMP "${CMAKE_BINARY_DIR}/packages/${PACKAGE_NAME}.version")
+  set(INSTALLED_VERSION "")
+  if(EXISTS "${PACKAGE_STAMP}")
+    file(READ "${PACKAGE_STAMP}" INSTALLED_VERSION)
+  endif()
+  if(NOT EXISTS "${PACKAGE_DIR}" OR NOT INSTALLED_VERSION STREQUAL PACKAGE_VERSION)
+    file(REMOVE_RECURSE "${PACKAGE_DIR}")
     if(NOT NUGET)
       message(NOTICE "Nuget is not installed! Cannot install ${PACKAGE_NAME} ${PACKAGE_VERSION}.")
       return()
@@ -44,6 +53,7 @@ function(drago_inappwebview_nuget_install PACKAGE_NAME PACKAGE_VERSION)
     if(NOT NUGET_RESULT EQUAL 0)
       message(FATAL_ERROR "Failed to install NuGet package ${PACKAGE_NAME} ${PACKAGE_VERSION}")
     endif()
+    file(WRITE "${PACKAGE_STAMP}" "${PACKAGE_VERSION}")
   endif()
 endfunction()
 

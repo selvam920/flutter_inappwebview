@@ -162,6 +162,9 @@ namespace drago_inappwebview_plugin
     void onDevToolsProtocolEventReceived(const std::string& eventName, const std::string& data) const;
     void onCreateWindow(std::shared_ptr<CreateWindowAction> createWindowAction, std::unique_ptr<CreateWindowCallback> callback) const;
     void onCloseWindow() const;
+    void onCreateContextMenu(const int64_t& hitTestType, const std::optional<std::string>& extra) const;
+    void onHideContextMenu() const;
+    void onContextMenuActionItemClicked(const flutter::EncodableValue& id, const std::string& title) const;
     void onPermissionRequest(const std::string& origin, const std::vector<int64_t>& resources, std::unique_ptr<PermissionRequestCallback> callback) const;
     void shouldInterceptRequest(std::shared_ptr<WebResourceRequest> request, std::unique_ptr<ShouldInterceptRequestCallback> callback) const;
     void onLoadResourceWithCustomScheme(std::shared_ptr<WebResourceRequest> request, std::unique_ptr<LoadResourceWithCustomSchemeCallback> callback) const;

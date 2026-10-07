@@ -1932,6 +1932,11 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
             'https://wpewebkit.org/reference/stable/wpe-platform-2.0/func.view_backend_add_activity_state.html',
         note: 'Adds focused state to WPE backend',
       ),
+      WindowsPlatform(
+        apiName: 'ICoreWebView2Controller.MoveFocus',
+        apiUrl:
+            'https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2controller#movefocus',
+      ),
     ],
   )
   Future<bool?> requestFocus({
@@ -1974,6 +1979,7 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
         note:
             'Removes focused state from WPE backend and blurs active element via JavaScript',
       ),
+      WindowsPlatform(),
     ],
   )
   Future<void> clearFocus() {
@@ -2052,7 +2058,17 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
   ///{@endtemplate}
   ///
   ///{@macro drago_inappwebview.PlatformInAppWebViewController.setContextMenu.supported_platforms}
-  @SupportedPlatforms(platforms: [AndroidPlatform(), IOSPlatform()])
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(),
+      IOSPlatform(),
+      WindowsPlatform(
+        apiName: 'ICoreWebView2_11.add_ContextMenuRequested',
+        apiUrl:
+            'https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2_11#add_contextmenurequested',
+      ),
+    ],
+  )
   Future<void> setContextMenu(ContextMenu? contextMenu) {
     throw UnimplementedError(
       '${PlatformInAppWebViewControllerMethod.setContextMenu.name} is not implemented on the current platform',
@@ -3087,6 +3103,11 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
         apiUrl:
             'https://developer.android.com/reference/android/webkit/WebView#zoomIn()',
       ),
+      WindowsPlatform(
+        apiName: 'ICoreWebView2Controller.put_ZoomFactor',
+        apiUrl:
+            'https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2controller#put_zoomfactor',
+      ),
     ],
   )
   Future<bool> zoomIn() {
@@ -3107,6 +3128,11 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
         apiName: 'WebView.zoomOut',
         apiUrl:
             'https://developer.android.com/reference/android/webkit/WebView#zoomOut()',
+      ),
+      WindowsPlatform(
+        apiName: 'ICoreWebView2Controller.put_ZoomFactor',
+        apiUrl:
+            'https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2controller#put_zoomfactor',
       ),
     ],
   )
@@ -3198,6 +3224,13 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
   ///{@macro drago_inappwebview.PlatformInAppWebViewController.createPdf.supported_platforms}
   @SupportedPlatforms(
     platforms: [
+      AndroidPlatform(
+        apiName: 'WebView.createPrintDocumentAdapter',
+        apiUrl:
+            'https://developer.android.com/reference/android/webkit/WebView#createPrintDocumentAdapter(java.lang.String)',
+        note:
+            'Rendered through PrintDocumentAdapter to a temporary PDF file, returned as bytes.',
+      ),
       IOSPlatform(
         apiName: 'WKWebView.createPdf',
         apiUrl:
@@ -3749,6 +3782,11 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
             'https://wpewebkit.org/reference/stable/wpe-webkit-2.0/method.WebView.is_playing_audio.html',
         available: '2.8',
       ),
+      WindowsPlatform(
+        apiName: 'ICoreWebView2_8.get_IsDocumentPlayingAudio',
+        apiUrl:
+            'https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2_8#get_isdocumentplayingaudio',
+      ),
     ],
   )
   Future<bool> isPlayingAudio() {
@@ -3771,6 +3809,11 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
         apiUrl:
             'https://wpewebkit.org/reference/stable/wpe-webkit-2.0/method.WebView.get_is_muted.html',
         available: '2.30',
+      ),
+      WindowsPlatform(
+        apiName: 'ICoreWebView2_8.get_IsMuted',
+        apiUrl:
+            'https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2_8#get_ismuted',
       ),
     ],
   )
@@ -3795,6 +3838,11 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
         apiUrl:
             'https://wpewebkit.org/reference/stable/wpe-webkit-2.0/method.WebView.set_is_muted.html',
         available: '2.30',
+      ),
+      WindowsPlatform(
+        apiName: 'ICoreWebView2_8.put_IsMuted',
+        apiUrl:
+            'https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2_8#put_ismuted',
       ),
     ],
   )

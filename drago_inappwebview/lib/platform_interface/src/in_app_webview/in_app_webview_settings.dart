@@ -1262,7 +1262,8 @@ because there isn't any way to make the website data store non-persistent for th
   @SupportedPlatforms(platforms: [AndroidPlatform()])
   String? regexToAllowSyncUrlLoading;
 
-  ///Set to `false` to disable Flutter Hybrid Composition. The default value is `true`.
+  ///Set to `true` to enable Flutter Hybrid Composition. The default value is `false` (texture layer).
+  ///Set it to `true` when SurfaceView-backed video or DRM playback is needed.
   ///Hybrid Composition is supported starting with Flutter v1.20+.
   @SupportedPlatforms(
     platforms: [
@@ -3453,7 +3454,7 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     this.supportMultipleWindows = false,
     this.regexToCancelSubFramesLoading,
     this.regexToAllowSyncUrlLoading,
-    this.useHybridComposition = true,
+    this.useHybridComposition = false,
     this.useShouldInterceptRequest,
     this.useOnRenderProcessGone,
     this.overScrollMode = OverScrollMode_.IF_CONTENT_SCROLLS,
