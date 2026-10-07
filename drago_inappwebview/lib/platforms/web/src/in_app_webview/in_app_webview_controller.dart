@@ -47,12 +47,13 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
   // ignore: unused_field
   static final MethodChannel _staticChannel = IN_APP_WEBVIEW_STATIC_CHANNEL;
 
-  Map<UserScriptInjectionTime, List<UserScript>> _userScripts = {
+  final Map<UserScriptInjectionTime, List<UserScript>> _userScripts = {
     UserScriptInjectionTime.AT_DOCUMENT_START: <UserScript>[],
     UserScriptInjectionTime.AT_DOCUMENT_END: <UserScript>[],
   };
-  Map<String, Function> _javaScriptHandlersMap = HashMap<String, Function>();
-  Map<String, ScriptHtmlTagAttributes> _injectedScriptsFromURL = {};
+  final Map<String, Function> _javaScriptHandlersMap = HashMap<String, Function>();
+  final Map<String, ScriptHtmlTagAttributes> _injectedScriptsFromURL = {};
+  final Map<String, PlatformWebMessageListener> _webMessageListeners = {};
 
   dynamic _controllerFromPlatform;
 
@@ -72,7 +73,7 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
     handler = handleMethod;
     initMethodCallHandler();
 
-    this._init(params);
+    _init(params);
   }
 
   static final WebPlatformInAppWebViewController _staticValue =
@@ -98,9 +99,9 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
     );
   }
 
-  _debugLog(String method, dynamic args) {
+  void _debugLog(String method, dynamic args) {
     debugLog(
-      className: this.runtimeType.toString(),
+      className: runtimeType.toString(),
       name: "WebView",
       id: getViewId().toString(),
       debugLoggingSettings: PlatformInAppWebViewController.debugLoggingSettings,
@@ -183,13 +184,13 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
           double oldScale = call.arguments["oldScale"];
           double newScale = call.arguments["newScale"];
 
-          if (webviewParams!.onZoomScaleChanged != null)
+          if (webviewParams!.onZoomScaleChanged != null) {
             webviewParams!.onZoomScaleChanged!(
               _controllerFromPlatform,
               oldScale,
               newScale,
             );
-          else {
+          } else {
             // ignore: deprecated_member_use_from_same_package
             webviewParams!.androidOnScaleChanged!(
               _controllerFromPlatform,
@@ -213,20 +214,24 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
         }
         break;
       case "onEnterFullscreen":
-        if (webviewParams != null && webviewParams!.onEnterFullscreen != null)
+        if (webviewParams != null && webviewParams!.onEnterFullscreen != null) {
           webviewParams!.onEnterFullscreen!(_controllerFromPlatform);
+        }
         break;
       case "onExitFullscreen":
-        if (webviewParams != null && webviewParams!.onExitFullscreen != null)
+        if (webviewParams != null && webviewParams!.onExitFullscreen != null) {
           webviewParams!.onExitFullscreen!(_controllerFromPlatform);
+        }
         break;
       case "onWindowFocus":
-        if (webviewParams != null && webviewParams!.onWindowFocus != null)
+        if (webviewParams != null && webviewParams!.onWindowFocus != null) {
           webviewParams!.onWindowFocus!(_controllerFromPlatform);
+        }
         break;
       case "onWindowBlur":
-        if (webviewParams != null && webviewParams!.onWindowBlur != null)
+        if (webviewParams != null && webviewParams!.onWindowBlur != null) {
           webviewParams!.onWindowBlur!(_controllerFromPlatform);
+        }
         break;
       case "onPrintRequest":
         if ((webviewParams != null &&
@@ -236,13 +241,13 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
           String? url = call.arguments["url"];
           WebUri? uri = url != null ? WebUri(url) : null;
 
-          if (webviewParams!.onPrintRequest != null)
+          if (webviewParams!.onPrintRequest != null) {
             return await webviewParams!.onPrintRequest!(
               _controllerFromPlatform,
               uri,
               null,
             );
-          else {
+          } else {
             // ignore: deprecated_member_use_from_same_package
             webviewParams!.onPrint!(_controllerFromPlatform, uri);
             return false;
@@ -263,6 +268,41 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
           onErrorCallback();
         }
         break;
+      case "onWebMessageListenerPostMessage":
+        String jsObjectName = call.arguments["jsObjectName"];
+        final listener = _webMessageListeners[jsObjectName];
+        final onPostMessage = listener?.onPostMessage;
+        if (listener != null && onPostMessage != null) {
+          Map<String, dynamic>? messageMap = call.arguments["message"]
+              ?.cast<String, dynamic>();
+          WebMessage? message;
+          if (messageMap != null) {
+            final data = messageMap["data"];
+            message = messageMap["type"] == 1
+                ? WebMessage(
+                    data: Uint8List.fromList(
+                      (data as List? ?? const []).cast<int>(),
+                    ),
+                    type: WebMessageType.ARRAY_BUFFER,
+                  )
+                : WebMessage(data: data?.toString());
+          }
+          String? sourceOrigin = call.arguments["sourceOrigin"];
+          bool isMainFrame = call.arguments["isMainFrame"] ?? true;
+          onPostMessage(
+            message,
+            sourceOrigin != null ? WebUri(sourceOrigin) : null,
+            isMainFrame,
+            WebPlatformJavaScriptReplyProxy(
+              PlatformJavaScriptReplyProxyCreationParams(
+                webMessageListener: listener,
+              ),
+              controller: this,
+              sourceOrigin: sourceOrigin,
+            ),
+          );
+        }
+        break;
       case "onCallJsHandler":
         String handlerName = call.arguments["handlerName"];
         Map<String, dynamic> handlerDataMap = call.arguments["data"]
@@ -278,7 +318,7 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
         if (_javaScriptHandlersMap.containsKey(handlerName)) {
           // convert result to json
           try {
-            var jsHandlerResult = null;
+            var jsHandlerResult;
             if (_javaScriptHandlersMap[handlerName]
                 is JavaScriptHandlerCallback) {
               jsHandlerResult =
@@ -295,7 +335,7 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
             return jsonEncode(jsHandlerResult);
           } catch (error, stacktrace) {
             developer.log(
-              error.toString() + '\n' + stacktrace.toString(),
+              '$error\n$stacktrace',
               name: 'JavaScript Handler "$handlerName"',
             );
             throw Exception(error.toString().replaceFirst('Exception: ', ''));
@@ -366,11 +406,11 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
     if (html == null || html.isEmpty) {
       return favicons;
     }
-    var assetPathBase;
+    String? assetPathBase;
 
     if (webviewUrl.isScheme("file")) {
       var assetPathSplit = webviewUrl.toString().split("/flutter_assets/");
-      assetPathBase = assetPathSplit[0] + "/flutter_assets/";
+      assetPathBase = "${assetPathSplit[0]}/flutter_assets/";
     }
 
     InAppWebViewSettings? settings = await getSettings();
@@ -415,7 +455,7 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
             }
             manifestUrl =
                 ((assetPathBase == null)
-                    ? webviewUrl.scheme + "://" + webviewUrl.host + "/"
+                    ? "${webviewUrl.scheme}://${webviewUrl.host}/"
                     : assetPathBase) +
                 manifestUrl;
           }
@@ -458,14 +498,14 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
       }
       urlIcon =
           ((assetPathBase == null)
-              ? url.scheme + "://" + url.host + "/"
+              ? "${url.scheme}://${url.host}/"
               : assetPathBase) +
           urlIcon;
     }
     if (isManifest) {
       rel = (sizes != null)
           ? urlSplit[urlSplit.length - 1]
-                .replaceFirst("-" + sizes, "")
+                .replaceFirst("-$sizes", "")
                 .split(" ")[0]
                 .split(".")[0]
           : null;
@@ -975,17 +1015,17 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
       !kJavaScriptHandlerForbiddenNames.contains(handlerName),
       '"$handlerName" is a forbidden name!',
     );
-    this._javaScriptHandlersMap[handlerName] = (callback);
+    _javaScriptHandlersMap[handlerName] = (callback);
   }
 
   @override
   Function? removeJavaScriptHandler({required String handlerName}) {
-    return this._javaScriptHandlersMap.remove(handlerName);
+    return _javaScriptHandlersMap.remove(handlerName);
   }
 
   @override
   bool hasJavaScriptHandler({required String handlerName}) {
-    return this._javaScriptHandlersMap.containsKey(handlerName);
+    return _javaScriptHandlersMap.containsKey(handlerName);
   }
 
   @override
@@ -1113,6 +1153,52 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
   );
 
   @override
+  Future<void> postWebMessage({
+    required WebMessage message,
+    WebUri? targetOrigin,
+  }) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent('message', () => message.toMap());
+    // No implicit '*': when targetOrigin is omitted the iframe's own origin is used.
+    String? origin = targetOrigin?.toString();
+    args.putIfAbsent(
+      'targetOrigin',
+      () => origin != null && origin.isNotEmpty ? origin : null,
+    );
+    await channel?.invokeMethod('postWebMessage', args);
+  }
+
+  @override
+  Future<void> addWebMessageListener(
+    PlatformWebMessageListener webMessageListener,
+  ) async {
+    assert(
+      !_webMessageListeners.containsKey(webMessageListener.jsObjectName),
+      "jsObjectName ${webMessageListener.jsObjectName} was already added.",
+    );
+    _webMessageListeners[webMessageListener.jsObjectName] = webMessageListener;
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent('jsObjectName', () => webMessageListener.jsObjectName);
+    args.putIfAbsent(
+      'allowedOriginRules',
+      () => webMessageListener.allowedOriginRules?.toList() ?? <String>[],
+    );
+    await channel?.invokeMethod('addWebMessageListener', args);
+  }
+
+  @override
+  bool hasWebMessageListener(PlatformWebMessageListener webMessageListener) {
+    return _webMessageListeners.containsKey(webMessageListener.jsObjectName);
+  }
+
+  Future<void> _replyWebMessage(WebMessage message, String sourceOrigin) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent('message', () => message.toMap());
+    args.putIfAbsent('sourceOrigin', () => sourceOrigin);
+    await channel?.invokeMethod('replyWebMessage', args);
+  }
+
+  @override
   Future<String?> getIFrameId() async {
     Map<String, dynamic> args = <String, dynamic>{};
     return await channel?.invokeMethod<String?>('getIFrameId', args);
@@ -1129,9 +1215,35 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
     webStorage.dispose();
     _controllerFromPlatform = null;
     _injectedScriptsFromURL.clear();
+    _webMessageListeners.clear();
   }
 }
 
 extension InternalInAppWebViewController on WebPlatformInAppWebViewController {
-  get handleMethod => _handleMethod;
+  Future<dynamic> Function(MethodCall call) get handleMethod => _handleMethod;
+}
+
+///Reply proxy given to [PlatformWebMessageListener.onPostMessage] on Web.
+///Replies are posted back to the webview iframe, targeted at the exact origin
+///that sent the message.
+class WebPlatformJavaScriptReplyProxy extends PlatformJavaScriptReplyProxy {
+  WebPlatformJavaScriptReplyProxy(
+    super.params, {
+    required WebPlatformInAppWebViewController controller,
+    required String? sourceOrigin,
+  }) : _controller = controller,
+       _sourceOrigin = sourceOrigin,
+       super.implementation();
+
+  final WebPlatformInAppWebViewController _controller;
+  final String? _sourceOrigin;
+
+  @override
+  Future<void> postMessage(WebMessage message) async {
+    final origin = _sourceOrigin;
+    if (origin == null || origin.isEmpty || origin == 'null') {
+      throw StateError('Cannot reply to an opaque source origin.');
+    }
+    await _controller._replyWebMessage(message, origin);
+  }
 }

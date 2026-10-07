@@ -15,7 +15,7 @@ import 'in_app_webview_controller.dart';
 class MacOSHeadlessInAppWebViewCreationParams
     extends PlatformHeadlessInAppWebViewCreationParams {
   /// Creates a new [MacOSHeadlessInAppWebViewCreationParams] instance.
-  MacOSHeadlessInAppWebViewCreationParams({
+  const MacOSHeadlessInAppWebViewCreationParams({
     super.controllerFromPlatform,
     super.initialSize,
     super.windowId,
@@ -34,6 +34,7 @@ class MacOSHeadlessInAppWebViewCreationParams
     @Deprecated('Use onDownloadStarting instead') super.onDownloadStart,
     @Deprecated('Use onDownloadStarting instead') super.onDownloadStartRequest,
     super.onDownloadStarting,
+    super.onDownloadProgress,
     @Deprecated('Use onLoadResourceWithCustomScheme instead')
     super.onLoadResourceCustomScheme,
     super.onLoadResourceWithCustomScheme,
@@ -152,6 +153,7 @@ class MacOSHeadlessInAppWebViewCreationParams
         onDownloadStart: params.onDownloadStart,
         onDownloadStartRequest: params.onDownloadStartRequest,
         onDownloadStarting: params.onDownloadStarting,
+        onDownloadProgress: params.onDownloadProgress,
         onLoadResourceCustomScheme: params.onLoadResourceCustomScheme,
         onLoadResourceWithCustomScheme: params.onLoadResourceWithCustomScheme,
         onCreateWindow: params.onCreateWindow,
@@ -254,7 +256,7 @@ class MacOSHeadlessInAppWebView extends PlatformHeadlessInAppWebView
   bool _started = false;
   bool _running = false;
 
-  static const MethodChannel _sharedChannel = const MethodChannel(
+  static const MethodChannel _sharedChannel = MethodChannel(
     'com.pichillilorenzo/flutter_headless_inappwebview',
   );
 
@@ -287,7 +289,7 @@ class MacOSHeadlessInAppWebView extends PlatformHeadlessInAppWebView
   MacOSHeadlessInAppWebViewCreationParams get _macosParams =>
       params as MacOSHeadlessInAppWebViewCreationParams;
 
-  _init() {
+  void _init() {
     _webViewController = MacOSInAppWebViewController(
       MacOSInAppWebViewControllerCreationParams(id: id, webviewParams: params),
     );
@@ -315,6 +317,7 @@ class MacOSHeadlessInAppWebView extends PlatformHeadlessInAppWebView
     return null;
   }
 
+  @override
   Future<void> run() async {
     if (_started) {
       return;
@@ -372,9 +375,7 @@ class MacOSHeadlessInAppWebView extends PlatformHeadlessInAppWebView
     if ((params.shouldInterceptAjaxRequest != null ||
         params.onAjaxProgress != null ||
         params.onAjaxReadyStateChange != null)) {
-      if (settings.useShouldInterceptAjaxRequest == null) {
-        settings.useShouldInterceptAjaxRequest = true;
-      }
+      settings.useShouldInterceptAjaxRequest ??= true;
       if (params.onAjaxReadyStateChange != null &&
           settings.useOnAjaxReadyStateChange == null) {
         settings.useOnAjaxReadyStateChange = true;

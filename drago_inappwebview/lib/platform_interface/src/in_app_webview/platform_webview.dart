@@ -548,6 +548,33 @@ Also, this event is not called for POST requests and is not called on the first 
   )?
   onDownloadStarting;
 
+  ///{@template drago_inappwebview.PlatformWebViewCreationParams.onDownloadProgress}
+  ///Event fired while a download handled natively by the WebView progresses,
+  ///and once more when it completes, fails or is canceled.
+  ///
+  ///On Android, iOS and macOS it is fired for downloads started with
+  ///[DownloadStartResponseAction.SAVE] from [onDownloadStarting].
+  ///On Windows it is fired for every download handled by WebView2.
+  ///
+  ///[DownloadState.IN_PROGRESS] events are throttled to about 4 per second.
+  ///{@endtemplate}
+  ///
+  ///{@macro drago_inappwebview.PlatformWebViewCreationParams.onDownloadProgress.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(),
+      IOSPlatform(),
+      MacOSPlatform(),
+      WindowsPlatform(
+        apiName: 'ICoreWebView2DownloadOperation',
+        apiUrl:
+            'https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2downloadoperation',
+      ),
+    ],
+  )
+  final void Function(T controller, DownloadProgress downloadProgress)?
+  onDownloadProgress;
+
   ///{@template drago_inappwebview.PlatformWebViewCreationParams.onLoadResourceCustomScheme}
   ///Use [onLoadResourceWithCustomScheme] instead.
   ///{@endtemplate}
@@ -2668,6 +2695,7 @@ This is a limitation of the native WebKit APIs.""",
     @Deprecated('Use onDownloadStarting instead') this.onDownloadStart,
     @Deprecated('Use onDownloadStarting instead') this.onDownloadStartRequest,
     this.onDownloadStarting,
+    this.onDownloadProgress,
     @Deprecated('Use onLoadResourceWithCustomScheme instead')
     this.onLoadResourceCustomScheme,
     this.onLoadResourceWithCustomScheme,

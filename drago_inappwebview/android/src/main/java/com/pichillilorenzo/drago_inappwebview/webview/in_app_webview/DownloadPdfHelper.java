@@ -28,7 +28,10 @@ import com.pichillilorenzo.drago_inappwebview.types.MarginsExt;
 
 import org.json.JSONObject;
 
+import android.database.Cursor;
+
 import java.io.ByteArrayOutputStream;
+import java.lang.ref.WeakReference;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -50,18 +53,123 @@ public class DownloadPdfHelper {
   private static final Handler mainHandler = new Handler(Looper.getMainLooper());
   private static final ExecutorService io = Executors.newCachedThreadPool();
 
+  // ---------------------------------------------------------------- progress
+
+  static final int STATE_IN_PROGRESS = 0;
+  static final int STATE_COMPLETED = 1;
+  static final int STATE_FAILED = 2;
+  static final int STATE_CANCELED = 3;
+  private static final long THROTTLE_MS = 250;
+
+  /** Sends onDownloadProgress events for one download; IN_PROGRESS throttled to ~4/sec. */
+  static class ProgressReporter {
+    private final WeakReference<InAppWebView> webViewRef;
+    private final String url;
+    @Nullable volatile String resultFilePath;
+    private long lastSent = 0;
+    private boolean finished = false;
+
+    ProgressReporter(InAppWebView webView, String url, @Nullable String resultFilePath) {
+      this.webViewRef = new WeakReference<>(webView);
+      this.url = url;
+      this.resultFilePath = resultFilePath;
+    }
+
+    /** False once the webview is gone (disposed). */
+    boolean isAlive() {
+      InAppWebView webView = webViewRef.get();
+      return webView != null && webView.channelDelegate != null;
+    }
+
+    synchronized void progress(long received, long total) {
+      long now = System.currentTimeMillis();
+      if (finished || now - lastSent < THROTTLE_MS) return;
+      lastSent = now;
+      send(STATE_IN_PROGRESS, received, total, null);
+    }
+
+    synchronized void finish(int state, long received, long total, @Nullable String error) {
+      if (finished) return;
+      finished = true;
+      send(state, received, total, error);
+    }
+
+    private void send(int state, long received, long total, @Nullable String error) {
+      final Map<String, Object> map = new HashMap<>();
+      map.put("url", url);
+      map.put("resultFilePath", resultFilePath);
+      map.put("receivedBytes", Math.max(received, 0));
+      map.put("totalBytes", total > 0 ? total : null);
+      map.put("state", state);
+      map.put("error", error);
+      mainHandler.post(new Runnable() {
+        @Override
+        public void run() {
+          InAppWebView webView = webViewRef.get();
+          if (webView != null && webView.channelDelegate != null) {
+            webView.channelDelegate.onDownloadProgress(map);
+          }
+        }
+      });
+    }
+  }
+
+  /** Polls DownloadManager every 250ms until the download ends or the webview is disposed. */
+  private static void pollDownloadManager(final DownloadManager manager, final long id,
+                                          final ProgressReporter reporter) {
+    mainHandler.postDelayed(new Runnable() {
+      @Override
+      public void run() {
+        if (!reporter.isAlive()) return;
+        Cursor c = null;
+        try {
+          c = manager.query(new DownloadManager.Query().setFilterById(id));
+          if (c == null || !c.moveToFirst()) {
+            reporter.finish(STATE_CANCELED, 0, -1, null);
+            return;
+          }
+          int status = c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
+          long received = c.getLong(c.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+          long total = c.getLong(c.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+          if (status == DownloadManager.STATUS_SUCCESSFUL) {
+            String local = c.getString(c.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI));
+            if (local != null) {
+              Uri u = Uri.parse(local);
+              reporter.resultFilePath = "file".equals(u.getScheme()) ? u.getPath() : local;
+            }
+            reporter.finish(STATE_COMPLETED, received, total, null);
+            return;
+          }
+          if (status == DownloadManager.STATUS_FAILED) {
+            int reason = c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_REASON));
+            reporter.finish(STATE_FAILED, received, total, "DownloadManager error " + reason);
+            return;
+          }
+          reporter.progress(received, total);
+        } catch (Exception e) {
+          reporter.finish(STATE_FAILED, 0, -1, e.toString());
+          return;
+        } finally {
+          if (c != null) c.close();
+        }
+        mainHandler.postDelayed(this, THROTTLE_MS);
+      }
+    }, THROTTLE_MS);
+  }
+
   // ---------------------------------------------------------------- downloads
 
   public static void save(@NonNull final InAppWebView webView, @NonNull DownloadStartRequest request,
                           @Nullable final String resultFilePath) {
     final Context context = webView.getContext().getApplicationContext();
     final String url = request.getUrl();
+    final ProgressReporter reporter = new ProgressReporter(webView, url, resultFilePath);
     final String mimeType = request.getMimeType();
     final String fileName = request.getSuggestedFilename() != null ? request.getSuggestedFilename()
             : URLUtil.guessFileName(url, request.getContentDisposition(), mimeType);
     try {
       if (url.startsWith("data:")) {
-        writeAsync(context, decodeDataUrl(url), resultFilePath, fileName, mimeType);
+        writeAsync(context, decodeDataUrl(url), resultFilePath, fileName, mimeType, reporter);
       } else if (url.startsWith("blob:")) {
         String body = "const r = await fetch(url); const b = await r.blob();"
                 + "return await new Promise((res, rej) => { const fr = new FileReader();"
@@ -76,16 +184,18 @@ public class DownloadPdfHelper {
               String dataUrl = json.optString("value", null);
               if (dataUrl == null || !dataUrl.startsWith("data:")) {
                 Log.e(LOG_TAG, "blob download failed: " + json.optString("error"));
+                reporter.finish(STATE_FAILED, 0, -1, json.optString("error", "blob download failed"));
                 return;
               }
-              writeAsync(context, decodeDataUrl(dataUrl), resultFilePath, fileName, mimeType);
+              writeAsync(context, decodeDataUrl(dataUrl), resultFilePath, fileName, mimeType, reporter);
             } catch (Exception e) {
               Log.e(LOG_TAG, "blob download failed", e);
+              reporter.finish(STATE_FAILED, 0, -1, e.toString());
             }
           }
         });
       } else if (resultFilePath != null) {
-        downloadToPath(url, request.getUserAgent(), resultFilePath);
+        downloadToPath(url, request.getUserAgent(), resultFilePath, reporter);
       } else {
         DownloadManager.Request dm = new DownloadManager.Request(Uri.parse(url));
         String cookies = CookieManager.getInstance().getCookie(url);
@@ -96,10 +206,16 @@ public class DownloadPdfHelper {
         dm.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         dm.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
         DownloadManager manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-        if (manager != null) manager.enqueue(dm);
+        if (manager != null) {
+          long id = manager.enqueue(dm);
+          pollDownloadManager(manager, id, reporter);
+        } else {
+          reporter.finish(STATE_FAILED, 0, -1, "DownloadManager unavailable");
+        }
       }
     } catch (Exception e) {
       Log.e(LOG_TAG, "download failed", e);
+      reporter.finish(STATE_FAILED, 0, -1, e.toString());
     }
   }
 
@@ -115,7 +231,8 @@ public class DownloadPdfHelper {
   }
 
   private static void writeAsync(final Context context, final byte[] bytes, @Nullable final String path,
-                                 final String fileName, @Nullable final String mimeType) {
+                                 final String fileName, @Nullable final String mimeType,
+                                 final ProgressReporter reporter) {
     io.execute(new Runnable() {
       @Override
       public void run() {
@@ -134,23 +251,29 @@ public class DownloadPdfHelper {
             values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
             Uri uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
             if (uri == null) throw new IllegalStateException("MediaStore insert failed");
+            reporter.resultFilePath = uri.toString();
             OutputStream os = resolver.openOutputStream(uri);
             if (os == null) throw new IllegalStateException("MediaStore open failed");
             try { os.write(bytes); } finally { os.close(); }
           } else {
             File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
             dir.mkdirs();
-            OutputStream os = new FileOutputStream(new File(dir, fileName), false);
+            File f = new File(dir, fileName);
+            reporter.resultFilePath = f.getAbsolutePath();
+            OutputStream os = new FileOutputStream(f, false);
             try { os.write(bytes); } finally { os.close(); }
           }
+          reporter.finish(STATE_COMPLETED, bytes.length, bytes.length, null);
         } catch (Exception e) {
           Log.e(LOG_TAG, "write download failed", e);
+          reporter.finish(STATE_FAILED, 0, bytes.length, e.toString());
         }
       }
     });
   }
 
-  private static void downloadToPath(final String url, @Nullable final String userAgent, final String path) {
+  private static void downloadToPath(final String url, @Nullable final String userAgent, final String path,
+                                     final ProgressReporter reporter) {
     io.execute(new Runnable() {
       @Override
       public void run() {
@@ -165,17 +288,25 @@ public class DownloadPdfHelper {
           File parent = f.getParentFile();
           if (parent != null) parent.mkdirs();
           InputStream is = conn.getInputStream();
+          long total = conn.getContentLength();
+          long received = 0;
           OutputStream os = new FileOutputStream(f, false);
           try {
             byte[] buf = new byte[16384];
             int n;
-            while ((n = is.read(buf)) > 0) os.write(buf, 0, n);
+            while ((n = is.read(buf)) > 0) {
+              os.write(buf, 0, n);
+              received += n;
+              reporter.progress(received, total);
+            }
           } finally {
             os.close();
             is.close();
           }
+          reporter.finish(STATE_COMPLETED, received, total > 0 ? total : received, null);
         } catch (Exception e) {
           Log.e(LOG_TAG, "download to path failed", e);
+          reporter.finish(STATE_FAILED, 0, -1, e.toString());
         } finally {
           if (conn != null) conn.disconnect();
         }

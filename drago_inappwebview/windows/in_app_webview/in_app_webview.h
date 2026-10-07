@@ -296,6 +296,10 @@ namespace drago_inappwebview_plugin
     // WebView2 event registrations, removed in the destructor
     std::vector<std::unique_ptr<EventTokenEntry>> eventTokens_;
 
+    // onDownloadProgress: BytesReceivedChanged/StateChanged on a WebView2 download,
+    // both tokens removed once the download leaves the in-progress state
+    void trackDownloadProgress(const wil::com_ptr<ICoreWebView2DownloadOperation>& download, const std::string& url);
+
     template<typename T, typename F>
     EventRegistrationToken* trackEventToken(T* source, F remove)
     {

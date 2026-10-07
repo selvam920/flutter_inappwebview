@@ -4283,20 +4283,38 @@ WebKitWebView* InAppWebView::OnCreateWebView(WebKitWebView* web_view,
 
   callback->nonNullSuccess = [](bool handledByClient) { return !handledByClient; };
 
-  // Capture for cleanup on default behaviour
+  // Capture for cleanup on default behaviour.
+  // manager_ is owned by the plugin instance (reset in plugin dispose) and
+  // outlives every InAppWebView it creates; it is only touched while the
+  // parent's lifetime token is alive, so a late Dart reply after teardown
+  // never dereferences it.
   auto* manager = self->manager_;
-  auto* parentWebview = self->webview_;
+  std::weak_ptr<int> alive = self->lifetime_token_;
+  // Hold a ref on the parent WebKitWebView for as long as the callback lives;
+  // the shared_ptr deleter unrefs it whether or not the callback ever runs.
+  std::shared_ptr<WebKitWebView> parentWebview;
+  if (self->webview_ != nullptr) {
+    parentWebview = std::shared_ptr<WebKitWebView>(
+        WEBKIT_WEB_VIEW(g_object_ref(self->webview_)),
+        [](WebKitWebView* v) { g_object_unref(v); });
+  }
   std::string captured_url = url_to_load.value_or("");
   int64_t capturedWindowId = windowId;
-  
-  callback->defaultBehaviour = [manager, parentWebview, captured_url, capturedWindowId](std::optional<bool>) {
+
+  callback->defaultBehaviour = [manager, alive, parentWebview, captured_url,
+                                capturedWindowId](std::optional<bool>) {
+    if (alive.expired()) {
+      // Parent InAppWebView is gone: the manager disposes its pending
+      // window transports itself; the ref is dropped with the lambda.
+      return;
+    }
     // If the Dart side doesn't handle the window, clean up and load in current view
     if (manager != nullptr) {
       manager->RemoveWindowWebView(capturedWindowId);
     }
     // Load the URL in the parent view instead
-    if (!captured_url.empty() && parentWebview != nullptr) {
-      webkit_web_view_load_uri(parentWebview, captured_url.c_str());
+    if (!captured_url.empty() && parentWebview) {
+      webkit_web_view_load_uri(parentWebview.get(), captured_url.c_str());
     }
   };
 

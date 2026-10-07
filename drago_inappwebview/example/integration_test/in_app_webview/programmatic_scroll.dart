@@ -69,21 +69,21 @@ void programmaticScroll() {
       await controller.scrollTo(x: 0, y: 0);
 
       // Check scrollTo()
-      const int X_SCROLL = 123;
-      const int Y_SCROLL = 321;
+      const int xScroll = 123;
+      const int yScroll = 321;
 
-      await controller.scrollTo(x: X_SCROLL, y: Y_SCROLL);
+      await controller.scrollTo(x: xScroll, y: yScroll);
       int? scrollPosX = await controller.getScrollX();
       int? scrollPosY = await controller.getScrollY();
-      expect(scrollPosX, X_SCROLL);
-      expect(scrollPosY, Y_SCROLL);
+      expect(scrollPosX, xScroll);
+      expect(scrollPosY, yScroll);
 
       // Check scrollBy() (on top of scrollTo())
-      await controller.scrollBy(x: X_SCROLL, y: Y_SCROLL);
+      await controller.scrollBy(x: xScroll, y: yScroll);
       scrollPosX = await controller.getScrollX();
       scrollPosY = await controller.getScrollY();
-      expect(scrollPosX, X_SCROLL * 2);
-      expect(scrollPosY, Y_SCROLL * 2);
+      expect(scrollPosX, xScroll * 2);
+      expect(scrollPosY, yScroll * 2);
     }, skip: shouldSkipTest1);
 
     final shouldSkipTest2 =
@@ -154,23 +154,23 @@ void programmaticScroll() {
         await tester.pumpAndSettle(Duration(seconds: 3));
 
         // Check scrollTo()
-        const int X_SCROLL = 123;
-        const int Y_SCROLL = 321;
+        const int xScroll = 123;
+        const int yScroll = 321;
 
-        await controller.scrollTo(x: X_SCROLL, y: Y_SCROLL);
+        await controller.scrollTo(x: xScroll, y: yScroll);
         await tester.pumpAndSettle(Duration(seconds: 2));
         int? scrollPosX = await controller.getScrollX();
         int? scrollPosY = await controller.getScrollY();
-        expect(scrollPosX, X_SCROLL);
-        expect(scrollPosY, Y_SCROLL);
+        expect(scrollPosX, xScroll);
+        expect(scrollPosY, yScroll);
 
         // Check scrollBy() (on top of scrollTo())
-        await controller.scrollBy(x: X_SCROLL, y: Y_SCROLL);
+        await controller.scrollBy(x: xScroll, y: yScroll);
         await tester.pumpAndSettle(Duration(seconds: 2));
         scrollPosX = await controller.getScrollX();
         scrollPosY = await controller.getScrollY();
-        expect(scrollPosX, X_SCROLL * 2);
-        expect(scrollPosY, Y_SCROLL * 2);
+        expect(scrollPosX, xScroll * 2);
+        expect(scrollPosY, yScroll * 2);
       },
       skip: shouldSkipTest2,
     );

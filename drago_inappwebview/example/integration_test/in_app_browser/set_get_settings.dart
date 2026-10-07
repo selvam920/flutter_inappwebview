@@ -4,7 +4,7 @@ void setGetSettings() {
   final shouldSkip = !InAppBrowser.isClassSupported();
 
   skippableTest('set/get settings', () async {
-    var inAppBrowser = new MyInAppBrowser();
+    var inAppBrowser = MyInAppBrowser();
     await inAppBrowser.openUrlRequest(
       urlRequest: URLRequest(url: TEST_URL_1),
       settings: InAppBrowserClassSettings(

@@ -1993,7 +1993,11 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         callback.nonNullSuccess = { [weak self] (result: [String: Any?]) in
             if !completionHandlerCalled {
                 completionHandlerCalled = true
-                completionHandler(self?.downloadDestination(result: result, suggestedFilename: suggestedFilename))
+                let destination = self?.downloadDestination(result: result, suggestedFilename: suggestedFilename)
+                if let destination = destination {
+                    self?.trackDownloadProgress(download, url: url.absoluteString, destination: destination)
+                }
+                completionHandler(destination)
             }
             return false
         }
@@ -2052,11 +2056,73 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     @available(iOS 14.5, *)
     public func downloadDidFinish(_ download: WKDownload) {
         print("onDownloadStarting: download finished \(download.originalRequest?.url?.absoluteString ?? "")")
+        finishDownloadProgress(download, state: 1, error: nil)
     }
     
     @available(iOS 14.5, *)
     public func download(_ download: WKDownload, didFailWithError error: Error, resumeData: Data?) {
         print("onDownloadStarting: download failed \(download.originalRequest?.url?.absoluteString ?? ""): \(error.localizedDescription)")
+        let nsError = error as NSError
+        let canceled = nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorCancelled
+        finishDownloadProgress(download, state: canceled ? 3 : 2, error: canceled ? nil : error.localizedDescription)
+    }
+
+    /// Per-download state for onDownloadProgress (keyed by the WKDownload identity).
+    class DownloadProgressTracker {
+        let url: String
+        let resultFilePath: String
+        var observation: NSKeyValueObservation?
+        var lastSent: TimeInterval = 0
+
+        init(url: String, resultFilePath: String) {
+            self.url = url
+            self.resultFilePath = resultFilePath
+        }
+    }
+
+    var downloadProgressTrackers: [ObjectIdentifier: DownloadProgressTracker] = [:]
+
+    private func sendDownloadProgress(_ tracker: DownloadProgressTracker, state: Int, received: Int64, total: Int64, error: String?) {
+        let arguments: [String: Any?] = [
+            "url": tracker.url,
+            "resultFilePath": tracker.resultFilePath,
+            "receivedBytes": max(received, 0),
+            "totalBytes": total > 0 ? total : nil,
+            "state": state,
+            "error": error
+        ]
+        channelDelegate?.onDownloadProgress(progress: arguments)
+    }
+
+    /// IN_PROGRESS events from download.progress KVO, throttled to ~4/sec.
+    @available(iOS 14.5, *)
+    private func trackDownloadProgress(_ download: WKDownload, url: String, destination: URL) {
+        let key = ObjectIdentifier(download)
+        let tracker = DownloadProgressTracker(url: url, resultFilePath: destination.path)
+        downloadProgressTrackers[key]?.observation?.invalidate()
+        downloadProgressTrackers[key] = tracker
+        tracker.observation = download.progress.observe(\.completedUnitCount, options: [.new]) { [weak self, weak tracker] progress, _ in
+            let received = progress.completedUnitCount
+            let total = progress.totalUnitCount
+            DispatchQueue.main.async {
+                guard let self = self, let tracker = tracker, tracker.observation != nil else { return }
+                let now = Date().timeIntervalSince1970
+                if now - tracker.lastSent < 0.25 { return }
+                tracker.lastSent = now
+                self.sendDownloadProgress(tracker, state: 0, received: received, total: total, error: nil)
+            }
+        }
+    }
+
+    @available(iOS 14.5, *)
+    private func finishDownloadProgress(_ download: WKDownload, state: Int, error: String?) {
+        let key = ObjectIdentifier(download)
+        guard let tracker = downloadProgressTrackers.removeValue(forKey: key) else { return }
+        tracker.observation?.invalidate()
+        tracker.observation = nil
+        let received = download.progress.completedUnitCount
+        let total = download.progress.totalUnitCount
+        sendDownloadProgress(tracker, state: state, received: received, total: total > 0 ? total : (state == 1 ? received : total), error: error)
     }
     
     @available(iOS 14.5, *)
@@ -3688,6 +3754,11 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
     }
     
     public func dispose() {
+        for (_, tracker) in downloadProgressTrackers {
+            tracker.observation?.invalidate()
+            tracker.observation = nil
+        }
+        downloadProgressTrackers.removeAll()
         channelDelegate?.dispose()
         channelDelegate = nil
         runWindowBeforeCreatedCallbacks()

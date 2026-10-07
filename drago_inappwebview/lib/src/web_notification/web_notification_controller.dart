@@ -47,7 +47,7 @@ class WebNotificationController {
   ///{@macro drago_inappwebview.PlatformWebNotificationController.onClose.supported_platforms}
   WebNotificationCloseHandler? get onClose => platform.onClose;
 
-  void set onClose(WebNotificationCloseHandler? handler) {
+  set onClose(WebNotificationCloseHandler? handler) {
     platform.onClose = handler;
   }
 

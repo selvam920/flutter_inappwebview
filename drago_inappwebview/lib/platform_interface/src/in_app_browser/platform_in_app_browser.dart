@@ -1085,6 +1085,19 @@ Also, this event is not called for POST requests and is not called on the first 
     return null;
   }
 
+  ///{@macro drago_inappwebview.PlatformWebViewCreationParams.onDownloadProgress}
+  ///
+  ///{@macro drago_inappwebview.PlatformInAppBrowserEvents.onDownloadProgress.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(),
+      IOSPlatform(),
+      MacOSPlatform(),
+      WindowsPlatform(),
+    ],
+  )
+  void onDownloadProgress(DownloadProgress downloadProgress) {}
+
   ///{@macro drago_inappwebview.PlatformWebViewCreationParams.onLoadResourceCustomScheme}
   ///
   ///{@macro drago_inappwebview.PlatformInAppBrowserEvents.onLoadResourceCustomScheme.supported_platforms}

@@ -1,11 +1,9 @@
 name: drago_inappwebview
-description: A Flutter plugin that allows you to add an inline webview, to use an headless webview, and to open an in-app browser window.
-version: 6.2.0-beta.3
-homepage: https://inappwebview.dev/
-repository: https://github.com/pichillilorenzo/flutter_inappwebview
-issue_tracker: https://github.com/pichillilorenzo/flutter_inappwebview/issues
-funding:
-  - https://inappwebview.dev/donate/
+description: A fork of flutter_inappwebview as a single package. Add an inline webview, use a headless webview, and open an in-app browser window.
+version: 7.0.0
+homepage: https://github.com/selvam920/drago_inappwebview
+repository: https://github.com/selvam920/drago_inappwebview
+issue_tracker: https://github.com/selvam920/drago_inappwebview/issues
 topics:
   - html
   - webview
@@ -24,9 +22,8 @@ dependencies:
     sdk: flutter
   web: ^1.0.0
   plugin_platform_interface: ^2.1.8
-  cupertino_ui: any
-
-  material_ui: any
+  cupertino_ui: ^1.0.1
+  material_ui: ^1.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

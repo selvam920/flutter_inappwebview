@@ -928,6 +928,16 @@ namespace drago_inappwebview_plugin
     channel->InvokeMethod("onDownloadStarting", std::move(arguments), std::move(callback));
   }
 
+  void WebViewChannelDelegate::onDownloadProgress(flutter::EncodableMap progress) const
+  {
+    if (!channel) {
+      return;
+    }
+
+    auto arguments = std::make_unique<flutter::EncodableValue>(std::move(progress));
+    channel->InvokeMethod("onDownloadProgress", std::move(arguments));
+  }
+
   void WebViewChannelDelegate::onAcceleratorKeyPressed(std::shared_ptr<AcceleratorKeyPressedDetail> detail) const
   {
     if (!channel) {

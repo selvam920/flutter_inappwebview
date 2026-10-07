@@ -32,7 +32,7 @@ class InAppWebView extends StatefulWidget {
        );
 
   /// Constructs a [InAppWebView] from a specific platform implementation.
-  InAppWebView.fromPlatform({super.key, required this.platform});
+  const InAppWebView.fromPlatform({super.key, required this.platform});
 
   /// Implementation of [PlatformInAppWebView] for the current platform.
   final PlatformInAppWebViewWidget platform;
@@ -152,6 +152,11 @@ class InAppWebView extends StatefulWidget {
       DownloadStartRequest downloadStartRequest,
     )?
     onDownloadStarting,
+    void Function(
+      InAppWebViewController controller,
+      DownloadProgress downloadProgress,
+    )?
+    onDownloadProgress,
     @Deprecated('Use FindInteractionController.onFindResultReceived instead')
     void Function(
       InAppWebViewController controller,
@@ -549,6 +554,10 @@ class InAppWebView extends StatefulWidget {
            onDownloadStarting: onDownloadStarting != null
                ? (controller, downloadStartRequest) =>
                      onDownloadStarting.call(controller, downloadStartRequest)
+               : null,
+           onDownloadProgress: onDownloadProgress != null
+               ? (controller, downloadProgress) =>
+                     onDownloadProgress.call(controller, downloadProgress)
                : null,
            onLoadResourceCustomScheme: onLoadResourceCustomScheme != null
                ? (controller, url) =>

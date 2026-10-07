@@ -37,7 +37,7 @@ class PrintJobController {
   ///{@macro drago_inappwebview.PlatformPrintJobController.onComplete.supported_platforms}
   PrintJobCompletionHandler? get onComplete => platform.onComplete;
 
-  void set onComplete(PrintJobCompletionHandler? handler) {
+  set onComplete(PrintJobCompletionHandler? handler) {
     platform.onComplete = handler;
   }
 

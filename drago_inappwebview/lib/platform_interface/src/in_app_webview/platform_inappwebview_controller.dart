@@ -4776,6 +4776,7 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
   ///{@endtemplate}
   ///
   ///{@macro drago_inappwebview.PlatformInAppWebViewController.dispose.supported_platforms}
+  @override
   @SupportedPlatforms(
     platforms: [
       AndroidPlatform(),

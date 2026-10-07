@@ -1,4 +1,4 @@
-library drago_inappwebview.internal_annotations;
+library;
 
 export 'exchangeable_object.dart';
 export 'exchangeable_object_constructor.dart';

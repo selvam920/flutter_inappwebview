@@ -33,7 +33,7 @@ class PlatformInAppLocalhostServerCreationParams {
     this.directoryIndex = 'index.html',
     this.documentRoot = './',
     this.shared = false,
-    this.onData = null,
+    this.onData,
   });
 
   ///{@macro drago_inappwebview.PlatformInAppLocalhostServer.port}

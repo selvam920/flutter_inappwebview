@@ -1,3 +1,23 @@
+## 7.0.0
+
+Fork of flutter_inappwebview, renamed to `drago_inappwebview` and shipped as a single package.
+
+### Breaking changes
+
+- Package renamed: depend on `drago_inappwebview` and import `package:drago_inappwebview/drago_inappwebview.dart`. The federated `*_platform_interface` / `_android` / `_ios` / `_macos` / `_windows` / `_web` / `_linux` packages are merged into this one.
+- JavaScript bridge renamed: `window.drago_inappwebview.callHandler(...)` and the `dragoInAppWebViewPlatformReady` event.
+- Android `useHybridComposition` now defaults to `false`.
+
+### Changes
+
+- Crash and leak fixes on all platforms.
+- Android: FileProvider, R8 and AGP fixes; texture rendering by default; `createPdf`; native downloads; runtime permission requests.
+- Windows: context menu, mute, zoom and focus fixes; WebView2 1.0.4258.31; faster builds.
+- iOS / macOS: native downloads.
+- Download progress events (`onDownloadProgress`).
+- Web: origin anchoring and `postMessage` support.
+- Removed the debug-mode startup banner.
+
 ## 6.2.0-beta.3
 
 - Added `ContainerController` (`getAllContainerNames`, `hasContainer`, `deleteContainer`, `clearContainerData`) for enumerating, clearing and deleting named persistent storage containers. `clearContainerData` empties a container's cookies, DOM storage, IndexedDB, ServiceWorkers and HTTP cache without removing the container itself — works while WebViews are still bound, which `deleteContainer` cannot

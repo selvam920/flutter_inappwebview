@@ -100,7 +100,7 @@ class CustomFlutterViewControllerValue {
 /// Controls a WebView and provides streams for various change events.
 class CustomPlatformViewController
     extends ValueNotifier<CustomFlutterViewControllerValue> {
-  Completer<void> _creatingCompleter = Completer<void>();
+  final Completer<void> _creatingCompleter = Completer<void>();
   int _textureId = 0;
   bool _isDisposed = false;
 
@@ -283,7 +283,7 @@ class CustomPlatformView extends StatefulWidget {
 
   final Function(int id)? onPlatformViewCreated;
 
-  const CustomPlatformView({
+  const CustomPlatformView({super.key, 
     this.creationParams,
     this.onPlatformViewCreated,
     this.scaleFactor,
@@ -316,7 +316,7 @@ class _CustomPlatformViewState extends State<CustomPlatformView>
 
   late final AppLifecycleListener _listener;
 
-  PlatformUtil _platformUtil = PlatformUtil.instance();
+  final PlatformUtil _platformUtil = PlatformUtil.instance();
 
   @override
   void initState() {

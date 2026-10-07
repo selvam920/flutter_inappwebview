@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:drago_inappwebview/drago_inappwebview.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:drago_inappwebview_example/providers/event_log_provider.dart';
 import 'package:drago_inappwebview_example/providers/settings_manager.dart';
@@ -104,7 +103,7 @@ class _MyAppState extends State<MyApp> {
 
   Widget _buildMaterialApp() {
     return MaterialApp(
-      title: '${InAppWebView} Test Suite',
+      title: '$InAppWebView Test Suite',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         appBarTheme: AppBarTheme(

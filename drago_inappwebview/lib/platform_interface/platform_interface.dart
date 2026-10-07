@@ -1,3 +1,3 @@
-library drago_inappwebview.platform_interface;
+library;
 
 export 'src/main.dart';

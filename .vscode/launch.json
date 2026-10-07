@@ -105,26 +105,6 @@
       "flutterMode": "release"
     },
     {
-      "name": "drago_inappwebview_platform_interface",
-      "cwd": "drago_inappwebview_platform_interface",
-      "request": "launch",
-      "type": "dart"
-    },
-    {
-      "name": "drago_inappwebview_platform_interface (profile mode)",
-      "cwd": "drago_inappwebview_platform_interface",
-      "request": "launch",
-      "type": "dart",
-      "flutterMode": "profile"
-    },
-    {
-      "name": "drago_inappwebview_platform_interface (release mode)",
-      "cwd": "drago_inappwebview_platform_interface",
-      "request": "launch",
-      "type": "dart",
-      "flutterMode": "release"
-    },
-    {
       "name": "drago_inappwebview",
       "cwd": "drago_inappwebview",
       "request": "launch",

@@ -107,5 +107,5 @@ class MacOSContainerController extends PlatformContainerController
 }
 
 extension InternalContainerController on MacOSContainerController {
-  get handleMethod => _handleMethod;
+  Future<dynamic> Function(MethodCall call) get handleMethod => _handleMethod;
 }

@@ -57,6 +57,7 @@ class PlatformHeadlessInAppWebViewCreationParams
     @Deprecated('Use onDownloadStarting instead') super.onDownloadStart,
     @Deprecated('Use onDownloadStarting instead') super.onDownloadStartRequest,
     super.onDownloadStarting,
+    super.onDownloadProgress,
     @Deprecated('Use onLoadResourceWithCustomScheme instead')
     super.onLoadResourceCustomScheme,
     super.onLoadResourceWithCustomScheme,
@@ -404,6 +405,7 @@ abstract class PlatformHeadlessInAppWebView extends PlatformInterface
   ///{@endtemplate}
   ///
   ///{@macro drago_inappwebview.PlatformHeadlessInAppWebView.dispose.supported_platforms}
+  @override
   @SupportedPlatforms(
     platforms: [
       AndroidPlatform(),

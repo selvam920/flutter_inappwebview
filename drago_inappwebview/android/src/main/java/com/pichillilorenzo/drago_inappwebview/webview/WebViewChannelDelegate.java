@@ -778,6 +778,12 @@ public class WebViewChannelDelegate extends ChannelDelegateImpl {
     channel.invokeMethod("onDownloadStarting", downloadStartRequest.toMap(), result);
   }
 
+  public void onDownloadProgress(Map<String, Object> downloadProgress) {
+    MethodChannel channel = getChannel();
+    if (channel == null) return;
+    channel.invokeMethod("onDownloadProgress", downloadProgress);
+  }
+
   public void onCreateContextMenu(HitTestResult hitTestResult) {
     MethodChannel channel = getChannel();
     if (channel == null) return;

@@ -19,7 +19,7 @@
  *
 */
 
-library drago_inappwebview;
+library;
 
 export 'src/platform_registrants_stub.dart'
     if (dart.library.io) 'src/platform_registrants.dart';

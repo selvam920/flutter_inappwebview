@@ -464,6 +464,7 @@ abstract class PlatformWebViewEnvironment extends PlatformInterface
   ///{@endtemplate}
   ///
   ///{@macro drago_inappwebview.PlatformWebViewEnvironment.dispose.supported_platforms}
+  @override
   @SupportedPlatforms(platforms: [WindowsPlatform(), LinuxPlatform()])
   Future<void> dispose() {
     throw UnimplementedError(

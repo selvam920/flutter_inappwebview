@@ -1144,6 +1144,23 @@ enum PlatformInAppBrowserEventsMethod {
   ///{@endtemplate}
   onDidReceiveServerRedirectForProvisionalNavigation,
 
+  ///Can be used to check if the [PlatformInAppBrowserEvents.onDownloadProgress] method is supported at runtime.
+  ///
+  ///{@template drago_inappwebview.PlatformInAppBrowserEvents.onDownloadProgress.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView
+  ///- iOS WKWebView
+  ///- macOS WKWebView
+  ///- Windows WebView2
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [downloadProgress]: all platforms
+  ///
+  ///Use the [PlatformInAppBrowserEvents.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  onDownloadProgress,
+
   ///Can be used to check if the [PlatformInAppBrowserEvents.onDownloadStart] method is supported at runtime.
   ///
   ///{@template drago_inappwebview.PlatformInAppBrowserEvents.onDownloadStart.supported_platforms}
@@ -2325,6 +2342,14 @@ extension _PlatformInAppBrowserEventsMethodSupported
             [
               TargetPlatform.iOS,
               TargetPlatform.macOS,
+            ].contains(platform ?? defaultTargetPlatform);
+      case PlatformInAppBrowserEventsMethod.onDownloadProgress:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
+              TargetPlatform.iOS,
+              TargetPlatform.macOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppBrowserEventsMethod.onDownloadStart:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

@@ -157,6 +157,11 @@ class HeadlessInAppWebView {
       DownloadStartRequest downloadStartRequest,
     )?
     onDownloadStarting,
+    void Function(
+      InAppWebViewController controller,
+      DownloadProgress downloadProgress,
+    )?
+    onDownloadProgress,
     @Deprecated('Use FindInteractionController.onFindResultReceived instead')
     void Function(
       InAppWebViewController controller,
@@ -552,6 +557,10 @@ class HeadlessInAppWebView {
            onDownloadStarting: onDownloadStarting != null
                ? (controller, downloadStartRequest) =>
                      onDownloadStarting.call(controller, downloadStartRequest)
+               : null,
+           onDownloadProgress: onDownloadProgress != null
+               ? (controller, downloadProgress) =>
+                     onDownloadProgress.call(controller, downloadProgress)
                : null,
            onLoadResourceCustomScheme: onLoadResourceCustomScheme != null
                ? (controller, url) =>

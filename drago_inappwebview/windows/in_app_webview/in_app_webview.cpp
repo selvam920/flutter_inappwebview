@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstring>
 #include <filesystem>
@@ -1329,6 +1330,7 @@ namespace drago_inappwebview_plugin
                   defaultBehaviour(std::nullopt);
                 };
               channelDelegate->onDownloadStarting(std::move(request), std::move(callback));
+              trackDownloadProgress(download, url);
             }
             return S_OK;
           }
@@ -4615,6 +4617,103 @@ namespace drago_inappwebview_plugin
         SetFocus(view->GetNativeWindow());
       }
     }
+  }
+
+  void InAppWebView::trackDownloadProgress(const wil::com_ptr<ICoreWebView2DownloadOperation>& download, const std::string& url)
+  {
+    struct DownloadTracker {
+      EventRegistrationToken bytesToken = {};
+      EventRegistrationToken stateToken = {};
+      bool finished = false;
+      std::chrono::steady_clock::time_point lastSent{};
+    };
+    auto tracker = std::make_shared<DownloadTracker>();
+
+    // state: 0 IN_PROGRESS, 1 COMPLETED, 2 FAILED, 3 CANCELED
+    auto send = [this, alive = alive_, url](ICoreWebView2DownloadOperation* op, int state, std::optional<std::string> error)
+      {
+        if (!*alive || !channelDelegate) {
+          return;
+        }
+        INT64 received = 0;
+        INT64 total = 0;
+        failedLog(op->get_BytesReceived(&received));
+        failedLog(op->get_TotalBytesToReceive(&total));
+        wil::unique_cotaskmem_string path;
+        flutter::EncodableValue resultFilePath = SUCCEEDED(op->get_ResultFilePath(&path)) && path
+          ? flutter::EncodableValue(wide_to_utf8(path.get())) : flutter::EncodableValue();
+        if (state == 1 && total <= 0) {
+          total = received;
+        }
+        flutter::EncodableMap map = {
+          {flutter::EncodableValue("url"), flutter::EncodableValue(url)},
+          {flutter::EncodableValue("resultFilePath"), resultFilePath},
+          {flutter::EncodableValue("receivedBytes"), flutter::EncodableValue((int64_t)(received > 0 ? received : 0))},
+          {flutter::EncodableValue("totalBytes"), total > 0 ? flutter::EncodableValue((int64_t)total) : flutter::EncodableValue()},
+          {flutter::EncodableValue("state"), flutter::EncodableValue(state)},
+          {flutter::EncodableValue("error"), error.has_value() ? flutter::EncodableValue(error.value()) : flutter::EncodableValue()}
+        };
+        channelDelegate->onDownloadProgress(std::move(map));
+      };
+
+    auto removeTokens = [download, tracker]()
+      {
+        if (tracker->finished) {
+          return;
+        }
+        tracker->finished = true;
+        download->remove_BytesReceivedChanged(tracker->bytesToken);
+        download->remove_StateChanged(tracker->stateToken);
+      };
+
+    failedLog(download->add_BytesReceivedChanged(
+      Callback<ICoreWebView2BytesReceivedChangedEventHandler>(
+        [alive = alive_, tracker, send](ICoreWebView2DownloadOperation* op, IUnknown* args)
+        {
+          if (!*alive || tracker->finished) {
+            return S_OK;
+          }
+          auto now = std::chrono::steady_clock::now();
+          if (now - tracker->lastSent < std::chrono::milliseconds(250)) {
+            return S_OK;
+          }
+          tracker->lastSent = now;
+          send(op, 0, std::nullopt);
+          return S_OK;
+        }
+      ).Get(), &tracker->bytesToken));
+
+    failedLog(download->add_StateChanged(
+      Callback<ICoreWebView2StateChangedEventHandler>(
+        [alive = alive_, tracker, send, removeTokens](ICoreWebView2DownloadOperation* op, IUnknown* args)
+        {
+          COREWEBVIEW2_DOWNLOAD_STATE state;
+          if (FAILED(op->get_State(&state)) || state == COREWEBVIEW2_DOWNLOAD_STATE_IN_PROGRESS) {
+            return S_OK;
+          }
+          if (tracker->finished) {
+            return S_OK;
+          }
+          if (*alive) {
+            if (state == COREWEBVIEW2_DOWNLOAD_STATE_COMPLETED) {
+              send(op, 1, std::nullopt);
+            }
+            else {
+              COREWEBVIEW2_DOWNLOAD_INTERRUPT_REASON reason = COREWEBVIEW2_DOWNLOAD_INTERRUPT_REASON_NONE;
+              failedLog(op->get_InterruptReason(&reason));
+              if (reason == COREWEBVIEW2_DOWNLOAD_INTERRUPT_REASON_USER_CANCELED ||
+                reason == COREWEBVIEW2_DOWNLOAD_INTERRUPT_REASON_USER_SHUTDOWN) {
+                send(op, 3, std::nullopt);
+              }
+              else {
+                send(op, 2, "Download interrupted, reason " + std::to_string((int)reason));
+              }
+            }
+          }
+          removeTokens();
+          return S_OK;
+        }
+      ).Get(), &tracker->stateToken));
   }
 
   InAppWebView::~InAppWebView()

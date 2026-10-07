@@ -738,6 +738,10 @@ public class WebViewChannelDelegate: ChannelDelegate {
         channel?.invokeMethod("onContentSizeChanged", arguments: arguments)
     }
     
+    public func onDownloadProgress(progress: [String: Any?]) {
+        channel?.invokeMethod("onDownloadProgress", arguments: progress)
+    }
+
     public func onDownloadStarting(request: DownloadStartRequest) {
         channel?.invokeMethod("onDownloadStarting", arguments: request.toMap())
     }

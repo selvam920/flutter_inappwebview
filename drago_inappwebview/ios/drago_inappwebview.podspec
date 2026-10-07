@@ -4,14 +4,14 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'drago_inappwebview'
-  s.version          = '0.0.1'
-  s.summary          = 'A new Flutter plugin.'
+  s.version          = '7.0.0'
+  s.summary          = 'Inline webview, headless webview and in-app browser for Flutter.'
   s.description      = <<-DESC
-A new Flutter plugin.
+Inline webview, headless webview and in-app browser for Flutter (fork of flutter_inappwebview).
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://github.com/selvam920/drago_inappwebview'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = 'drago_inappwebview contributors'
   s.source           = { :path => '.' }
   s.source_files = 'drago_inappwebview/Sources/drago_inappwebview/**/*.swift'
   s.resources = 'drago_inappwebview/Sources/drago_inappwebview/Resources/**/*.storyboard'

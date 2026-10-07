@@ -83,53 +83,63 @@ abstract class Storage implements PlatformStorage {
   ///{@macro drago_inappwebview.PlatformStorage.controller}
   ///
   ///{@macro drago_inappwebview.PlatformStorage.controller.supported_platforms}
+  @override
   PlatformInAppWebViewController? get controller => platform.controller;
 
   ///{@macro drago_inappwebview.PlatformStorage.webStorageType}
   ///
   ///{@macro drago_inappwebview.PlatformStorage.webStorageType.supported_platforms}
+  @override
   WebStorageType get webStorageType => platform.webStorageType;
 
   ///{@macro drago_inappwebview.PlatformStorage.length}
   ///
   ///{@macro drago_inappwebview.PlatformStorage.length.supported_platforms}
+  @override
   Future<int?> length() => platform.length();
 
   ///{@macro drago_inappwebview.PlatformStorage.setItem}
   ///
   ///{@macro drago_inappwebview.PlatformStorage.setItem.supported_platforms}
+  @override
   Future<void> setItem({required String key, required dynamic value}) =>
       platform.setItem(key: key, value: value);
 
   ///{@macro drago_inappwebview.PlatformStorage.getItem}
   ///
   ///{@macro drago_inappwebview.PlatformStorage.getItem.supported_platforms}
+  @override
   Future<dynamic> getItem({required String key}) => platform.getItem(key: key);
 
   ///{@macro drago_inappwebview.PlatformStorage.removeItem}
   ///
   ///{@macro drago_inappwebview.PlatformStorage.removeItem.supported_platforms}
+  @override
   Future<void> removeItem({required String key}) =>
       platform.removeItem(key: key);
 
   ///{@macro drago_inappwebview.PlatformStorage.getItems}
   ///
   ///{@macro drago_inappwebview.PlatformStorage.getItems.supported_platforms}
+  @override
   Future<List<WebStorageItem>> getItems() => platform.getItems();
 
   ///{@macro drago_inappwebview.PlatformStorage.clear}
   ///
   ///{@macro drago_inappwebview.PlatformStorage.clear.supported_platforms}
+  @override
   Future<void> clear() => platform.clear();
 
   ///{@macro drago_inappwebview.PlatformStorage.key}
   ///
   ///{@macro drago_inappwebview.PlatformStorage.key.supported_platforms}
+  @override
   Future<String> key({required int index}) => platform.key(index: index);
 
   ///{@macro drago_inappwebview.PlatformStorage.dispose}
   ///
   ///{@macro drago_inappwebview.PlatformStorage.dispose.supported_platforms}
+  @override
   void dispose() => platform.dispose();
 }
 
@@ -161,6 +171,7 @@ class LocalStorage extends Storage {
     : super.fromPlatform(platform: platform);
 
   /// Implementation of [PlatformLocalStorage] for the current platform.
+  @override
   final PlatformLocalStorage platform;
 
   ///Check if the current class is supported by the [defaultTargetPlatform] or a specific [platform].
@@ -214,6 +225,7 @@ class SessionStorage extends Storage {
     : super.fromPlatform(platform: platform);
 
   /// Implementation of [PlatformSessionStorage] for the current platform.
+  @override
   final PlatformSessionStorage platform;
 
   ///Check if the current class is supported by the [defaultTargetPlatform] or a specific [platform].

@@ -108,5 +108,5 @@ class AndroidContainerController extends PlatformContainerController
 }
 
 extension InternalContainerController on AndroidContainerController {
-  get handleMethod => _handleMethod;
+  Future<dynamic> Function(MethodCall call) get handleMethod => _handleMethod;
 }

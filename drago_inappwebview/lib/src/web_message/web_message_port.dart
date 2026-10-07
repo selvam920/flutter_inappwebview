@@ -27,22 +27,27 @@ class WebMessagePort implements IWebMessagePort {
   ///{@macro drago_inappwebview.PlatformWebMessagePort.setWebMessageCallback}
   ///
   ///{@macro drago_inappwebview.PlatformWebMessagePort.setWebMessageCallback.supported_platforms}
+  @override
   Future<void> setWebMessageCallback(WebMessageCallback? onMessage) =>
       platform.setWebMessageCallback(onMessage);
 
   ///{@macro drago_inappwebview.PlatformWebMessagePort.postMessage}
   ///
   ///{@macro drago_inappwebview.PlatformWebMessagePort.postMessage.supported_platforms}
+  @override
   Future<void> postMessage(WebMessage message) => platform.postMessage(message);
 
   ///{@macro drago_inappwebview.PlatformWebMessagePort.close}
   ///
   ///{@macro drago_inappwebview.PlatformWebMessagePort.close.supported_platforms}
+  @override
   Future<void> close() => platform.close();
 
+  @override
   Map<String, dynamic> toMap({EnumMethod? enumMethod}) =>
       platform.toMap(enumMethod: enumMethod);
 
+  @override
   Map<String, dynamic> toJson() => platform.toJson();
 
   @override

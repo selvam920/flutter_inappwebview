@@ -751,6 +751,89 @@ declare global {
         }
       };
 
+      // Web messages: the host only accepts messages whose source is this
+      // webview's iframe window and whose origin passes the listener's
+      // (anchored) allowed-origin rules.
+      webView.webMessageListeners = {};
+      webView.webMessageHandler = null;
+
+      const _resolveTargetOrigin = function (targetOrigin?: string | null): string | null {
+        if (targetOrigin != null && targetOrigin !== '') {
+          return targetOrigin;
+        }
+        try {
+          const src = webView.iframe?.src;
+          if (src != null && src !== '') {
+            const origin = new URL(src, window.location.href).origin;
+            if (origin != null && origin !== 'null') {
+              return origin;
+            }
+          }
+        } catch (_) {
+        }
+        return null;
+      };
+
+      const _postToIframe = function (data: any, targetOrigin: string | null) {
+        const contentWindow = webView.iframe?.contentWindow;
+        if (contentWindow == null) {
+          throw new Error('WebView iframe is not available.');
+        }
+        if (targetOrigin == null) {
+          throw new Error('Cannot resolve a target origin for the WebView iframe.');
+        }
+        contentWindow.postMessage(data, targetOrigin);
+      };
+
+      webView.postWebMessage = function (data: any, targetOrigin?: string | null) {
+        _postToIframe(data, _resolveTargetOrigin(targetOrigin));
+      };
+
+      webView.replyWebMessage = function (data: any, sourceOrigin: string) {
+        // Reply only to the exact origin that sent the message.
+        if (sourceOrigin == null || sourceOrigin === '' || sourceOrigin === 'null' || sourceOrigin === '*') {
+          throw new Error('Cannot reply to an opaque or wildcard origin.');
+        }
+        _postToIframe(data, sourceOrigin);
+      };
+
+      webView.addWebMessageListener = function (jsObjectName: string, allowedOriginRules: string[]) {
+        webView.webMessageListeners![jsObjectName] = allowedOriginRules ?? [];
+        if (webView.webMessageHandler != null) {
+          return;
+        }
+        webView.webMessageHandler = function (event: MessageEvent) {
+          const contentWindow = webView.iframe?.contentWindow;
+          if (contentWindow == null || event.source !== contentWindow) {
+            return;
+          }
+          const origin = event.origin;
+          let type = 0;
+          let data: any = event.data;
+          if (data instanceof ArrayBuffer) {
+            type = 1;
+            data = Array.from(new Uint8Array(data));
+          } else if (ArrayBuffer.isView(data)) {
+            type = 1;
+            data = Array.from(new Uint8Array(data.buffer, data.byteOffset, data.byteLength));
+          } else if (data != null && typeof data !== 'string') {
+            try {
+              data = _JSON_stringify(data);
+            } catch (_) {
+              return;
+            }
+          }
+          const message = _JSON_stringify({type: type, data: data});
+          const listeners = webView.webMessageListeners ?? {};
+          for (const name of Object.keys(listeners)) {
+            if (_isOriginAllowed(listeners[name], origin)) {
+              _nativeCommunication('onWebMessageListenerPostMessage', viewId, [name, message, origin]);
+            }
+          }
+        };
+        window.addEventListener('message', webView.webMessageHandler);
+      };
+
       webView.dispose = function () {
         if (webView.fullscreenChangeHandler != null) {
           document.removeEventListener('fullscreenchange', webView.fullscreenChangeHandler);
@@ -765,6 +848,11 @@ declare global {
           disposedIframe?.contentWindow?.removeEventListener('contextmenu', webView.disableContextMenuHandler);
         } catch (_) {
         }
+        if (webView.webMessageHandler != null) {
+          window.removeEventListener('message', webView.webMessageHandler);
+          webView.webMessageHandler = null;
+        }
+        webView.webMessageListeners = {};
         webView.functionMap = {};
         webView.iframe = null;
         webView.iframeContainer = null;

@@ -176,6 +176,7 @@ namespace drago_inappwebview_plugin
     void onWebContentProcessDidTerminate() const;
     void onProcessFailed(const std::shared_ptr<ProcessFailedDetail> detail) const;
     void onDownloadStarting(std::shared_ptr<DownloadStartRequest> request, std::unique_ptr<DownloadStartRequestCallback> callback) const;
+    void onDownloadProgress(flutter::EncodableMap progress) const;
     void onAcceleratorKeyPressed(std::shared_ptr<AcceleratorKeyPressedDetail> detail) const;
     void onZoomScaleChanged(const double& oldScale, const double& newScale) const;
     void onEnterFullscreen() const;

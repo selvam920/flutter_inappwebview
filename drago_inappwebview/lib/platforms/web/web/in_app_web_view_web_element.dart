@@ -46,8 +46,8 @@ class InAppWebViewWebElement implements Disposable {
     required dynamic viewId,
     required BinaryMessenger messenger,
   }) {
-    this._viewId = viewId;
-    this._messenger = messenger;
+    _viewId = viewId;
+    _messenger = messenger;
     iframeContainer = HTMLDivElement()
       ..id = 'drago_inappwebview-$_viewId-container'
       ..style.height = '100%'
@@ -66,7 +66,7 @@ class InAppWebViewWebElement implements Disposable {
       _messenger,
     );
 
-    this._channel?.setMethodCallHandler((call) async {
+    _channel?.setMethodCallHandler((call) async {
       try {
         return await handleMethodCall(call);
       } on Error catch (e) {
@@ -232,6 +232,26 @@ class InAppWebViewWebElement implements Disposable {
       case "removeAllUserScripts":
         userContentController.removeAllUserOnlyScripts();
         break;
+      case "postWebMessage":
+        postWebMessage(
+          call.arguments["message"]?.cast<String, dynamic>(),
+          call.arguments["targetOrigin"],
+        );
+        break;
+      case "replyWebMessage":
+        replyWebMessage(
+          call.arguments["message"]?.cast<String, dynamic>(),
+          call.arguments["sourceOrigin"],
+        );
+        break;
+      case "addWebMessageListener":
+        addWebMessageListener(
+          call.arguments["jsObjectName"],
+          (call.arguments["allowedOriginRules"] as List?)
+                  ?.cast<String>() ??
+              const <String>[],
+        );
+        break;
       case "dispose":
         dispose();
         break;
@@ -339,7 +359,7 @@ class InAppWebViewWebElement implements Disposable {
     bool? withCredentials,
     String? responseType,
     String? mimeType,
-    void onProgress(ProgressEvent e)?,
+    void Function(ProgressEvent e)? onProgress,
   }) {
     return HttpRequest.request(
       urlRequest.url?.toString() ?? 'about:blank',
@@ -356,7 +376,7 @@ class InAppWebViewWebElement implements Disposable {
   String _convertHttpResponseToData(XMLHttpRequest httpRequest) {
     final String contentType =
         httpRequest.getResponseHeader('content-type') ?? 'text/html';
-    return 'data:$contentType,' + Uri.encodeComponent(httpRequest.responseText);
+    return 'data:$contentType,${Uri.encodeComponent(httpRequest.responseText)}';
   }
 
   String getIFrameId() {
@@ -392,7 +412,7 @@ class InAppWebViewWebElement implements Disposable {
     required String data,
     String mimeType = "text/html",
   }) async {
-    iframe.src = 'data:$mimeType,' + Uri.encodeComponent(data);
+    iframe.src = 'data:$mimeType,${Uri.encodeComponent(data)}';
   }
 
   Future<void> loadFile({required String assetFilePath}) async {
@@ -530,7 +550,7 @@ class InAppWebViewWebElement implements Disposable {
 
   Set<Sandbox> getSandbox() {
     var sandbox = iframe.sandbox;
-    Set<Sandbox> values = Set();
+    Set<Sandbox> values = {};
     for (int i = 0; i < sandbox.length; i++) {
       var token = Sandbox.fromNativeValue(sandbox.item(i));
       if (token != null) {
@@ -629,6 +649,59 @@ class InAppWebViewWebElement implements Disposable {
   void onScrollChanged(int x, int y) async {
     var obj = {"x": x, "y": y};
     await _channel?.invokeMethod("onScrollChanged", obj);
+  }
+
+  JSAny? _webMessageDataToJS(Map<String, dynamic>? message) {
+    final data = message?["data"];
+    if (data == null) {
+      return null;
+    }
+    if (data is Uint8List) {
+      return data.toJS;
+    }
+    if (data is List) {
+      return Uint8List.fromList(data.cast<int>()).toJS;
+    }
+    return data.toString().toJS;
+  }
+
+  void postWebMessage(Map<String, dynamic>? message, String? targetOrigin) {
+    jsWebView?.postWebMessage(
+      _webMessageDataToJS(message),
+      targetOrigin?.toJS,
+    );
+  }
+
+  void replyWebMessage(Map<String, dynamic>? message, String sourceOrigin) {
+    jsWebView?.replyWebMessage(
+      _webMessageDataToJS(message),
+      sourceOrigin.toJS,
+    );
+  }
+
+  void addWebMessageListener(
+    String jsObjectName,
+    List<String> allowedOriginRules,
+  ) {
+    jsWebView?.addWebMessageListener(
+      jsObjectName.toJS,
+      allowedOriginRules.map((e) => e.toJS).toList().toJS,
+    );
+  }
+
+  void onWebMessageListenerPostMessage(
+    String jsObjectName,
+    String message,
+    String sourceOrigin,
+  ) async {
+    final Map<String, dynamic> decoded = jsonDecode(message);
+    var obj = {
+      "jsObjectName": jsObjectName,
+      "message": decoded,
+      "sourceOrigin": sourceOrigin,
+      "isMainFrame": true,
+    };
+    await _channel?.invokeMethod("onWebMessageListenerPostMessage", obj);
   }
 
   void onConsoleMessage(String type, String? message) async {
@@ -752,8 +825,7 @@ class InAppWebViewWebElement implements Disposable {
     if (_expectedBridgeSecret != bridgeSecret) {
       if (kDebugMode) {
         print(
-          "Bridge access attempt with wrong secret token, possibly from malicious code from origin: " +
-              origin,
+          "Bridge access attempt with wrong secret token, possibly from malicious code from origin: $origin",
         );
       }
       return null;
@@ -780,7 +852,7 @@ class InAppWebViewWebElement implements Disposable {
     }
     if (!isOriginAllowed) {
       if (kDebugMode) {
-        print("Bridge access attempt from an origin not allowed: " + origin);
+        print("Bridge access attempt from an origin not allowed: $origin");
       }
       return null;
     }
@@ -852,7 +924,7 @@ class UserContentController implements Disposable {
     }
   }
 
-  removeAllUserOnlyScripts() {
+  void removeAllUserOnlyScripts() {
     _userOnlyScripts[UserScriptInjectionTime.AT_DOCUMENT_START]!.clear();
     _userOnlyScripts[UserScriptInjectionTime.AT_DOCUMENT_END]!.clear();
   }

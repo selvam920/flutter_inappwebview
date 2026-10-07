@@ -79,7 +79,7 @@ Future<String?> _dartNativeAsyncCommunication(
   if (InAppWebViewManager.webViews.containsKey(viewId)) {
     var webViewHtmlElement =
         InAppWebViewManager.webViews[viewId] as InAppWebViewWebElement;
-    var result = null;
+    var result;
     try {
       switch (method) {
         case 'onCreateWindow':
@@ -102,10 +102,10 @@ Future<String?> _dartNativeAsyncCommunication(
       }
       return result != null ? jsonEncode(result) : null;
     } catch (e, stacktrace) {
-      if (!(e is UnimplementedError) && kDebugMode) {
+      if (e is! UnimplementedError && kDebugMode) {
         print("$e\n$stacktrace");
       }
-      throw e;
+      rethrow;
     }
   }
   return null;
@@ -119,7 +119,7 @@ String? _dartNativeSyncCommunication(
   if (InAppWebViewManager.webViews.containsKey(viewId)) {
     var webViewHtmlElement =
         InAppWebViewManager.webViews[viewId] as InAppWebViewWebElement;
-    var result = null;
+    Object? result;
 
     try {
       switch (method) {
@@ -144,6 +144,16 @@ String? _dartNativeSyncCommunication(
           String type = args![0];
           String? message = args[1];
           webViewHtmlElement.onConsoleMessage(type, message);
+          break;
+        case 'onWebMessageListenerPostMessage':
+          String jsObjectName = args![0];
+          String message = args[1];
+          String sourceOrigin = args[2];
+          webViewHtmlElement.onWebMessageListenerPostMessage(
+            jsObjectName,
+            message,
+            sourceOrigin,
+          );
           break;
         case 'onWindowFocus':
           webViewHtmlElement.onWindowFocus();
@@ -195,13 +205,13 @@ String? _dartNativeSyncCommunication(
           throw UnimplementedError("Method '$method' not implemented");
       }
     } catch (e, stacktrace) {
-      if (!(e is UnimplementedError) && kDebugMode) {
+      if (e is! UnimplementedError && kDebugMode) {
         print("$e\n$stacktrace");
       }
-      throw e;
+      rethrow;
     }
 
-    return result != null ? jsonEncode(result) : null;
+    return jsonEncode(result);
   }
   return null;
 }

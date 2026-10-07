@@ -38,6 +38,7 @@ class IOSInAppWebViewWidgetCreationParams
     @Deprecated('Use onDownloadStarting instead') super.onDownloadStart,
     @Deprecated('Use onDownloadStarting instead') super.onDownloadStartRequest,
     super.onDownloadStarting,
+    super.onDownloadProgress,
     @Deprecated('Use onLoadResourceWithCustomScheme instead')
     super.onLoadResourceCustomScheme,
     super.onLoadResourceWithCustomScheme,
@@ -162,6 +163,7 @@ class IOSInAppWebViewWidgetCreationParams
         onDownloadStart: params.onDownloadStart,
         onDownloadStartRequest: params.onDownloadStartRequest,
         onDownloadStarting: params.onDownloadStarting,
+        onDownloadProgress: params.onDownloadProgress,
         onLoadResourceCustomScheme: params.onLoadResourceCustomScheme,
         onLoadResourceWithCustomScheme: params.onLoadResourceWithCustomScheme,
         onCreateWindow: params.onCreateWindow,
@@ -384,9 +386,7 @@ class IOSInAppWebViewWidget extends PlatformInAppWebViewWidget {
     if ((params.shouldInterceptAjaxRequest != null ||
         params.onAjaxProgress != null ||
         params.onAjaxReadyStateChange != null)) {
-      if (settings.useShouldInterceptAjaxRequest == null) {
-        settings.useShouldInterceptAjaxRequest = true;
-      }
+      settings.useShouldInterceptAjaxRequest ??= true;
       if (params.onAjaxReadyStateChange != null &&
           settings.useOnAjaxReadyStateChange == null) {
         settings.useOnAjaxReadyStateChange = true;

@@ -614,6 +614,23 @@ enum PlatformWebViewCreationParamsProperty {
   ///{@endtemplate}
   onDidReceiveServerRedirectForProvisionalNavigation,
 
+  ///Can be used to check if the [PlatformWebViewCreationParams.onDownloadProgress] property is supported at runtime.
+  ///
+  ///{@template drago_inappwebview.PlatformWebViewCreationParams.onDownloadProgress.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView
+  ///- iOS WKWebView
+  ///- macOS WKWebView
+  ///- Windows WebView2 ([Official API - ICoreWebView2DownloadOperation](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2downloadoperation))
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [downloadProgress]: all platforms
+  ///
+  ///Use the [PlatformWebViewCreationParams.isPropertySupported] method to check if this property is supported at runtime.
+  ///{@endtemplate}
+  onDownloadProgress,
+
   ///Can be used to check if the [PlatformWebViewCreationParams.onDownloadStart] property is supported at runtime.
   ///
   ///{@template drago_inappwebview.PlatformWebViewCreationParams.onDownloadStart.supported_platforms}
@@ -1975,6 +1992,14 @@ extension _PlatformWebViewCreationParamsPropertySupported
             [
               TargetPlatform.iOS,
               TargetPlatform.macOS,
+            ].contains(platform ?? defaultTargetPlatform);
+      case PlatformWebViewCreationParamsProperty.onDownloadProgress:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
+              TargetPlatform.iOS,
+              TargetPlatform.macOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformWebViewCreationParamsProperty.onDownloadStart:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

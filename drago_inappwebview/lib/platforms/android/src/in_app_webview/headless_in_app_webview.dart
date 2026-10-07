@@ -15,7 +15,7 @@ import 'in_app_webview_controller.dart';
 class AndroidHeadlessInAppWebViewCreationParams
     extends PlatformHeadlessInAppWebViewCreationParams {
   /// Creates a new [AndroidHeadlessInAppWebViewCreationParams] instance.
-  AndroidHeadlessInAppWebViewCreationParams({
+  const AndroidHeadlessInAppWebViewCreationParams({
     super.controllerFromPlatform,
     super.initialSize,
     super.windowId,
@@ -34,6 +34,7 @@ class AndroidHeadlessInAppWebViewCreationParams
     @Deprecated('Use onDownloadStarting instead') super.onDownloadStart,
     @Deprecated('Use onDownloadStarting instead') super.onDownloadStartRequest,
     super.onDownloadStarting,
+    super.onDownloadProgress,
     @Deprecated('Use onLoadResourceWithCustomScheme instead')
     super.onLoadResourceCustomScheme,
     super.onLoadResourceWithCustomScheme,
@@ -152,6 +153,7 @@ class AndroidHeadlessInAppWebViewCreationParams
         onDownloadStart: params.onDownloadStart,
         onDownloadStartRequest: params.onDownloadStartRequest,
         onDownloadStarting: params.onDownloadStarting,
+        onDownloadProgress: params.onDownloadProgress,
         onLoadResourceCustomScheme: params.onLoadResourceCustomScheme,
         onLoadResourceWithCustomScheme: params.onLoadResourceWithCustomScheme,
         onCreateWindow: params.onCreateWindow,
@@ -259,7 +261,7 @@ class AndroidHeadlessInAppWebView extends PlatformHeadlessInAppWebView
   bool _started = false;
   bool _running = false;
 
-  static const MethodChannel _sharedChannel = const MethodChannel(
+  static const MethodChannel _sharedChannel = MethodChannel(
     'com.pichillilorenzo/flutter_headless_inappwebview',
   );
 
@@ -292,7 +294,7 @@ class AndroidHeadlessInAppWebView extends PlatformHeadlessInAppWebView
   AndroidHeadlessInAppWebViewCreationParams get _androidParams =>
       params as AndroidHeadlessInAppWebViewCreationParams;
 
-  _init() {
+  void _init() {
     _webViewController = AndroidInAppWebViewController(
       AndroidInAppWebViewControllerCreationParams(
         id: id,
@@ -324,6 +326,7 @@ class AndroidHeadlessInAppWebView extends PlatformHeadlessInAppWebView
     return null;
   }
 
+  @override
   Future<void> run() async {
     if (_started) {
       return;
@@ -381,9 +384,7 @@ class AndroidHeadlessInAppWebView extends PlatformHeadlessInAppWebView
     if ((params.shouldInterceptAjaxRequest != null ||
         params.onAjaxProgress != null ||
         params.onAjaxReadyStateChange != null)) {
-      if (settings.useShouldInterceptAjaxRequest == null) {
-        settings.useShouldInterceptAjaxRequest = true;
-      }
+      settings.useShouldInterceptAjaxRequest ??= true;
       if (params.onAjaxReadyStateChange != null &&
           settings.useOnAjaxReadyStateChange == null) {
         settings.useOnAjaxReadyStateChange = true;
