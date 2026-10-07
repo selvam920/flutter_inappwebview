@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import '../find_interaction/find_interaction_controller.dart';
 import '../pull_to_refresh/pull_to_refresh_controller.dart';
@@ -259,11 +259,11 @@ class IOSInAppWebViewWidgetCreationParams
   final IOSPullToRefreshController? pullToRefreshController;
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformInAppWebViewWidget}
+///{@macro drago_inappwebview.PlatformInAppWebViewWidget}
 class IOSInAppWebViewWidget extends PlatformInAppWebViewWidget {
   /// Constructs a [IOSInAppWebViewWidget].
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppWebViewWidget}
+  ///{@macro drago_inappwebview.PlatformInAppWebViewWidget}
   IOSInAppWebViewWidget(PlatformInAppWebViewWidgetCreationParams params)
     : super.implementation(
         params is IOSInAppWebViewWidgetCreationParams

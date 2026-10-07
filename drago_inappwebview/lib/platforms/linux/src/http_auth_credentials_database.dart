@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 /// Object specifying creation parameters for creating a [LinuxHttpAuthCredentialDatabase].
 ///
@@ -26,7 +26,7 @@ class LinuxHttpAuthCredentialDatabaseCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformHttpAuthCredentialDatabase}
+///{@macro drago_inappwebview.PlatformHttpAuthCredentialDatabase}
 ///
 /// This implementation delegates to native C++ code which uses libsecret for secure storage.
 /// Passwords are stored in the system keyring (gnome-keyring, KDE Wallet, etc.).

@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 /// Object specifying creation parameters for creating a [LinuxWebStorageManager].
 ///

@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
-///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController}
+///{@macro drago_inappwebview.PlatformServiceWorkerController}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.supported_platforms}
+///{@macro drago_inappwebview.PlatformServiceWorkerController.supported_platforms}
 class ServiceWorkerController {
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController}
   ServiceWorkerController()
     : this.fromPlatformCreationParams(
         const PlatformServiceWorkerControllerCreationParams(),
@@ -36,72 +36,72 @@ class ServiceWorkerController {
     return _instance!;
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.serviceWorkerClient}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.serviceWorkerClient}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.serviceWorkerClient.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.serviceWorkerClient.supported_platforms}
   ServiceWorkerClient? get serviceWorkerClient => platform.serviceWorkerClient;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.setServiceWorkerClient}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.setServiceWorkerClient}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.setServiceWorkerClient.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.setServiceWorkerClient.supported_platforms}
   setServiceWorkerClient(ServiceWorkerClient? value) =>
       platform.setServiceWorkerClient(value);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.getAllowContentAccess}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.getAllowContentAccess}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.getAllowContentAccess.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.getAllowContentAccess.supported_platforms}
   static Future<bool> getAllowContentAccess() =>
       PlatformServiceWorkerController.static().getAllowContentAccess();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.getAllowFileAccess}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.getAllowFileAccess}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.getAllowFileAccess.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.getAllowFileAccess.supported_platforms}
   static Future<bool> getAllowFileAccess() =>
       PlatformServiceWorkerController.static().getAllowFileAccess();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.getBlockNetworkLoads}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.getBlockNetworkLoads}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.getBlockNetworkLoads.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.getBlockNetworkLoads.supported_platforms}
   static Future<bool> getBlockNetworkLoads() =>
       PlatformServiceWorkerController.static().getBlockNetworkLoads();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.getCacheMode}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.getCacheMode}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.getCacheMode.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.getCacheMode.supported_platforms}
   static Future<CacheMode?> getCacheMode() =>
       PlatformServiceWorkerController.static().getCacheMode();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.setAllowContentAccess}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.setAllowContentAccess}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.setAllowContentAccess.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.setAllowContentAccess.supported_platforms}
   static Future<void> setAllowContentAccess(bool allow) =>
       PlatformServiceWorkerController.static().setAllowContentAccess(allow);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.setAllowFileAccess}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.setAllowFileAccess}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.setAllowFileAccess.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.setAllowFileAccess.supported_platforms}
   static Future<void> setAllowFileAccess(bool allow) =>
       PlatformServiceWorkerController.static().setAllowFileAccess(allow);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.setBlockNetworkLoads}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.setBlockNetworkLoads}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.setBlockNetworkLoads.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.setBlockNetworkLoads.supported_platforms}
   static Future<void> setBlockNetworkLoads(bool flag) =>
       PlatformServiceWorkerController.static().setBlockNetworkLoads(flag);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.setCacheMode}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.setCacheMode}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.setCacheMode.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.setCacheMode.supported_platforms}
   static Future<void> setCacheMode(CacheMode mode) =>
       PlatformServiceWorkerController.static().setCacheMode(mode);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerControllerCreationParams.isClassSupported}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerControllerCreationParams.isClassSupported}
   static bool isClassSupported({TargetPlatform? platform}) =>
       PlatformServiceWorkerController.static().isClassSupported(
         platform: platform,
       );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformServiceWorkerController.isMethodSupported}
+  ///{@macro drago_inappwebview.PlatformServiceWorkerController.isMethodSupported}
   static bool isMethodSupported(
     PlatformServiceWorkerControllerMethod method, {
     TargetPlatform? platform,

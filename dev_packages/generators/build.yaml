@@ -19,3 +19,4 @@ builders:
     defaults:
       generate_for:
         - lib/src/**.dart
+        - lib/platform_interface/src/**.dart

@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
-///{@macro drago_inappwebview_platform_interface.PlatformProxyController}
+///{@macro drago_inappwebview.PlatformProxyController}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformProxyController.supported_platforms}
+///{@macro drago_inappwebview.PlatformProxyController.supported_platforms}
 class ProxyController {
-  ///{@macro drago_inappwebview_platform_interface.PlatformProxyController}
+  ///{@macro drago_inappwebview.PlatformProxyController}
   ProxyController()
     : this.fromPlatformCreationParams(
         const PlatformProxyControllerCreationParams(),
@@ -36,22 +36,22 @@ class ProxyController {
     return _instance!;
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformProxyController.setProxyOverride}
+  ///{@macro drago_inappwebview.PlatformProxyController.setProxyOverride}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformProxyController.setProxyOverride.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformProxyController.setProxyOverride.supported_platforms}
   Future<void> setProxyOverride({required ProxySettings settings}) =>
       platform.setProxyOverride(settings: settings);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformProxyController.clearProxyOverride}
+  ///{@macro drago_inappwebview.PlatformProxyController.clearProxyOverride}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformProxyController.clearProxyOverride.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformProxyController.clearProxyOverride.supported_platforms}
   Future<void> clearProxyOverride() => platform.clearProxyOverride();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformProxyControllerCreationParams.isClassSupported}
+  ///{@macro drago_inappwebview.PlatformProxyControllerCreationParams.isClassSupported}
   static bool isClassSupported({TargetPlatform? platform}) =>
       PlatformProxyController.static().isClassSupported(platform: platform);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformProxyController.isMethodSupported}
+  ///{@macro drago_inappwebview.PlatformProxyController.isMethodSupported}
   static bool isMethodSupported(
     PlatformProxyControllerMethod method, {
     TargetPlatform? platform,

@@ -7,7 +7,7 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import '../in_app_browser/in_app_browser.dart';
 import '../web_message/web_message_channel.dart';

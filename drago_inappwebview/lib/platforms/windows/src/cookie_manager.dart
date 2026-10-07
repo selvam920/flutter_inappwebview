@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import 'webview_environment/webview_environment.dart';
 
@@ -33,7 +33,7 @@ class WindowsCookieManagerCreationParams
   final WindowsWebViewEnvironment? webViewEnvironment;
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformCookieManager}
+///{@macro drago_inappwebview.PlatformCookieManager}
 class WindowsCookieManager extends PlatformCookieManager
     with ChannelController {
   /// Creates a new [WindowsCookieManager].

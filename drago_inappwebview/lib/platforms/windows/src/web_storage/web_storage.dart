@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import '../in_app_webview/in_app_webview_controller.dart';
 
@@ -29,7 +29,7 @@ class WindowsWebStorageCreationParams extends PlatformWebStorageCreationParams {
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformWebStorage}
+///{@macro drago_inappwebview.PlatformWebStorage}
 class WindowsWebStorage extends PlatformWebStorage {
   /// Constructs a [WindowsWebStorage].
   WindowsWebStorage(PlatformWebStorageCreationParams params)
@@ -79,7 +79,7 @@ class WindowsStorageCreationParams extends PlatformStorageCreationParams {
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformStorage}
+///{@macro drago_inappwebview.PlatformStorage}
 abstract mixin class WindowsStorage implements PlatformStorage {
   @override
   WindowsInAppWebViewController? controller;
@@ -219,7 +219,7 @@ class WindowsLocalStorageCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformLocalStorage}
+///{@macro drago_inappwebview.PlatformLocalStorage}
 class WindowsLocalStorage extends PlatformLocalStorage with WindowsStorage {
   /// Constructs a [WindowsLocalStorage].
   WindowsLocalStorage(PlatformLocalStorageCreationParams params)
@@ -272,7 +272,7 @@ class WindowsSessionStorageCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformSessionStorage}
+///{@macro drago_inappwebview.PlatformSessionStorage}
 class WindowsSessionStorage extends PlatformSessionStorage with WindowsStorage {
   /// Constructs a [WindowsSessionStorage].
   WindowsSessionStorage(PlatformSessionStorageCreationParams params)

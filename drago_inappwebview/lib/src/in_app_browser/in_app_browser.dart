@@ -5,7 +5,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import '../find_interaction/find_interaction_controller.dart';
 import '../pull_to_refresh/main.dart';
@@ -13,15 +13,15 @@ import '../pull_to_refresh/main.dart';
 import '../in_app_webview/in_app_webview_controller.dart';
 import '../webview_environment/webview_environment.dart';
 
-///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser}
+///{@macro drago_inappwebview.PlatformInAppBrowser}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.supported_platforms}
+///{@macro drago_inappwebview.PlatformInAppBrowser.supported_platforms}
 class InAppBrowser implements PlatformInAppBrowserEvents {
   ///Constructs a [InAppBrowser].
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.supported_platforms}
   InAppBrowser({
     ContextMenu? contextMenu,
     PullToRefreshController? pullToRefreshController,
@@ -55,19 +55,19 @@ class InAppBrowser implements PlatformInAppBrowserEvents {
   /// Implementation of [PlatformInAppBrowser] for the current platform.
   final PlatformInAppBrowser platform;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.id}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.id}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.id.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.id.supported_platforms}
   String get id => platform.id;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewCreationParams.contextMenu}
+  ///{@macro drago_inappwebview.PlatformWebViewCreationParams.contextMenu}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.contextMenu.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.contextMenu.supported_platforms}
   ContextMenu? get contextMenu => platform.contextMenu;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewCreationParams.pullToRefreshController}
+  ///{@macro drago_inappwebview.PlatformWebViewCreationParams.pullToRefreshController}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.pullToRefreshController.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.pullToRefreshController.supported_platforms}
   PullToRefreshController? get pullToRefreshController {
     final pullToRefreshControllerPlatform = platform.pullToRefreshController;
     if (pullToRefreshControllerPlatform == null) {
@@ -78,9 +78,9 @@ class InAppBrowser implements PlatformInAppBrowserEvents {
     );
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewCreationParams.findInteractionController}
+  ///{@macro drago_inappwebview.PlatformWebViewCreationParams.findInteractionController}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.findInteractionController.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.findInteractionController.supported_platforms}
   FindInteractionController? get findInteractionController {
     final findInteractionControllerPlatform =
         platform.findInteractionController;
@@ -92,20 +92,20 @@ class InAppBrowser implements PlatformInAppBrowserEvents {
     );
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewCreationParams.initialUserScripts}
+  ///{@macro drago_inappwebview.PlatformWebViewCreationParams.initialUserScripts}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.initialUserScripts.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.initialUserScripts.supported_platforms}
   UnmodifiableListView<UserScript>? get initialUserScripts =>
       platform.initialUserScripts;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewCreationParams.windowId}
+  ///{@macro drago_inappwebview.PlatformWebViewCreationParams.windowId}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.windowId.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.windowId.supported_platforms}
   int? get windowId => platform.windowId;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.webViewController}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.webViewController}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.webViewController.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.webViewController.supported_platforms}
   InAppWebViewController? get webViewController {
     final webViewControllerPlatform = platform.webViewController;
     if (webViewControllerPlatform == null) {
@@ -116,9 +116,9 @@ class InAppBrowser implements PlatformInAppBrowserEvents {
     );
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.openUrlRequest}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.openUrlRequest}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.openUrlRequest.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.openUrlRequest.supported_platforms}
   Future<void> openUrlRequest({
     required URLRequest urlRequest,
     @Deprecated('Use settings instead') InAppBrowserClassOptions? options,
@@ -132,9 +132,9 @@ class InAppBrowser implements PlatformInAppBrowserEvents {
     );
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.openFile}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.openFile}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.openFile.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.openFile.supported_platforms}
   Future<void> openFile({
     required String assetFilePath,
     @Deprecated('Use settings instead') InAppBrowserClassOptions? options,
@@ -148,9 +148,9 @@ class InAppBrowser implements PlatformInAppBrowserEvents {
     );
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.openData}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.openData}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.openData.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.openData.supported_platforms}
   Future<void> openData({
     required String data,
     String mimeType = "text/html",
@@ -174,99 +174,99 @@ class InAppBrowser implements PlatformInAppBrowserEvents {
     );
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.openWithSystemBrowser}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.openWithSystemBrowser}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.openWithSystemBrowser.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.openWithSystemBrowser.supported_platforms}
   static Future<void> openWithSystemBrowser({required WebUri url}) =>
       PlatformInAppBrowser.static().openWithSystemBrowser(url: url);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.addMenuItem}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.addMenuItem}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.addMenuItem.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.addMenuItem.supported_platforms}
   void addMenuItem(InAppBrowserMenuItem menuItem) =>
       platform.addMenuItem(menuItem);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.addMenuItems}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.addMenuItems}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.addMenuItems.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.addMenuItems.supported_platforms}
   void addMenuItems(List<InAppBrowserMenuItem> menuItems) =>
       platform.addMenuItems(menuItems);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.removeMenuItem}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.removeMenuItem}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.removeMenuItem.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.removeMenuItem.supported_platforms}
   bool removeMenuItem(InAppBrowserMenuItem menuItem) =>
       platform.removeMenuItem(menuItem);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.removeMenuItems}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.removeMenuItems}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.removeMenuItems.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.removeMenuItems.supported_platforms}
   void removeMenuItems(List<InAppBrowserMenuItem> menuItems) =>
       platform.removeMenuItems(menuItems);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.removeAllMenuItem}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.removeAllMenuItem}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.removeAllMenuItem.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.removeAllMenuItem.supported_platforms}
   void removeAllMenuItem() => platform.removeAllMenuItem();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.hasMenuItem}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.hasMenuItem}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.hasMenuItem.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.hasMenuItem.supported_platforms}
   bool hasMenuItem(InAppBrowserMenuItem menuItem) =>
       platform.hasMenuItem(menuItem);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.show}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.show}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.show.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.show.supported_platforms}
   Future<void> show() => platform.show();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.hide}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.hide}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.hide.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.hide.supported_platforms}
   Future<void> hide() => platform.hide();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.close}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.close}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.close.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.close.supported_platforms}
   Future<void> close() => platform.close();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.isHidden}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.isHidden}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.isHidden.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.isHidden.supported_platforms}
   Future<bool> isHidden() => platform.isHidden();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.setOptions}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.setOptions}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.setOptions.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.setOptions.supported_platforms}
   @Deprecated('Use setSettings instead')
   Future<void> setOptions({required InAppBrowserClassOptions options}) =>
       platform.setOptions(options: options);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.getOptions}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.getOptions}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.getOptions.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.getOptions.supported_platforms}
   @Deprecated('Use getSettings instead')
   Future<InAppBrowserClassOptions?> getOptions() => platform.getOptions();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.setSettings}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.setSettings}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.setSettings.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.setSettings.supported_platforms}
   Future<void> setSettings({required InAppBrowserClassSettings settings}) =>
       platform.setSettings(settings: settings);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.getSettings}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.getSettings}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.getSettings.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.getSettings.supported_platforms}
   Future<InAppBrowserClassSettings?> getSettings() => platform.getSettings();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.isOpened}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.isOpened}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.isOpened.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.isOpened.supported_platforms}
   bool isOpened() => platform.isOpened();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.dispose}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.dispose}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.dispose.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.dispose.supported_platforms}
   @mustCallSuper
   void dispose() => platform.dispose();
 
@@ -773,11 +773,11 @@ class InAppBrowser implements PlatformInAppBrowserEvents {
     return null;
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.isClassSupported}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.isClassSupported}
   static bool isClassSupported({TargetPlatform? platform}) =>
       PlatformInAppBrowser.static().isClassSupported(platform: platform);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.isPropertySupported}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.isPropertySupported}
   static bool isPropertySupported(
     PlatformInAppBrowserProperty property, {
     TargetPlatform? platform,
@@ -786,7 +786,7 @@ class InAppBrowser implements PlatformInAppBrowserEvents {
     platform: platform,
   );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser.isMethodSupported}
+  ///{@macro drago_inappwebview.PlatformInAppBrowser.isMethodSupported}
   static bool isMethodSupported(
     PlatformInAppBrowserMethod property, {
     TargetPlatform? platform,
@@ -795,7 +795,7 @@ class InAppBrowser implements PlatformInAppBrowserEvents {
     platform: platform,
   );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowserEvents.isMethodSupported}
+  ///{@macro drago_inappwebview.PlatformInAppBrowserEvents.isMethodSupported}
   static bool isEventMethodSupported(
     PlatformInAppBrowserEventsMethod method, {
     TargetPlatform? platform,

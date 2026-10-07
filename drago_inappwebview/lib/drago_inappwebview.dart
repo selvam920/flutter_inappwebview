@@ -24,7 +24,7 @@ library drago_inappwebview;
 export 'src/platform_registrants_stub.dart'
     if (dart.library.io) 'src/platform_registrants.dart';
 
-export 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart'
+export 'package:drago_inappwebview/platform_interface/platform_interface.dart'
     hide
         ChannelController,
         InternalChannelController,

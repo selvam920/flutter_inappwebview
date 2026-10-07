@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 /// Object specifying creation parameters for creating a [AndroidTracingController].
 ///
@@ -26,7 +26,7 @@ class AndroidTracingControllerCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformTracingController}
+///{@macro drago_inappwebview.PlatformTracingController}
 class AndroidTracingController extends PlatformTracingController
     with ChannelController {
   /// Creates a new [AndroidTracingController].

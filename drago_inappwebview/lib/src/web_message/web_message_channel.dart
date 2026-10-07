@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 import 'web_message_port.dart';
 
-///{@macro drago_inappwebview_platform_interface.PlatformWebMessageChannel}
+///{@macro drago_inappwebview.PlatformWebMessageChannel}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformWebMessageChannel.supported_platforms}
+///{@macro drago_inappwebview.PlatformWebMessageChannel.supported_platforms}
 class WebMessageChannel {
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageChannel}
+  ///{@macro drago_inappwebview.PlatformWebMessageChannel}
   WebMessageChannel({
     required String id,
     required WebMessagePort port1,
@@ -40,11 +40,11 @@ class WebMessageChannel {
     );
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageChannelCreationParams.isClassSupported}
+  ///{@macro drago_inappwebview.PlatformWebMessageChannelCreationParams.isClassSupported}
   static bool isClassSupported({TargetPlatform? platform}) =>
       PlatformWebMessageChannel.static().isClassSupported(platform: platform);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageChannel.isPropertySupported}
+  ///{@macro drago_inappwebview.PlatformWebMessageChannel.isPropertySupported}
   static bool isPropertySupported(
     PlatformWebMessageChannelCreationParamsProperty property, {
     TargetPlatform? platform,
@@ -53,7 +53,7 @@ class WebMessageChannel {
     platform: platform,
   );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageChannel.isMethodSupported}
+  ///{@macro drago_inappwebview.PlatformWebMessageChannel.isMethodSupported}
   static bool isMethodSupported(
     PlatformWebMessageChannelMethod method, {
     TargetPlatform? platform,
@@ -71,26 +71,26 @@ class WebMessageChannel {
     return WebMessageChannel.fromPlatform(platform: platform);
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageChannel.id}
+  ///{@macro drago_inappwebview.PlatformWebMessageChannel.id}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageChannel.id.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebMessageChannel.id.supported_platforms}
   String get id => platform.id;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageChannel.port1}
+  ///{@macro drago_inappwebview.PlatformWebMessageChannel.port1}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageChannel.port1.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebMessageChannel.port1.supported_platforms}
   WebMessagePort get port1 =>
       WebMessagePort.fromPlatform(platform: platform.port1);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageChannel.port2}
+  ///{@macro drago_inappwebview.PlatformWebMessageChannel.port2}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageChannel.port2.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebMessageChannel.port2.supported_platforms}
   WebMessagePort get port2 =>
       WebMessagePort.fromPlatform(platform: platform.port2);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageChannel.dispose}
+  ///{@macro drago_inappwebview.PlatformWebMessageChannel.dispose}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageChannel.dispose.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebMessageChannel.dispose.supported_platforms}
   void dispose() => platform.dispose();
 
   @override

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 /// Object specifying creation parameters for creating a [IOSContainerController].
 @immutable
@@ -22,7 +22,7 @@ class IOSContainerControllerCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformContainerController}
+///{@macro drago_inappwebview.PlatformContainerController}
 class IOSContainerController extends PlatformContainerController
     with ChannelController {
   /// Creates a new [IOSContainerController].

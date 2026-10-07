@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 /// Object specifying creation parameters for creating a [IOSWebMessageListener].
 ///
@@ -39,7 +39,7 @@ class IOSWebMessageListenerCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformWebMessageListener}
+///{@macro drago_inappwebview.PlatformWebMessageListener}
 class IOSWebMessageListener extends PlatformWebMessageListener
     with ChannelController {
   /// Constructs a [IOSWebMessageListener].
@@ -161,7 +161,7 @@ class IOSJavaScriptReplyProxyCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.JavaScriptReplyProxy}
+///{@macro drago_inappwebview.JavaScriptReplyProxy}
 class IOSJavaScriptReplyProxy extends PlatformJavaScriptReplyProxy {
   /// Constructs a [IOSWebMessageListener].
   IOSJavaScriptReplyProxy(PlatformJavaScriptReplyProxyCreationParams params)

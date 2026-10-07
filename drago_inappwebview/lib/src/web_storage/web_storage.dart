@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import '../in_app_webview/in_app_webview_controller.dart';
 
-///{@macro drago_inappwebview_platform_interface.PlatformWebStorage}
+///{@macro drago_inappwebview.PlatformWebStorage}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformWebStorage.supported_platforms}
+///{@macro drago_inappwebview.PlatformWebStorage.supported_platforms}
 class WebStorage {
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebStorage}
+  ///{@macro drago_inappwebview.PlatformWebStorage}
   WebStorage({
     required PlatformLocalStorage localStorage,
     required PlatformSessionStorage sessionStorage,
@@ -52,27 +52,27 @@ class WebStorage {
   }) =>
       PlatformWebStorage.static().isMethodSupported(method, platform: platform);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebStorage.localStorage}
+  ///{@macro drago_inappwebview.PlatformWebStorage.localStorage}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebStorage.localStorage.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebStorage.localStorage.supported_platforms}
   LocalStorage get localStorage =>
       LocalStorage.fromPlatform(platform: platform.localStorage);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebStorage.sessionStorage}
+  ///{@macro drago_inappwebview.PlatformWebStorage.sessionStorage}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebStorage.sessionStorage.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebStorage.sessionStorage.supported_platforms}
   SessionStorage get sessionStorage =>
       SessionStorage.fromPlatform(platform: platform.sessionStorage);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebStorage.dispose}
+  ///{@macro drago_inappwebview.PlatformWebStorage.dispose}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebStorage.dispose.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebStorage.dispose.supported_platforms}
   void dispose() => platform.dispose();
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformStorage}
+///{@macro drago_inappwebview.PlatformStorage}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformStorage.supported_platforms}
+///{@macro drago_inappwebview.PlatformStorage.supported_platforms}
 abstract class Storage implements PlatformStorage {
   /// Constructs a [Storage] from a specific platform implementation.
   Storage.fromPlatform({required this.platform});
@@ -80,64 +80,64 @@ abstract class Storage implements PlatformStorage {
   /// Implementation of [PlatformStorage] for the current platform.
   final PlatformStorage platform;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.controller}
+  ///{@macro drago_inappwebview.PlatformStorage.controller}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.controller.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformStorage.controller.supported_platforms}
   PlatformInAppWebViewController? get controller => platform.controller;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.webStorageType}
+  ///{@macro drago_inappwebview.PlatformStorage.webStorageType}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.webStorageType.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformStorage.webStorageType.supported_platforms}
   WebStorageType get webStorageType => platform.webStorageType;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.length}
+  ///{@macro drago_inappwebview.PlatformStorage.length}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.length.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformStorage.length.supported_platforms}
   Future<int?> length() => platform.length();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.setItem}
+  ///{@macro drago_inappwebview.PlatformStorage.setItem}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.setItem.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformStorage.setItem.supported_platforms}
   Future<void> setItem({required String key, required dynamic value}) =>
       platform.setItem(key: key, value: value);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.getItem}
+  ///{@macro drago_inappwebview.PlatformStorage.getItem}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.getItem.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformStorage.getItem.supported_platforms}
   Future<dynamic> getItem({required String key}) => platform.getItem(key: key);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.removeItem}
+  ///{@macro drago_inappwebview.PlatformStorage.removeItem}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.removeItem.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformStorage.removeItem.supported_platforms}
   Future<void> removeItem({required String key}) =>
       platform.removeItem(key: key);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.getItems}
+  ///{@macro drago_inappwebview.PlatformStorage.getItems}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.getItems.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformStorage.getItems.supported_platforms}
   Future<List<WebStorageItem>> getItems() => platform.getItems();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.clear}
+  ///{@macro drago_inappwebview.PlatformStorage.clear}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.clear.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformStorage.clear.supported_platforms}
   Future<void> clear() => platform.clear();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.key}
+  ///{@macro drago_inappwebview.PlatformStorage.key}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.key.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformStorage.key.supported_platforms}
   Future<String> key({required int index}) => platform.key(index: index);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.dispose}
+  ///{@macro drago_inappwebview.PlatformStorage.dispose}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformStorage.dispose.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformStorage.dispose.supported_platforms}
   void dispose() => platform.dispose();
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformLocalStorage}
+///{@macro drago_inappwebview.PlatformLocalStorage}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformLocalStorage.supported_platforms}
+///{@macro drago_inappwebview.PlatformLocalStorage.supported_platforms}
 class LocalStorage extends Storage {
-  ///{@macro drago_inappwebview_platform_interface.PlatformLocalStorage}
+  ///{@macro drago_inappwebview.PlatformLocalStorage}
   LocalStorage({required InAppWebViewController? controller})
     : this.fromPlatformCreationParams(
         params: PlatformLocalStorageCreationParams(
@@ -186,11 +186,11 @@ class LocalStorage extends Storage {
   );
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformSessionStorage}
+///{@macro drago_inappwebview.PlatformSessionStorage}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformSessionStorage.supported_platforms}
+///{@macro drago_inappwebview.PlatformSessionStorage.supported_platforms}
 class SessionStorage extends Storage {
-  ///{@macro drago_inappwebview_platform_interface.PlatformSessionStorage}
+  ///{@macro drago_inappwebview.PlatformSessionStorage}
   SessionStorage({required InAppWebViewController? controller})
     : this.fromPlatformCreationParams(
         params: PlatformSessionStorageCreationParams(

@@ -1,15 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
-///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession}
+///{@macro drago_inappwebview.PlatformWebAuthenticationSession}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.supported_platforms}
+///{@macro drago_inappwebview.PlatformWebAuthenticationSession.supported_platforms}
 class WebAuthenticationSession {
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.supported_platforms}
   WebAuthenticationSession()
     : this.fromPlatformCreationParams(
         params: PlatformWebAuthenticationSessionCreationParams(),
@@ -29,36 +29,36 @@ class WebAuthenticationSession {
   /// Implementation of [PlatformWebAuthenticationSession] for the current platform.
   final PlatformWebAuthenticationSession platform;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.id}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.id}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.id.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.id.supported_platforms}
   String get id => platform.id;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.url}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.url}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.url.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.url.supported_platforms}
   WebUri get url => platform.url;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.callbackURLScheme}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.callbackURLScheme}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.callbackURLScheme.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.callbackURLScheme.supported_platforms}
   String? get callbackURLScheme => platform.callbackURLScheme;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.initialSettings}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.initialSettings}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.initialSettings.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.initialSettings.supported_platforms}
   WebAuthenticationSessionSettings? get initialSettings =>
       platform.initialSettings;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.onComplete}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.onComplete}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.onComplete.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.onComplete.supported_platforms}
   WebAuthenticationSessionCompletionHandler get onComplete =>
       platform.onComplete;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.create}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.create}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.create.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.create.supported_platforms}
   static Future<WebAuthenticationSession> create({
     required WebUri url,
     String? callbackURLScheme,
@@ -75,29 +75,29 @@ class WebAuthenticationSession {
     );
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.canStart}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.canStart}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.canStart.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.canStart.supported_platforms}
   Future<bool> canStart() => platform.canStart();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.start}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.start}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.start.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.start.supported_platforms}
   Future<bool> start() => platform.start();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.cancel}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.cancel}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.cancel.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.cancel.supported_platforms}
   Future<void> cancel() => platform.cancel();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.dispose}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.dispose}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.dispose.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.dispose.supported_platforms}
   Future<void> dispose() => platform.dispose();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.isAvailable}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.isAvailable}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession.isAvailable.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebAuthenticationSession.isAvailable.supported_platforms}
   static Future<bool> isAvailable() =>
       PlatformWebAuthenticationSession.static().isAvailable();
 

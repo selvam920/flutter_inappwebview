@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import '../in_app_webview/in_app_webview_controller.dart';
 
@@ -29,7 +29,7 @@ class IOSWebStorageCreationParams extends PlatformWebStorageCreationParams {
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformWebStorage}
+///{@macro drago_inappwebview.PlatformWebStorage}
 class IOSWebStorage extends PlatformWebStorage {
   /// Constructs a [IOSWebStorage].
   IOSWebStorage(PlatformWebStorageCreationParams params)
@@ -79,7 +79,7 @@ class IOSStorageCreationParams extends PlatformStorageCreationParams {
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformStorage}
+///{@macro drago_inappwebview.PlatformStorage}
 abstract mixin class IOSStorage implements PlatformStorage {
   @override
   IOSInAppWebViewController? controller;
@@ -218,7 +218,7 @@ class IOSLocalStorageCreationParams extends PlatformLocalStorageCreationParams {
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformLocalStorage}
+///{@macro drago_inappwebview.PlatformLocalStorage}
 class IOSLocalStorage extends PlatformLocalStorage with IOSStorage {
   /// Constructs a [IOSLocalStorage].
   IOSLocalStorage(PlatformLocalStorageCreationParams params)
@@ -271,7 +271,7 @@ class IOSSessionStorageCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformSessionStorage}
+///{@macro drago_inappwebview.PlatformSessionStorage}
 class IOSSessionStorage extends PlatformSessionStorage with IOSStorage {
   /// Constructs a [IOSSessionStorage].
   IOSSessionStorage(PlatformSessionStorageCreationParams params)

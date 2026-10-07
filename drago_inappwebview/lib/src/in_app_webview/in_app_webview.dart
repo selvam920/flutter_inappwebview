@@ -6,7 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import '../find_interaction/find_interaction_controller.dart';
 import '../pull_to_refresh/main.dart';
@@ -15,9 +15,9 @@ import '../webview_environment/webview_environment.dart';
 import 'headless_in_app_webview.dart';
 import 'in_app_webview_controller.dart';
 
-///{@macro drago_inappwebview_platform_interface.PlatformInAppWebViewWidget}
+///{@macro drago_inappwebview.PlatformInAppWebViewWidget}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformWebViewCreationParams.supported_platforms}
+///{@macro drago_inappwebview.PlatformWebViewCreationParams.supported_platforms}
 class InAppWebView extends StatefulWidget {
   /// Constructs a [InAppWebView].
   ///
@@ -37,9 +37,9 @@ class InAppWebView extends StatefulWidget {
   /// Implementation of [PlatformInAppWebView] for the current platform.
   final PlatformInAppWebViewWidget platform;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppWebViewWidget}
+  ///{@macro drago_inappwebview.PlatformInAppWebViewWidget}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewCreationParams.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebViewCreationParams.supported_platforms}
   InAppWebView({
     Key? key,
     Set<Factory<OneSequenceGestureRecognizer>>? gestureRecognizers,
@@ -896,11 +896,11 @@ class InAppWebView extends StatefulWidget {
   @override
   _InAppWebViewState createState() => _InAppWebViewState();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppWebViewWidgetCreationParams.isClassSupported}
+  ///{@macro drago_inappwebview.PlatformInAppWebViewWidgetCreationParams.isClassSupported}
   static bool isClassSupported({TargetPlatform? platform}) =>
       PlatformInAppWebViewWidget.static().isClassSupported(platform: platform);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppWebViewWidgetCreationParams.isPropertySupported}
+  ///{@macro drago_inappwebview.PlatformInAppWebViewWidgetCreationParams.isPropertySupported}
   static bool isPropertySupported(
     dynamic property, {
     TargetPlatform? platform,

@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
-///{@macro drago_inappwebview_platform_interface.PlatformContainerController}
+///{@macro drago_inappwebview.PlatformContainerController}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformContainerController.supported_platforms}
+///{@macro drago_inappwebview.PlatformContainerController.supported_platforms}
 class ContainerController {
-  ///{@macro drago_inappwebview_platform_interface.PlatformContainerController}
+  ///{@macro drago_inappwebview.PlatformContainerController}
   ContainerController()
     : this.fromPlatformCreationParams(
         const PlatformContainerControllerCreationParams(),
@@ -33,35 +33,35 @@ class ContainerController {
     return _instance ??= ContainerController();
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformContainerController.getAllContainerNames}
+  ///{@macro drago_inappwebview.PlatformContainerController.getAllContainerNames}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformContainerController.getAllContainerNames.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformContainerController.getAllContainerNames.supported_platforms}
   Future<List<String>> getAllContainerNames() =>
       platform.getAllContainerNames();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformContainerController.hasProfile}
+  ///{@macro drago_inappwebview.PlatformContainerController.hasProfile}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformContainerController.hasProfile.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformContainerController.hasProfile.supported_platforms}
   Future<bool> hasContainer(String containerId) =>
       platform.hasContainer(containerId);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformContainerController.deleteProfile}
+  ///{@macro drago_inappwebview.PlatformContainerController.deleteProfile}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformContainerController.deleteProfile.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformContainerController.deleteProfile.supported_platforms}
   Future<bool> deleteContainer(String containerId) =>
       platform.deleteContainer(containerId);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformContainerController.clearContainerData}
+  ///{@macro drago_inappwebview.PlatformContainerController.clearContainerData}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformContainerController.clearContainerData.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformContainerController.clearContainerData.supported_platforms}
   Future<bool> clearContainerData(String containerId) =>
       platform.clearContainerData(containerId);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformContainerControllerCreationParams.isClassSupported}
+  ///{@macro drago_inappwebview.PlatformContainerControllerCreationParams.isClassSupported}
   static bool isClassSupported({TargetPlatform? platform}) =>
       PlatformContainerController.static().isClassSupported(platform: platform);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformContainerController.isMethodSupported}
+  ///{@macro drago_inappwebview.PlatformContainerController.isMethodSupported}
   static bool isMethodSupported(
     PlatformContainerControllerMethod method, {
     TargetPlatform? platform,

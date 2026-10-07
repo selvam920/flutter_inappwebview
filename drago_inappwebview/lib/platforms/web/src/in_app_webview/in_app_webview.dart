@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/widgets.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 import '../../web/in_app_webview_manager.dart';
 import 'headless_in_app_webview.dart';
 
@@ -249,11 +249,11 @@ class WebPlatformInAppWebViewWidgetCreationParams
       );
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformInAppWebViewWidget}
+///{@macro drago_inappwebview.PlatformInAppWebViewWidget}
 class WebPlatformInAppWebViewWidget extends PlatformInAppWebViewWidget {
   /// Constructs a [WebPlatformInAppWebViewWidget].
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppWebViewWidget}
+  ///{@macro drago_inappwebview.PlatformInAppWebViewWidget}
   WebPlatformInAppWebViewWidget(PlatformInAppWebViewWidgetCreationParams params)
     : super.implementation(
         params is WebPlatformInAppWebViewWidgetCreationParams

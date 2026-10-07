@@ -24,8 +24,9 @@ dependencies:
     sdk: flutter
   web: ^1.0.0
   plugin_platform_interface: ^2.1.8
-  drago_inappwebview_platform_interface:
-    path: ../drago_inappwebview_platform_interface
+  drago_inappwebview_internal_annotations:
+    path: ../dev_packages/drago_inappwebview_internal_annotations
+  cupertino_ui: any
 
   material_ui: any
 dev_dependencies:

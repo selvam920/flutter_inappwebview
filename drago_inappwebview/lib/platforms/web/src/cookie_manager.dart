@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import 'in_app_webview/headless_in_app_webview.dart';
 import 'platform_util.dart';
@@ -31,7 +31,7 @@ class WebPlatformCookieManagerCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformCookieManager}
+///{@macro drago_inappwebview.PlatformCookieManager}
 class WebPlatformCookieManager extends PlatformCookieManager
     with ChannelController {
   /// Creates a new [WebPlatformCookieManager].

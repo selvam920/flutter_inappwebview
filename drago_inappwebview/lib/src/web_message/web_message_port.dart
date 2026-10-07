@@ -1,10 +1,10 @@
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
-///{@macro drago_inappwebview_platform_interface.PlatformWebMessagePort}
+///{@macro drago_inappwebview.PlatformWebMessagePort}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformWebMessagePort.supported_platforms}
+///{@macro drago_inappwebview.PlatformWebMessagePort.supported_platforms}
 class WebMessagePort implements IWebMessagePort {
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessagePort}
+  ///{@macro drago_inappwebview.PlatformWebMessagePort}
   WebMessagePort({required int index})
     : this.fromPlatformCreationParams(
         params: PlatformWebMessagePortCreationParams(index: index),
@@ -24,20 +24,20 @@ class WebMessagePort implements IWebMessagePort {
   /// Implementation of [PlatformWebMessagePort] for the current platform.
   final PlatformWebMessagePort platform;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessagePort.setWebMessageCallback}
+  ///{@macro drago_inappwebview.PlatformWebMessagePort.setWebMessageCallback}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessagePort.setWebMessageCallback.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebMessagePort.setWebMessageCallback.supported_platforms}
   Future<void> setWebMessageCallback(WebMessageCallback? onMessage) =>
       platform.setWebMessageCallback(onMessage);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessagePort.postMessage}
+  ///{@macro drago_inappwebview.PlatformWebMessagePort.postMessage}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessagePort.postMessage.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebMessagePort.postMessage.supported_platforms}
   Future<void> postMessage(WebMessage message) => platform.postMessage(message);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessagePort.close}
+  ///{@macro drago_inappwebview.PlatformWebMessagePort.close}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessagePort.close.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebMessagePort.close.supported_platforms}
   Future<void> close() => platform.close();
 
   Map<String, dynamic> toMap({EnumMethod? enumMethod}) =>

@@ -1,18 +1,18 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import 'in_app_webview/in_app_webview_controller.dart';
 import 'webview_environment/webview_environment.dart';
 
-///{@macro drago_inappwebview_platform_interface.PlatformCookieManager}
+///{@macro drago_inappwebview.PlatformCookieManager}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.supported_platforms}
+///{@macro drago_inappwebview.PlatformCookieManager.supported_platforms}
 class CookieManager {
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager}
+  ///{@macro drago_inappwebview.PlatformCookieManager}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformCookieManager.supported_platforms}
   CookieManager()
     : this.fromPlatformCreationParams(
         const PlatformCookieManagerCreationParams(),
@@ -55,9 +55,9 @@ class CookieManager {
     }
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.setCookie}
+  ///{@macro drago_inappwebview.PlatformCookieManager.setCookie}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.setCookie.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformCookieManager.setCookie.supported_platforms}
   Future<bool> setCookie({
     required WebUri url,
     required String name,
@@ -87,9 +87,9 @@ class CookieManager {
     webViewController: webViewController?.platform,
   );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.getCookies}
+  ///{@macro drago_inappwebview.PlatformCookieManager.getCookies}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.getCookies.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformCookieManager.getCookies.supported_platforms}
   Future<List<Cookie>> getCookies({
     required WebUri url,
     @Deprecated("Use webViewController instead")
@@ -101,9 +101,9 @@ class CookieManager {
     webViewController: webViewController?.platform,
   );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.getCookie}
+  ///{@macro drago_inappwebview.PlatformCookieManager.getCookie}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.getCookie.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformCookieManager.getCookie.supported_platforms}
   Future<Cookie?> getCookie({
     required WebUri url,
     required String name,
@@ -117,9 +117,9 @@ class CookieManager {
     webViewController: webViewController?.platform,
   );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.deleteCookie}
+  ///{@macro drago_inappwebview.PlatformCookieManager.deleteCookie}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.deleteCookie.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformCookieManager.deleteCookie.supported_platforms}
   Future<bool> deleteCookie({
     required WebUri url,
     required String name,
@@ -137,9 +137,9 @@ class CookieManager {
     webViewController: webViewController?.platform,
   );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.deleteCookies}
+  ///{@macro drago_inappwebview.PlatformCookieManager.deleteCookies}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.deleteCookies.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformCookieManager.deleteCookies.supported_platforms}
   Future<bool> deleteCookies({
     required WebUri url,
     String path = "/",
@@ -155,31 +155,31 @@ class CookieManager {
     webViewController: webViewController?.platform,
   );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.deleteAllCookies}
+  ///{@macro drago_inappwebview.PlatformCookieManager.deleteAllCookies}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.deleteAllCookies.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformCookieManager.deleteAllCookies.supported_platforms}
   Future<bool> deleteAllCookies() => platform.deleteAllCookies();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.getAllCookies}
+  ///{@macro drago_inappwebview.PlatformCookieManager.getAllCookies}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.getAllCookies.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformCookieManager.getAllCookies.supported_platforms}
   Future<List<Cookie>> getAllCookies() => platform.getAllCookies();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.removeSessionCookies}
+  ///{@macro drago_inappwebview.PlatformCookieManager.removeSessionCookies}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.removeSessionCookies.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformCookieManager.removeSessionCookies.supported_platforms}
   Future<bool> removeSessionCookies() => platform.removeSessionCookies();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.flush}
+  ///{@macro drago_inappwebview.PlatformCookieManager.flush}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.flush.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformCookieManager.flush.supported_platforms}
   Future<void> flush() => platform.flush();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManagerCreationParams.isClassSupported}
+  ///{@macro drago_inappwebview.PlatformCookieManagerCreationParams.isClassSupported}
   static bool isClassSupported({TargetPlatform? platform}) =>
       PlatformCookieManager.static().isClassSupported(platform: platform);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManagerCreationParams.isPropertySupported}
+  ///{@macro drago_inappwebview.PlatformCookieManagerCreationParams.isPropertySupported}
   static bool isPropertySupported(
     PlatformCookieManagerCreationParamsProperty property, {
     TargetPlatform? platform,
@@ -188,7 +188,7 @@ class CookieManager {
     platform: platform,
   );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformCookieManager.isMethodSupported}
+  ///{@macro drago_inappwebview.PlatformCookieManager.isMethodSupported}
   static bool isMethodSupported(
     PlatformCookieManagerMethod method, {
     TargetPlatform? platform,

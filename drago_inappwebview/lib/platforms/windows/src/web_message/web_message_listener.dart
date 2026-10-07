@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 /// Object specifying creation parameters for creating a [WindowsWebMessageListener].
 ///
@@ -37,7 +37,7 @@ class WindowsWebMessageListenerCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformWebMessageListener}
+///{@macro drago_inappwebview.PlatformWebMessageListener}
 class WindowsWebMessageListener extends PlatformWebMessageListener
     with ChannelController {
   /// Constructs a [WindowsWebMessageListener].
@@ -158,7 +158,7 @@ class WindowsJavaScriptReplyProxyCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.JavaScriptReplyProxy}
+///{@macro drago_inappwebview.JavaScriptReplyProxy}
 class WindowsJavaScriptReplyProxy extends PlatformJavaScriptReplyProxy {
   /// Constructs a [WindowsWebMessageListener].
   WindowsJavaScriptReplyProxy(PlatformJavaScriptReplyProxyCreationParams params)

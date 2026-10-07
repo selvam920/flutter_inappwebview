@@ -4,7 +4,7 @@ import 'dart:js_interop';
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 import '../src/inappwebview_platform.dart';

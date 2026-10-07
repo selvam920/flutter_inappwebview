@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 import '../find_interaction/find_interaction_controller.dart';
 import '../webview_environment/webview_environment.dart';
 import 'in_app_webview_controller.dart';
@@ -269,7 +269,7 @@ class WindowsHeadlessInAppWebViewCreationParams
   final WindowsWebViewEnvironment? webViewEnvironment;
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView}
+///{@macro drago_inappwebview.PlatformHeadlessInAppWebView}
 class WindowsHeadlessInAppWebView extends PlatformHeadlessInAppWebView
     with ChannelController {
   @override

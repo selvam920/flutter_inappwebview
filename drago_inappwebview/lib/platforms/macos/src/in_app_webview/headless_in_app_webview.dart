@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 import '../find_interaction/find_interaction_controller.dart';
 import 'in_app_webview_controller.dart';
 
@@ -245,7 +245,7 @@ class MacOSHeadlessInAppWebViewCreationParams
   final MacOSFindInteractionController? findInteractionController;
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView}
+///{@macro drago_inappwebview.PlatformHeadlessInAppWebView}
 class MacOSHeadlessInAppWebView extends PlatformHeadlessInAppWebView
     with ChannelController {
   @override

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 /// Object specifying creation parameters for creating a [AndroidWebViewFeature].
 ///
@@ -26,7 +26,7 @@ class AndroidWebViewFeatureCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformWebViewFeature}
+///{@macro drago_inappwebview.PlatformWebViewFeature}
 class AndroidWebViewFeature extends PlatformWebViewFeature
     with ChannelController {
   /// Creates a new [AndroidWebViewFeature].

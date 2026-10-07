@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/widgets.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 import '../webview_environment/webview_environment.dart';
 import 'headless_in_app_webview.dart';
 
@@ -279,11 +279,11 @@ class WindowsInAppWebViewWidgetCreationParams
   final WindowsWebViewEnvironment? webViewEnvironment;
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformInAppWebViewWidget}
+///{@macro drago_inappwebview.PlatformInAppWebViewWidget}
 class WindowsInAppWebViewWidget extends PlatformInAppWebViewWidget {
   /// Constructs a [WindowsInAppWebViewWidget].
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInAppWebViewWidget}
+  ///{@macro drago_inappwebview.PlatformInAppWebViewWidget}
   WindowsInAppWebViewWidget(PlatformInAppWebViewWidgetCreationParams params)
     : super.implementation(
         params is WindowsInAppWebViewWidgetCreationParams

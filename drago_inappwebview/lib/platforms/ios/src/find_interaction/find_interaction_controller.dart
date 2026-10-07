@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 /// Object specifying creation parameters for creating a [IOSFindInteractionController].
 ///
@@ -27,7 +27,7 @@ class IOSFindInteractionControllerCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController}
+///{@macro drago_inappwebview.PlatformFindInteractionController}
 class IOSFindInteractionController extends PlatformFindInteractionController
     with ChannelController {
   /// Constructs a [IOSFindInteractionController].
@@ -84,64 +84,64 @@ class IOSFindInteractionController extends PlatformFindInteractionController
     return null;
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.findAll}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.findAll}
   Future<void> findAll({String? find}) async {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent('find', () => find);
     await channel?.invokeMethod('findAll', args);
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.findNext}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.findNext}
   Future<void> findNext({bool forward = true}) async {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent('forward', () => forward);
     await channel?.invokeMethod('findNext', args);
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.clearMatches}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.clearMatches}
   Future<void> clearMatches() async {
     Map<String, dynamic> args = <String, dynamic>{};
     await channel?.invokeMethod('clearMatches', args);
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.setSearchText}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.setSearchText}
   Future<void> setSearchText(String? searchText) async {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent('searchText', () => searchText);
     await channel?.invokeMethod('setSearchText', args);
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.getSearchText}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.getSearchText}
   Future<String?> getSearchText() async {
     Map<String, dynamic> args = <String, dynamic>{};
     return await channel?.invokeMethod<String?>('getSearchText', args);
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.isFindNavigatorVisible}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.isFindNavigatorVisible}
   Future<bool?> isFindNavigatorVisible() async {
     Map<String, dynamic> args = <String, dynamic>{};
     return await channel?.invokeMethod<bool?>('isFindNavigatorVisible', args);
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.updateResultCount}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.updateResultCount}
   Future<void> updateResultCount() async {
     Map<String, dynamic> args = <String, dynamic>{};
     await channel?.invokeMethod('updateResultCount', args);
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.presentFindNavigator}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.presentFindNavigator}
   Future<void> presentFindNavigator() async {
     Map<String, dynamic> args = <String, dynamic>{};
     await channel?.invokeMethod('presentFindNavigator', args);
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.dismissFindNavigator}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.dismissFindNavigator}
   Future<void> dismissFindNavigator() async {
     Map<String, dynamic> args = <String, dynamic>{};
     await channel?.invokeMethod('dismissFindNavigator', args);
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.getActiveFindSession}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.getActiveFindSession}
   Future<FindSession?> getActiveFindSession() async {
     Map<String, dynamic> args = <String, dynamic>{};
     Map<String, dynamic>? result = (await channel?.invokeMethod(
@@ -151,7 +151,7 @@ class IOSFindInteractionController extends PlatformFindInteractionController
     return FindSession.fromMap(result);
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.dispose}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.dispose}
   @override
   void dispose({bool isKeepAlive = false}) {
     disposeChannel(removeMethodCallHandler: !isKeepAlive);

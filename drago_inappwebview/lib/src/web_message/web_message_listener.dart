@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
-///{@macro drago_inappwebview_platform_interface.PlatformWebMessageListener}
+///{@macro drago_inappwebview.PlatformWebMessageListener}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformWebMessageListener.supported_platforms}
+///{@macro drago_inappwebview.PlatformWebMessageListener.supported_platforms}
 class WebMessageListener {
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageListener}
+  ///{@macro drago_inappwebview.PlatformWebMessageListener}
   WebMessageListener({
     required String jsObjectName,
     Set<String>? allowedOriginRules,
@@ -39,11 +39,11 @@ class WebMessageListener {
     );
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageListenerCreationParams.isClassSupported}
+  ///{@macro drago_inappwebview.PlatformWebMessageListenerCreationParams.isClassSupported}
   static bool isClassSupported({TargetPlatform? platform}) =>
       PlatformWebMessageListener.static().isClassSupported(platform: platform);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageListener.isPropertySupported}
+  ///{@macro drago_inappwebview.PlatformWebMessageListener.isPropertySupported}
   static bool isPropertySupported(
     PlatformWebMessageListenerCreationParamsProperty property, {
     TargetPlatform? platform,
@@ -52,7 +52,7 @@ class WebMessageListener {
     platform: platform,
   );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageListener.isMethodSupported}
+  ///{@macro drago_inappwebview.PlatformWebMessageListener.isMethodSupported}
   static bool isMethodSupported(
     PlatformWebMessageListenerMethod method, {
     TargetPlatform? platform,
@@ -61,24 +61,24 @@ class WebMessageListener {
     platform: platform,
   );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageListener.jsObjectName}
+  ///{@macro drago_inappwebview.PlatformWebMessageListener.jsObjectName}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageListener.jsObjectName.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebMessageListener.jsObjectName.supported_platforms}
   String get jsObjectName => platform.jsObjectName;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageListener.allowedOriginRules}
+  ///{@macro drago_inappwebview.PlatformWebMessageListener.allowedOriginRules}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageListener.allowedOriginRules.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebMessageListener.allowedOriginRules.supported_platforms}
   Set<String>? get allowedOriginRules => platform.allowedOriginRules;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageListener.onPostMessage}
+  ///{@macro drago_inappwebview.PlatformWebMessageListener.onPostMessage}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageListener.onPostMessage.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebMessageListener.onPostMessage.supported_platforms}
   OnPostMessageCallback? get onPostMessage => platform.onPostMessage;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageListener.dispose}
+  ///{@macro drago_inappwebview.PlatformWebMessageListener.dispose}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebMessageListener.dispose.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebMessageListener.dispose.supported_platforms}
   void dispose() => platform.dispose();
 
   Map<String, dynamic> toMap() => platform.toMap();
@@ -89,11 +89,11 @@ class WebMessageListener {
   String toString() => platform.toString();
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformJavaScriptReplyProxy}
+///{@macro drago_inappwebview.PlatformJavaScriptReplyProxy}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformJavaScriptReplyProxy.supported_platforms}
+///{@macro drago_inappwebview.PlatformJavaScriptReplyProxy.supported_platforms}
 class JavaScriptReplyProxy {
-  ///{@macro drago_inappwebview_platform_interface.PlatformJavaScriptReplyProxy}
+  ///{@macro drago_inappwebview.PlatformJavaScriptReplyProxy}
   JavaScriptReplyProxy({required PlatformWebMessageListener webMessageListener})
     : this.fromPlatformCreationParams(
         params: PlatformJavaScriptReplyProxyCreationParams(
@@ -115,9 +115,9 @@ class JavaScriptReplyProxy {
   /// Implementation of [PlatformJavaScriptReplyProxy] for the current platform.
   final PlatformJavaScriptReplyProxy platform;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformJavaScriptReplyProxy.postMessage}
+  ///{@macro drago_inappwebview.PlatformJavaScriptReplyProxy.postMessage}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformJavaScriptReplyProxy.postMessage.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformJavaScriptReplyProxy.postMessage.supported_platforms}
   Future<void> postMessage(WebMessage message) => platform.postMessage(message);
 
   @override

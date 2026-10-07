@@ -1,7 +1,7 @@
 import 'package:web/web.dart';
 
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 import 'in_app_webview_manager.dart';
 import 'in_app_web_view_web_element.dart';
 import 'headless_in_app_web_view_web_element.dart';

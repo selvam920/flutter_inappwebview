@@ -2,20 +2,20 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import '../find_interaction/find_interaction_controller.dart';
 import '../pull_to_refresh/pull_to_refresh_controller.dart';
 import '../webview_environment/webview_environment.dart';
 import 'in_app_webview_controller.dart';
 
-///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView}
+///{@macro drago_inappwebview.PlatformHeadlessInAppWebView}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView.supported_platforms}
+///{@macro drago_inappwebview.PlatformHeadlessInAppWebView.supported_platforms}
 class HeadlessInAppWebView {
   /// Constructs a [HeadlessInAppWebView].
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebView}
   HeadlessInAppWebView.fromPlatformCreationParams({
     required PlatformHeadlessInAppWebViewCreationParams params,
   }) : this.fromPlatform(platform: PlatformHeadlessInAppWebView(params));
@@ -26,14 +26,14 @@ class HeadlessInAppWebView {
   /// Implementation of [PlatformHeadlessInAppWebView] for the current platform.
   final PlatformHeadlessInAppWebView platform;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView.id}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebView.id}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView.id.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebView.id.supported_platforms}
   String get id => platform.id;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView.webViewController}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebView.webViewController}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView.webViewController.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebView.webViewController.supported_platforms}
   InAppWebViewController? get webViewController {
     final webViewControllerPlatform = platform.webViewController;
     if (webViewControllerPlatform == null) {
@@ -44,9 +44,9 @@ class HeadlessInAppWebView {
     );
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebView}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebView.supported_platforms}
   HeadlessInAppWebView({
     Size initialSize = const Size(-1, -1),
     int? windowId,
@@ -893,38 +893,38 @@ class HeadlessInAppWebView {
          ),
        );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView.run}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebView.run}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView.run.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebView.run.supported_platforms}
   Future<void> run() => platform.run();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView.isRunning}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebView.isRunning}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView.isRunning.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebView.isRunning.supported_platforms}
   bool isRunning() => platform.isRunning();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView.setSize}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebView.setSize}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView.setSize.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebView.setSize.supported_platforms}
   Future<void> setSize(Size size) => platform.setSize(size);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView.getSize}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebView.getSize}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView.getSize.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebView.getSize.supported_platforms}
   Future<Size?> getSize() => platform.getSize();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView.dispose}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebView.dispose}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView.dispose.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebView.dispose.supported_platforms}
   Future<void> dispose() => platform.dispose();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebViewCreationParams.isClassSupported}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebViewCreationParams.isClassSupported}
   static bool isClassSupported({TargetPlatform? platform}) =>
       PlatformHeadlessInAppWebView.static().isClassSupported(
         platform: platform,
       );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebViewCreationParams.isPropertySupported}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebViewCreationParams.isPropertySupported}
   static bool isPropertySupported(
     PlatformHeadlessInAppWebViewCreationParamsProperty property, {
     TargetPlatform? platform,
@@ -933,7 +933,7 @@ class HeadlessInAppWebView {
     platform: platform,
   );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebViewCreationParams.isMethodSupported}
+  ///{@macro drago_inappwebview.PlatformHeadlessInAppWebViewCreationParams.isMethodSupported}
   static bool isMethodSupported(
     PlatformHeadlessInAppWebViewMethod method, {
     TargetPlatform? platform,

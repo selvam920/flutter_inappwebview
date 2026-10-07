@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import '../in_app_webview/in_app_webview_controller.dart';
 
@@ -30,7 +30,7 @@ class WebPlatformWebStorageCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformWebStorage}
+///{@macro drago_inappwebview.PlatformWebStorage}
 class WebPlatformWebStorage extends PlatformWebStorage {
   /// Constructs a [WebPlatformWebStorage].
   WebPlatformWebStorage(PlatformWebStorageCreationParams params)
@@ -80,7 +80,7 @@ class WebPlatformStorageCreationParams extends PlatformStorageCreationParams {
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformStorage}
+///{@macro drago_inappwebview.PlatformStorage}
 abstract mixin class WebPlatformStorage implements PlatformStorage {
   @override
   WebPlatformInAppWebViewController? controller;
@@ -222,7 +222,7 @@ class WebPlatformLocalStorageCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformLocalStorage}
+///{@macro drago_inappwebview.PlatformLocalStorage}
 class WebPlatformLocalStorage extends PlatformLocalStorage
     with WebPlatformStorage {
   /// Constructs a [WebPlatformLocalStorage].
@@ -276,7 +276,7 @@ class WebPlatformSessionStorageCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformSessionStorage}
+///{@macro drago_inappwebview.PlatformSessionStorage}
 class WebPlatformSessionStorage extends PlatformSessionStorage
     with WebPlatformStorage {
   /// Constructs a [WebPlatformSessionStorage].

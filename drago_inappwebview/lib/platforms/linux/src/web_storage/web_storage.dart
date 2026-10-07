@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import '../in_app_webview/in_app_webview_controller.dart';
 
@@ -29,7 +29,7 @@ class LinuxWebStorageCreationParams extends PlatformWebStorageCreationParams {
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformWebStorage}
+///{@macro drago_inappwebview.PlatformWebStorage}
 class LinuxWebStorage extends PlatformWebStorage {
   /// Constructs a [LinuxWebStorage].
   LinuxWebStorage(PlatformWebStorageCreationParams params)
@@ -79,7 +79,7 @@ class LinuxStorageCreationParams extends PlatformStorageCreationParams {
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformStorage}
+///{@macro drago_inappwebview.PlatformStorage}
 abstract mixin class LinuxStorage implements PlatformStorage {
   @override
   LinuxInAppWebViewController? controller;
@@ -218,7 +218,7 @@ class LinuxLocalStorageCreationParams extends PlatformLocalStorageCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformLocalStorage}
+///{@macro drago_inappwebview.PlatformLocalStorage}
 class LinuxLocalStorage extends PlatformLocalStorage with LinuxStorage {
   /// Constructs a [LinuxLocalStorage].
   LinuxLocalStorage(PlatformLocalStorageCreationParams params)
@@ -271,7 +271,7 @@ class LinuxSessionStorageCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformSessionStorage}
+///{@macro drago_inappwebview.PlatformSessionStorage}
 class LinuxSessionStorage extends PlatformSessionStorage with LinuxStorage {
   /// Constructs a [LinuxSessionStorage].
   LinuxSessionStorage(PlatformSessionStorageCreationParams params)

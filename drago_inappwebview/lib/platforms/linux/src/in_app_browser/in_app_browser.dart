@@ -3,7 +3,7 @@ import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import '../find_interaction/find_interaction_controller.dart';
 import '../in_app_webview/in_app_webview_controller.dart';
@@ -51,7 +51,7 @@ class LinuxInAppBrowserCreationParams
   final LinuxWebViewEnvironment? webViewEnvironment;
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformInAppBrowser}
+///{@macro drago_inappwebview.PlatformInAppBrowser}
 class LinuxInAppBrowser extends PlatformInAppBrowser with ChannelController {
   @override
   final String id = IdGenerator.generate();

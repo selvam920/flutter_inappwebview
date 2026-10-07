@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
-///{@macro drago_inappwebview_platform_interface.PlatformPathHandler}
+///{@macro drago_inappwebview.PlatformPathHandler}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformPathHandler.supported_platforms}
+///{@macro drago_inappwebview.PlatformPathHandler.supported_platforms}
 abstract class PathHandler
     implements PlatformPathHandler, PlatformPathHandlerEvents {
   /// Constructs a [PathHandler] from a specific platform implementation.
@@ -44,13 +44,13 @@ abstract class PathHandler
   Map<String, dynamic> toJson() => platform.toJson();
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformAssetsPathHandler}
+///{@macro drago_inappwebview.PlatformAssetsPathHandler}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformAssetsPathHandler.supported_platforms}
+///{@macro drago_inappwebview.PlatformAssetsPathHandler.supported_platforms}
 class AssetsPathHandler extends PathHandler {
-  ///{@macro drago_inappwebview_platform_interface.PlatformAssetsPathHandler}
+  ///{@macro drago_inappwebview.PlatformAssetsPathHandler}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformAssetsPathHandler.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformAssetsPathHandler.supported_platforms}
   AssetsPathHandler({required String path})
     : this.fromPlatformCreationParams(
         params: PlatformAssetsPathHandlerCreationParams(
@@ -82,13 +82,13 @@ class AssetsPathHandler extends PathHandler {
       ).isClassSupported(platform: platform);
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformResourcesPathHandler}
+///{@macro drago_inappwebview.PlatformResourcesPathHandler}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformResourcesPathHandler.supported_platforms}
+///{@macro drago_inappwebview.PlatformResourcesPathHandler.supported_platforms}
 class ResourcesPathHandler extends PathHandler {
-  ///{@macro drago_inappwebview_platform_interface.PlatformResourcesPathHandler}
+  ///{@macro drago_inappwebview.PlatformResourcesPathHandler}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformResourcesPathHandler.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformResourcesPathHandler.supported_platforms}
   ResourcesPathHandler({required String path})
     : this.fromPlatformCreationParams(
         params: PlatformResourcesPathHandlerCreationParams(
@@ -120,13 +120,13 @@ class ResourcesPathHandler extends PathHandler {
       ).isClassSupported(platform: platform);
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformInternalStoragePathHandler}
+///{@macro drago_inappwebview.PlatformInternalStoragePathHandler}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformInternalStoragePathHandler.supported_platforms}
+///{@macro drago_inappwebview.PlatformInternalStoragePathHandler.supported_platforms}
 class InternalStoragePathHandler extends PathHandler {
-  ///{@macro drago_inappwebview_platform_interface.PlatformInternalStoragePathHandler}
+  ///{@macro drago_inappwebview.PlatformInternalStoragePathHandler}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformInternalStoragePathHandler.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformInternalStoragePathHandler.supported_platforms}
   InternalStoragePathHandler({required String path, required String directory})
     : this.fromPlatformCreationParams(
         params: PlatformInternalStoragePathHandlerCreationParams(
@@ -161,13 +161,13 @@ class InternalStoragePathHandler extends PathHandler {
       ).isClassSupported(platform: platform);
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformCustomPathHandler}
+///{@macro drago_inappwebview.PlatformCustomPathHandler}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformCustomPathHandler.supported_platforms}
+///{@macro drago_inappwebview.PlatformCustomPathHandler.supported_platforms}
 abstract class CustomPathHandler extends PathHandler {
-  ///{@macro drago_inappwebview_platform_interface.PlatformCustomPathHandler}
+  ///{@macro drago_inappwebview.PlatformCustomPathHandler}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformCustomPathHandler.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformCustomPathHandler.supported_platforms}
   CustomPathHandler({required String path})
     : this.fromPlatformCreationParams(
         params: PlatformCustomPathHandlerCreationParams(

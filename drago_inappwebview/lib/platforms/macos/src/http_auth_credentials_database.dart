@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 /// Object specifying creation parameters for creating a [MacOSHttpAuthCredentialDatabase].
 ///
@@ -26,7 +26,7 @@ class MacOSHttpAuthCredentialDatabaseCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformHttpAuthCredentialDatabase}
+///{@macro drago_inappwebview.PlatformHttpAuthCredentialDatabase}
 class MacOSHttpAuthCredentialDatabase extends PlatformHttpAuthCredentialDatabase
     with ChannelController {
   /// Creates a new [MacOSHttpAuthCredentialDatabase].

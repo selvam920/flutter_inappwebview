@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
-///{@macro drago_inappwebview_platform_interface.PlatformTracingController}
+///{@macro drago_inappwebview.PlatformTracingController}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformTracingController.supported_platforms}
+///{@macro drago_inappwebview.PlatformTracingController.supported_platforms}
 class TracingController {
-  ///{@macro drago_inappwebview_platform_interface.PlatformTracingController}
+  ///{@macro drago_inappwebview.PlatformTracingController}
   TracingController()
     : this.fromPlatformCreationParams(
         const PlatformTracingControllerCreationParams(),
@@ -36,27 +36,27 @@ class TracingController {
     return _instance!;
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformTracingController.start}
+  ///{@macro drago_inappwebview.PlatformTracingController.start}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformTracingController.start.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformTracingController.start.supported_platforms}
   Future<void> start({required TracingSettings settings}) =>
       platform.start(settings: settings);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformTracingController.stop}
+  ///{@macro drago_inappwebview.PlatformTracingController.stop}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformTracingController.stop.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformTracingController.stop.supported_platforms}
   Future<bool> stop({String? filePath}) => platform.stop(filePath: filePath);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformTracingController.isTracing}
+  ///{@macro drago_inappwebview.PlatformTracingController.isTracing}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformTracingController.isTracing.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformTracingController.isTracing.supported_platforms}
   Future<bool> isTracing() => platform.isTracing();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformTracingControllerCreationParams.isClassSupported}
+  ///{@macro drago_inappwebview.PlatformTracingControllerCreationParams.isClassSupported}
   static bool isClassSupported({TargetPlatform? platform}) =>
       PlatformTracingController.static().isClassSupported(platform: platform);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformTracingController.isMethodSupported}
+  ///{@macro drago_inappwebview.PlatformTracingController.isMethodSupported}
   static bool isMethodSupported(
     PlatformTracingControllerMethod method, {
     TargetPlatform? platform,

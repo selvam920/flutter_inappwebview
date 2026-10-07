@@ -1,11 +1,11 @@
 import 'dart:core';
 
 import 'package:flutter/foundation.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
-///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment}
+///{@macro drago_inappwebview.PlatformWebViewEnvironment}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.supported_platforms}
+///{@macro drago_inappwebview.PlatformWebViewEnvironment.supported_platforms}
 class WebViewEnvironment {
   /// Constructs a [WebViewEnvironment].
   ///
@@ -21,37 +21,37 @@ class WebViewEnvironment {
   /// Implementation of [PlatformWebViewEnvironment] for the current platform.
   final PlatformWebViewEnvironment platform;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.id}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.id}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.id.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.id.supported_platforms}
   String get id => platform.id;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.settings}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.settings}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.settings.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.settings.supported_platforms}
   WebViewEnvironmentSettings? get settings => platform.settings;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.isInterfaceSupported}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.isInterfaceSupported}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.isInterfaceSupported.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.isInterfaceSupported.supported_platforms}
   Future<bool> isInterfaceSupported(WebViewInterface interface) =>
       platform.isInterfaceSupported(interface);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.getProcessInfos}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.getProcessInfos}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.getProcessInfos.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.getProcessInfos.supported_platforms}
   Future<List<BrowserProcessInfo>> getProcessInfos() =>
       platform.getProcessInfos();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.getFailureReportFolderPath}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.getFailureReportFolderPath}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.getFailureReportFolderPath.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.getFailureReportFolderPath.supported_platforms}
   Future<String?> getFailureReportFolderPath() =>
       platform.getFailureReportFolderPath();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.create}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.create}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.create.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.create.supported_platforms}
   static Future<WebViewEnvironment> create({
     WebViewEnvironmentSettings? settings,
   }) async {
@@ -62,18 +62,18 @@ class WebViewEnvironment {
     );
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.getAvailableVersion}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.getAvailableVersion}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.getAvailableVersion.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.getAvailableVersion.supported_platforms}
   static Future<String?> getAvailableVersion({
     String? browserExecutableFolder,
   }) => PlatformWebViewEnvironment.static().getAvailableVersion(
     browserExecutableFolder: browserExecutableFolder,
   );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.getAvailableVersion}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.getAvailableVersion}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.getAvailableVersion.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.getAvailableVersion.supported_platforms}
   static Future<int?> compareBrowserVersions({
     required String version1,
     required String version2,
@@ -82,63 +82,63 @@ class WebViewEnvironment {
     version2: version2,
   );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.onNewBrowserVersionAvailable}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.onNewBrowserVersionAvailable}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.onNewBrowserVersionAvailable.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.onNewBrowserVersionAvailable.supported_platforms}
   void Function()? get onNewBrowserVersionAvailable =>
       platform.onNewBrowserVersionAvailable;
   set onNewBrowserVersionAvailable(void Function()? value) =>
       platform.onNewBrowserVersionAvailable = value;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.onBrowserProcessExited}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.onBrowserProcessExited}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.onBrowserProcessExited.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.onBrowserProcessExited.supported_platforms}
   void Function(BrowserProcessExitedDetail detail)?
   get onBrowserProcessExited => platform.onBrowserProcessExited;
   set onBrowserProcessExited(
     void Function(BrowserProcessExitedDetail detail)? value,
   ) => platform.onBrowserProcessExited = value;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.onProcessInfosChanged}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.onProcessInfosChanged}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.onProcessInfosChanged.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.onProcessInfosChanged.supported_platforms}
   void Function(BrowserProcessInfosChangedDetail detail)?
   get onProcessInfosChanged => platform.onProcessInfosChanged;
   set onProcessInfosChanged(
     void Function(BrowserProcessInfosChangedDetail detail)? value,
   ) => platform.onProcessInfosChanged = value;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.getCacheModel}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.getCacheModel}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.getCacheModel.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.getCacheModel.supported_platforms}
   Future<CacheModel?> getCacheModel() => platform.getCacheModel();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.isSpellCheckingEnabled}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.isSpellCheckingEnabled}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.isSpellCheckingEnabled.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.isSpellCheckingEnabled.supported_platforms}
   Future<bool> isSpellCheckingEnabled() => platform.isSpellCheckingEnabled();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.getSpellCheckingLanguages}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.getSpellCheckingLanguages}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.getSpellCheckingLanguages.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.getSpellCheckingLanguages.supported_platforms}
   Future<List<String>> getSpellCheckingLanguages() =>
       platform.getSpellCheckingLanguages();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.isAutomationAllowed}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.isAutomationAllowed}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.isAutomationAllowed.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.isAutomationAllowed.supported_platforms}
   Future<bool> isAutomationAllowed() => platform.isAutomationAllowed();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.dispose}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.dispose}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.dispose.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.dispose.supported_platforms}
   Future<void> dispose() => platform.dispose();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironmentCreationParams.isClassSupported}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironmentCreationParams.isClassSupported}
   static bool isClassSupported({TargetPlatform? platform}) =>
       PlatformWebViewEnvironment.static().isClassSupported(platform: platform);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.isPropertySupported}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.isPropertySupported}
   static bool isPropertySupported(
     dynamic property, {
     TargetPlatform? platform,
@@ -147,7 +147,7 @@ class WebViewEnvironment {
     platform: platform,
   );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.isMethodSupported}
+  ///{@macro drago_inappwebview.PlatformWebViewEnvironment.isMethodSupported}
   static bool isMethodSupported(
     PlatformWebViewEnvironmentMethod method, {
     TargetPlatform? platform,

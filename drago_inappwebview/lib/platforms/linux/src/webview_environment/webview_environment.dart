@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 /// Object specifying creation parameters for creating a [LinuxWebViewEnvironment].
 ///
@@ -80,7 +80,7 @@ class LinuxWebViewEnvironment extends PlatformWebViewEnvironment
     }
   }
 
-  /// {@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.create}
+  /// {@macro drago_inappwebview.PlatformWebViewEnvironment.create}
   ///
   /// On Linux, this creates a new WebKitWebContext instance.
   @override
@@ -106,7 +106,7 @@ class LinuxWebViewEnvironment extends PlatformWebViewEnvironment
     return env;
   }
 
-  /// {@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.getAvailableVersion}
+  /// {@macro drago_inappwebview.PlatformWebViewEnvironment.getAvailableVersion}
   ///
   /// On Linux, this returns the WPE WebKit version (e.g., "2.42.0").
   ///
@@ -117,13 +117,13 @@ class LinuxWebViewEnvironment extends PlatformWebViewEnvironment
     return await _staticChannel.invokeMethod<String>('getAvailableVersion');
   }
 
-  /// {@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.isSpellCheckingEnabled}
+  /// {@macro drago_inappwebview.PlatformWebViewEnvironment.isSpellCheckingEnabled}
   @override
   Future<bool> isSpellCheckingEnabled() async {
     return await channel?.invokeMethod<bool>('isSpellCheckingEnabled') ?? false;
   }
 
-  /// {@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.getSpellCheckingLanguages}
+  /// {@macro drago_inappwebview.PlatformWebViewEnvironment.getSpellCheckingLanguages}
   @override
   Future<List<String>> getSpellCheckingLanguages() async {
     final result = await channel?.invokeMethod<List>(
@@ -132,14 +132,14 @@ class LinuxWebViewEnvironment extends PlatformWebViewEnvironment
     return result?.cast<String>() ?? [];
   }
 
-  /// {@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.getCacheModel}
+  /// {@macro drago_inappwebview.PlatformWebViewEnvironment.getCacheModel}
   @override
   Future<CacheModel?> getCacheModel() async {
     final result = await channel?.invokeMethod<int>('getCacheModel');
     return CacheModel.fromNativeValue(result);
   }
 
-  /// {@macro drago_inappwebview_platform_interface.PlatformWebViewEnvironment.isAutomationAllowed}
+  /// {@macro drago_inappwebview.PlatformWebViewEnvironment.isAutomationAllowed}
   @override
   Future<bool> isAutomationAllowed() async {
     return await channel?.invokeMethod<bool>('isAutomationAllowed') ?? false;

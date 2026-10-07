@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
-///{@macro drago_inappwebview_platform_interface.PlatformProcessGlobalConfig}
+///{@macro drago_inappwebview.PlatformProcessGlobalConfig}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformProcessGlobalConfig.supported_platforms}
+///{@macro drago_inappwebview.PlatformProcessGlobalConfig.supported_platforms}
 class ProcessGlobalConfig {
-  ///{@macro drago_inappwebview_platform_interface.PlatformProcessGlobalConfig}
+  ///{@macro drago_inappwebview.PlatformProcessGlobalConfig}
   ProcessGlobalConfig()
     : this.fromPlatformCreationParams(
         const PlatformProcessGlobalConfigCreationParams(),
@@ -35,17 +35,17 @@ class ProcessGlobalConfig {
     return _instance!;
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformProcessGlobalConfig.apply}
+  ///{@macro drago_inappwebview.PlatformProcessGlobalConfig.apply}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformProcessGlobalConfig.apply.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformProcessGlobalConfig.apply.supported_platforms}
   Future<void> apply({required ProcessGlobalConfigSettings settings}) =>
       platform.apply(settings: settings);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformProcessGlobalConfigCreationParams.isClassSupported}
+  ///{@macro drago_inappwebview.PlatformProcessGlobalConfigCreationParams.isClassSupported}
   static bool isClassSupported({TargetPlatform? platform}) =>
       PlatformProcessGlobalConfig.static().isClassSupported(platform: platform);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformProcessGlobalConfig.isMethodSupported}
+  ///{@macro drago_inappwebview.PlatformProcessGlobalConfig.isMethodSupported}
   static bool isMethodSupported(
     PlatformProcessGlobalConfigMethod method, {
     TargetPlatform? platform,

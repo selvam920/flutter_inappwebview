@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 /// Object specifying creation parameters for creating a [LinuxContainerController].
 @immutable
@@ -21,7 +21,7 @@ class LinuxContainerControllerCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformContainerController}
+///{@macro drago_inappwebview.PlatformContainerController}
 ///
 /// Linux implementation. Containers are filesystem-backed: data lives
 /// under `<XDG_DATA_HOME>/drago_inappwebview/containers/<id>/data` and

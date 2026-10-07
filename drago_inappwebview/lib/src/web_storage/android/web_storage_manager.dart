@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import '../web_storage_manager.dart';
 

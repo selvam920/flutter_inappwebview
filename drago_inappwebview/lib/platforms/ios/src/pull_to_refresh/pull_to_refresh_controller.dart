@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 /// Object specifying creation parameters for creating a [IOSPullToRefreshController].
 ///
@@ -31,7 +31,7 @@ class IOSPullToRefreshControllerCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformPullToRefreshController}
+///{@macro drago_inappwebview.PlatformPullToRefreshController}
 class IOSPullToRefreshController extends PlatformPullToRefreshController
     with ChannelController {
   /// Constructs a [IOSPullToRefreshController].

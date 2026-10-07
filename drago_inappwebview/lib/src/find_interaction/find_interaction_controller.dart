@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
-///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController}
+///{@macro drago_inappwebview.PlatformFindInteractionController}
 ///
-///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.supported_platforms}
+///{@macro drago_inappwebview.PlatformFindInteractionController.supported_platforms}
 class FindInteractionController {
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.supported_platforms}
   FindInteractionController({
     void Function(
       PlatformFindInteractionController controller,
@@ -36,9 +36,9 @@ class FindInteractionController {
   /// Implementation of [PlatformFindInteractionController] for the current platform.
   final PlatformFindInteractionController platform;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.onFindResultReceived}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.onFindResultReceived}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.onFindResultReceived.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.onFindResultReceived.supported_platforms}
   void Function(
     PlatformFindInteractionController controller,
     int activeMatchOrdinal,
@@ -47,71 +47,71 @@ class FindInteractionController {
   )?
   get onFindResultReceived => platform.onFindResultReceived;
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.findAll}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.findAll}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.findAll.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.findAll.supported_platforms}
   Future<void> findAll({String? find}) => platform.findAll(find: find);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.findNext}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.findNext}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.findNext.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.findNext.supported_platforms}
   Future<void> findNext({bool forward = true}) =>
       platform.findNext(forward: forward);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.clearMatches}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.clearMatches}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.clearMatches.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.clearMatches.supported_platforms}
   Future<void> clearMatches() => platform.clearMatches();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.setSearchText}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.setSearchText}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.setSearchText.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.setSearchText.supported_platforms}
   Future<void> setSearchText(String? searchText) =>
       platform.setSearchText(searchText);
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.getSearchText}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.getSearchText}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.getSearchText.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.getSearchText.supported_platforms}
   Future<String?> getSearchText() => platform.getSearchText();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.isFindNavigatorVisible}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.isFindNavigatorVisible}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.isFindNavigatorVisible.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.isFindNavigatorVisible.supported_platforms}
   Future<bool?> isFindNavigatorVisible() => platform.isFindNavigatorVisible();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.updateResultCount}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.updateResultCount}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.updateResultCount.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.updateResultCount.supported_platforms}
   Future<void> updateResultCount() => platform.updateResultCount();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.presentFindNavigator}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.presentFindNavigator}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.presentFindNavigator.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.presentFindNavigator.supported_platforms}
   Future<void> presentFindNavigator() => platform.presentFindNavigator();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.dismissFindNavigator}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.dismissFindNavigator}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.dismissFindNavigator.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.dismissFindNavigator.supported_platforms}
   Future<void> dismissFindNavigator() => platform.dismissFindNavigator();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.getActiveFindSession}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.getActiveFindSession}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.getActiveFindSession.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.getActiveFindSession.supported_platforms}
   Future<FindSession?> getActiveFindSession() =>
       platform.getActiveFindSession();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.dispose}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.dispose}
   ///
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.dispose.supported_platforms}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.dispose.supported_platforms}
   void dispose({bool isKeepAlive = false}) => platform.dispose();
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionControllerCreationParams.isClassSupported}
+  ///{@macro drago_inappwebview.PlatformFindInteractionControllerCreationParams.isClassSupported}
   static bool isClassSupported({TargetPlatform? platform}) =>
       PlatformFindInteractionController.static().isClassSupported(
         platform: platform,
       );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.isPropertySupported}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.isPropertySupported}
   static bool isPropertySupported(
     PlatformFindInteractionControllerCreationParamsProperty property, {
     TargetPlatform? platform,
@@ -120,7 +120,7 @@ class FindInteractionController {
     platform: platform,
   );
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.isMethodSupported}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.isMethodSupported}
   static bool isMethodSupported(
     PlatformFindInteractionControllerMethod method, {
     TargetPlatform? platform,

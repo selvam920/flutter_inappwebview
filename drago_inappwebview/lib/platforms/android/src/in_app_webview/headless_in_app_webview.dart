@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import '../find_interaction/find_interaction_controller.dart';
 import '../pull_to_refresh/pull_to_refresh_controller.dart';
@@ -250,7 +250,7 @@ class AndroidHeadlessInAppWebViewCreationParams
   final AndroidPullToRefreshController? pullToRefreshController;
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformHeadlessInAppWebView}
+///{@macro drago_inappwebview.PlatformHeadlessInAppWebView}
 class AndroidHeadlessInAppWebView extends PlatformHeadlessInAppWebView
     with ChannelController {
   @override

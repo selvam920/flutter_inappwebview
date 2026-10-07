@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 /// A mock InAppWebViewPlatform for testing purposes.

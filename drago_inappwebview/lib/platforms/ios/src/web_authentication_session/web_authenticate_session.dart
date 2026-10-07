@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 /// Object specifying creation parameters for creating a [IOSWebAuthenticationSession].
 ///
@@ -23,7 +23,7 @@ class IOSWebAuthenticationSessionCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformWebAuthenticationSession}
+///{@macro drago_inappwebview.PlatformWebAuthenticationSession}
 class IOSWebAuthenticationSession extends PlatformWebAuthenticationSession
     with ChannelController {
   /// Constructs a [IOSWebAuthenticationSession].

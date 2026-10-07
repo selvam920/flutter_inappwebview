@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 /// Object specifying creation parameters for creating a [LinuxFindInteractionController].
 ///
@@ -82,7 +82,7 @@ class LinuxFindInteractionController extends PlatformFindInteractionController
     return null;
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.findAll}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.findAll}
   @override
   Future<void> findAll({String? find}) async {
     Map<String, dynamic> args = <String, dynamic>{};
@@ -90,7 +90,7 @@ class LinuxFindInteractionController extends PlatformFindInteractionController
     await channel?.invokeMethod('findAll', args);
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.findNext}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.findNext}
   @override
   Future<void> findNext({bool forward = true}) async {
     Map<String, dynamic> args = <String, dynamic>{};
@@ -98,14 +98,14 @@ class LinuxFindInteractionController extends PlatformFindInteractionController
     await channel?.invokeMethod('findNext', args);
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.clearMatches}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.clearMatches}
   @override
   Future<void> clearMatches() async {
     Map<String, dynamic> args = <String, dynamic>{};
     await channel?.invokeMethod('clearMatches', args);
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.setSearchText}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.setSearchText}
   @override
   Future<void> setSearchText(String? searchText) async {
     Map<String, dynamic> args = <String, dynamic>{};
@@ -113,14 +113,14 @@ class LinuxFindInteractionController extends PlatformFindInteractionController
     await channel?.invokeMethod('setSearchText', args);
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.getSearchText}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.getSearchText}
   @override
   Future<String?> getSearchText() async {
     Map<String, dynamic> args = <String, dynamic>{};
     return await channel?.invokeMethod<String?>('getSearchText', args);
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.getActiveFindSession}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.getActiveFindSession}
   @override
   Future<FindSession?> getActiveFindSession() async {
     Map<String, dynamic> args = <String, dynamic>{};
@@ -131,7 +131,7 @@ class LinuxFindInteractionController extends PlatformFindInteractionController
     return FindSession.fromMap(result);
   }
 
-  ///{@macro drago_inappwebview_platform_interface.PlatformFindInteractionController.dispose}
+  ///{@macro drago_inappwebview.PlatformFindInteractionController.dispose}
   @override
   void dispose({bool isKeepAlive = false}) {
     disposeChannel(removeMethodCallHandler: !isKeepAlive);

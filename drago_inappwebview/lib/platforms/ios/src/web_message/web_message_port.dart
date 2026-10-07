@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import 'web_message_channel.dart';
 
@@ -29,7 +29,7 @@ class IOSWebMessagePortCreationParams
   }
 }
 
-///{@macro drago_inappwebview_platform_interface.PlatformWebMessagePort}
+///{@macro drago_inappwebview.PlatformWebMessagePort}
 class IOSWebMessagePort extends PlatformWebMessagePort {
   WebMessageCallback? _onMessage;
   late IOSWebMessageChannel _webMessageChannel;

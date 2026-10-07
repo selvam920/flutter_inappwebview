@@ -2,7 +2,7 @@ import 'dart:core';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_platform_interface/drago_inappwebview_platform_interface.dart';
+import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import '../in_app_webview_controller.dart';
 
