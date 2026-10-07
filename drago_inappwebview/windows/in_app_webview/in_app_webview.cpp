@@ -55,6 +55,38 @@
 
 namespace drago_inappwebview_plugin
 {
+  namespace
+  {
+    // Completes a WebView2 deferral exactly once: explicitly via complete(),
+    // or when the last owner goes away (e.g. a Flutter callback that is never answered).
+    class DeferralCompleter
+    {
+    public:
+      explicit DeferralCompleter(wil::com_ptr<ICoreWebView2Deferral> deferral) : deferral_(std::move(deferral)) {}
+      ~DeferralCompleter()
+      {
+        complete();
+      }
+
+      void complete()
+      {
+        if (deferral_) {
+          auto deferral = std::move(deferral_);
+          deferral_ = nullptr;
+          failedLog(deferral->Complete());
+        }
+      }
+
+      // ownership of the deferral moved elsewhere
+      void release()
+      {
+        deferral_ = nullptr;
+      }
+    private:
+      wil::com_ptr<ICoreWebView2Deferral> deferral_;
+    };
+  }
+
   using namespace Microsoft::WRL;
 
   InAppWebView::InAppWebView(const DragoInappwebviewPlugin* plugin, const InAppWebViewCreationParams& params, const HWND parentWindow, wil::com_ptr<ICoreWebView2Environment> webViewEnv,
@@ -305,8 +337,11 @@ namespace drago_inappwebview_plugin
 
     // required to make Runtime events work
     failedLog(webView->CallDevToolsProtocolMethod(L"Runtime.enable", L"{}", Callback<ICoreWebView2CallDevToolsProtocolMethodCompletedHandler>(
-      [this](HRESULT errorCode, LPCWSTR returnObjectAsJson)
+      [this, alive = alive_](HRESULT errorCode, LPCWSTR returnObjectAsJson)
       {
+        if (!*alive) {
+          return S_OK;
+        }
         failedLog(errorCode);
         return S_OK;
       }
@@ -314,8 +349,11 @@ namespace drago_inappwebview_plugin
 
     // required to make Page events work and to add User Scripts
     failedLog(webView->CallDevToolsProtocolMethod(L"Page.enable", L"{}", Callback<ICoreWebView2CallDevToolsProtocolMethodCompletedHandler>(
-      [this](HRESULT errorCode, LPCWSTR returnObjectAsJson)
+      [this, alive = alive_](HRESULT errorCode, LPCWSTR returnObjectAsJson)
       {
+        if (!*alive) {
+          return S_OK;
+        }
         failedLog(errorCode);
         return S_OK;
       }
@@ -323,8 +361,11 @@ namespace drago_inappwebview_plugin
 
     // required to use Network domain
     failedLog(webView->CallDevToolsProtocolMethod(L"Network.enable", L"{}", Callback<ICoreWebView2CallDevToolsProtocolMethodCompletedHandler>(
-      [this](HRESULT errorCode, LPCWSTR returnObjectAsJson)
+      [this, alive = alive_](HRESULT errorCode, LPCWSTR returnObjectAsJson)
       {
+        if (!*alive) {
+          return S_OK;
+        }
         failedLog(errorCode);
         return S_OK;
       }
@@ -332,16 +373,22 @@ namespace drago_inappwebview_plugin
 
     // required to use Fetch domain and implement the shouldOverrideUrlLoading event correctly
     failedLog(webView->CallDevToolsProtocolMethod(L"Fetch.enable", L"{\"patterns\": [{\"resourceType\": \"Document\", \"requestStage\": \"Request\"}]}", Callback<ICoreWebView2CallDevToolsProtocolMethodCompletedHandler>(
-      [this](HRESULT errorCode, LPCWSTR returnObjectAsJson)
+      [this, alive = alive_](HRESULT errorCode, LPCWSTR returnObjectAsJson)
       {
+        if (!*alive) {
+          return S_OK;
+        }
         failedLog(errorCode);
         return S_OK;
       }
     ).Get()));
 
     failedLog(webView->CallDevToolsProtocolMethod(L"Page.getFrameTree", L"{}", Callback<ICoreWebView2CallDevToolsProtocolMethodCompletedHandler>(
-      [this](HRESULT errorCode, LPCWSTR returnObjectAsJson)
+      [this, alive = alive_](HRESULT errorCode, LPCWSTR returnObjectAsJson)
       {
+        if (!*alive) {
+          return S_OK;
+        }
         if (succeededOrLog(errorCode)) {
           auto treeJson = nlohmann::json::parse(wide_to_utf8(returnObjectAsJson));
           pageFrameId_ = treeJson["frameTree"]["frame"]["id"].get<std::string>();
@@ -388,7 +435,7 @@ namespace drago_inappwebview_plugin
           }
           return S_OK;
         }
-      ).Get(), nullptr);
+      ).Get(), trackEventToken(webViewController, [](auto* o, EventRegistrationToken t) { return o->remove_AcceleratorKeyPressed(t); }));
     failedLog(add_AcceleratorKeyPressed_HResult);
 
     auto add_ZoomFactorChanged_HResult = webViewController->add_ZoomFactorChanged(
@@ -404,7 +451,7 @@ namespace drago_inappwebview_plugin
           }
           return S_OK;
         }
-      ).Get(), nullptr);
+      ).Get(), trackEventToken(webViewController, [](auto* o, EventRegistrationToken t) { return o->remove_ZoomFactorChanged(t); }));
     failedLog(add_ZoomFactorChanged_HResult);
 
     wil::com_ptr<ICoreWebView2DevToolsProtocolEventReceiver> fetchRequestPausedEventReceiver;
@@ -432,13 +479,19 @@ namespace drago_inappwebview_plugin
               }
               auto isForMainFrame = pageFrameId_.empty() || string_equals(pageFrameId_, frameId);
 
-              auto allowRequest = [this, requestId, url, isForMainFrame]()
+              auto allowRequest = [this, alive = alive_, requestId, url, isForMainFrame]()
                 {
+                  if (!*alive) {
+                    return;
+                  }
                   failedAndLog(webView->CallDevToolsProtocolMethod(L"Fetch.continueRequest",
                     utf8_to_wide("{\"requestId\":\"" + requestId + "\"}").c_str(),
                     Callback<ICoreWebView2CallDevToolsProtocolMethodCompletedHandler>(
-                      [this](HRESULT errorCode, LPCWSTR returnObjectAsJson)
+                      [this, alive = alive_](HRESULT errorCode, LPCWSTR returnObjectAsJson)
                       {
+                        if (!*alive) {
+                          return S_OK;
+                        }
                         failedLog(errorCode);
                         return S_OK;
                       }
@@ -453,13 +506,19 @@ namespace drago_inappwebview_plugin
                   }
                 };
 
-              auto cancelRequest = [this, requestId]()
+              auto cancelRequest = [this, alive = alive_, requestId]()
                 {
+                  if (!*alive) {
+                    return;
+                  }
                   failedAndLog(webView->CallDevToolsProtocolMethod(L"Fetch.failRequest",
                     utf8_to_wide("{\"requestId\":\"" + requestId + "\", \"errorReason\": \"Aborted\"}").c_str(),
                     Callback<ICoreWebView2CallDevToolsProtocolMethodCompletedHandler>(
-                      [this](HRESULT errorCode, LPCWSTR returnObjectAsJson)
+                      [this, alive = alive_](HRESULT errorCode, LPCWSTR returnObjectAsJson)
                       {
+                        if (!*alive) {
+                          return S_OK;
+                        }
                         failedLog(errorCode);
                         return S_OK;
                       }
@@ -510,8 +569,11 @@ namespace drago_inappwebview_plugin
                 );
 
                 auto callback = std::make_unique<WebViewChannelDelegate::ShouldOverrideUrlLoadingCallback>();
-                callback->nonNullSuccess = [this, allowRequest, cancelRequest](const NavigationActionPolicy actionPolicy)
+                callback->nonNullSuccess = [this, alive = alive_, allowRequest, cancelRequest](const NavigationActionPolicy actionPolicy)
                   {
+                    if (!*alive) {
+                      return false;
+                    }
                     if (actionPolicy == NavigationActionPolicy::allow) {
                       allowRequest();
                     }
@@ -520,8 +582,11 @@ namespace drago_inappwebview_plugin
                     }
                     return false;
                   };
-                auto defaultBehaviour = [this, allowRequest](const std::optional<const NavigationActionPolicy> actionPolicy)
+                auto defaultBehaviour = [this, alive = alive_, allowRequest](const std::optional<const NavigationActionPolicy> actionPolicy)
                   {
+                    if (!*alive) {
+                      return;
+                    }
                     allowRequest();
                   };
                 callback->defaultBehaviour = defaultBehaviour;
@@ -544,7 +609,7 @@ namespace drago_inappwebview_plugin
 
             return S_OK;
           })
-        .Get(), nullptr);
+        .Get(), trackEventToken(fetchRequestPausedEventReceiver, [](auto* o, EventRegistrationToken t) { return o->remove_DevToolsProtocolEventReceived(t); }));
       failedAndLog(add_DevToolsProtocolEventReceived_HResult);
     }
 
@@ -649,7 +714,7 @@ namespace drago_inappwebview_plugin
 
           return S_OK;
         }
-      ).Get(), nullptr);
+      ).Get(), trackEventToken(webView, [](auto* o, EventRegistrationToken t) { return o->remove_NavigationStarting(t); }));
     failedLog(add_NavigationStarting_HResult);
 
     auto add_ContentLoading_HResult = webView->add_ContentLoading(
@@ -665,7 +730,7 @@ namespace drago_inappwebview_plugin
           }
           return S_OK;
         }
-      ).Get(), nullptr);
+      ).Get(), trackEventToken(webView, [](auto* o, EventRegistrationToken t) { return o->remove_ContentLoading(t); }));
     failedLog(add_ContentLoading_HResult);
 
     auto add_NavigationCompleted_HResult = webView->add_NavigationCompleted(
@@ -723,7 +788,7 @@ namespace drago_inappwebview_plugin
 
           return S_OK;
         }
-      ).Get(), nullptr);
+      ).Get(), trackEventToken(webView, [](auto* o, EventRegistrationToken t) { return o->remove_NavigationCompleted(t); }));
     failedLog(add_NavigationCompleted_HResult);
 
     auto add_DocumentTitleChanged_HResult = webView->add_DocumentTitleChanged(Callback<ICoreWebView2DocumentTitleChangedEventHandler>(
@@ -736,7 +801,7 @@ namespace drago_inappwebview_plugin
         }
         return S_OK;
       }
-    ).Get(), nullptr);
+    ).Get(), trackEventToken(webView, [](auto* o, EventRegistrationToken t) { return o->remove_DocumentTitleChanged(t); }));
     failedLog(add_DocumentTitleChanged_HResult);
 
     auto add_ContainsFullScreenElementChanged_HResult = webView->add_ContainsFullScreenElementChanged(
@@ -758,7 +823,7 @@ namespace drago_inappwebview_plugin
           }
           return S_OK;
         }
-      ).Get(), nullptr);
+      ).Get(), trackEventToken(webView, [](auto* o, EventRegistrationToken t) { return o->remove_ContainsFullScreenElementChanged(t); }));
     failedLog(add_ContainsFullScreenElementChanged_HResult);
 
     auto add_HistoryChanged_HResult = webView->add_HistoryChanged(Callback<ICoreWebView2HistoryChangedEventHandler>(
@@ -773,7 +838,7 @@ namespace drago_inappwebview_plugin
         }
         return S_OK;
       }
-    ).Get(), nullptr);
+    ).Get(), trackEventToken(webView, [](auto* o, EventRegistrationToken t) { return o->remove_HistoryChanged(t); }));
     failedLog(add_HistoryChanged_HResult);
 
     auto add_WebMessageReceived_HResult = webView->add_WebMessageReceived(Callback<ICoreWebView2WebMessageReceivedEventHandler>(
@@ -781,7 +846,7 @@ namespace drago_inappwebview_plugin
       {
         return this->onCallJsHandler(true, args);
       }
-    ).Get(), nullptr);
+    ).Get(), trackEventToken(webView, [](auto* o, EventRegistrationToken t) { return o->remove_WebMessageReceived(t); }));
     failedLog(add_WebMessageReceived_HResult);
 
     wil::com_ptr<ICoreWebView2DevToolsProtocolEventReceiver> consoleMessageReceiver;
@@ -826,7 +891,7 @@ namespace drago_inappwebview_plugin
 
             return S_OK;
           })
-        .Get(), nullptr);
+        .Get(), trackEventToken(consoleMessageReceiver, [](auto* o, EventRegistrationToken t) { return o->remove_DevToolsProtocolEventReceived(t); }));
       failedLog(consoleMessageReceiver_add_DevToolsProtocolEventReceived_HResult);
     }
 
@@ -863,22 +928,34 @@ namespace drago_inappwebview_plugin
               hasGesture,
               std::move(windowFeatures));
 
+            // completes the deferral if the callback is dropped without an answer
+            // (e.g. the WebView has been disposed), so WebView2 never hangs
+            auto deferralGuard = std::make_shared<DeferralCompleter>(deferral);
+            wil::com_ptr<ICoreWebView2NewWindowRequestedEventArgs> argsRef = args;
             auto callback = std::make_unique<WebViewChannelDelegate::CreateWindowCallback>();
-            auto defaultBehaviour = [this, windowId, urlRequest, deferral, args](const std::optional<const bool> handledByClient)
+            auto defaultBehaviour = [this, alive = alive_, windowId, urlRequest, deferralGuard, argsRef](const std::optional<const bool> handledByClient)
               {
-                if (plugin && plugin->inAppWebViewManager && map_contains(plugin->inAppWebViewManager->windowWebViews, windowId)) {
-                  plugin->inAppWebViewManager->windowWebViews.erase(windowId);
+                if (*alive) {
+                  if (plugin && plugin->inAppWebViewManager && map_contains(plugin->inAppWebViewManager->windowWebViews, windowId)) {
+                    // the deferral is completed below
+                    plugin->inAppWebViewManager->windowWebViews.at(windowId)->deferral = nullptr;
+                    plugin->inAppWebViewManager->windowWebViews.erase(windowId);
+                  }
+                  loadUrl(urlRequest);
+                  failedLog(argsRef->put_Handled(TRUE));
                 }
-                loadUrl(urlRequest);
-                failedLog(args->put_Handled(TRUE));
-                failedLog(deferral->Complete());
+                deferralGuard->complete();
               };
-            callback->nonNullSuccess = [this, deferral, args](const bool handledByClient)
+            callback->nonNullSuccess = [deferralGuard](const bool handledByClient)
               {
+                if (handledByClient) {
+                  // the window request is now owned by InAppWebViewManager::windowWebViews
+                  deferralGuard->release();
+                }
                 return !handledByClient;
               };
             callback->defaultBehaviour = defaultBehaviour;
-            callback->error = [this, defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
+            callback->error = [defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
               {
                 debugLog(error_code + ", " + error_message);
                 defaultBehaviour(std::nullopt);
@@ -887,7 +964,7 @@ namespace drago_inappwebview_plugin
           }
           return S_OK;
         }
-      ).Get(), nullptr);
+      ).Get(), trackEventToken(webView, [](auto* o, EventRegistrationToken t) { return o->remove_NewWindowRequested(t); }));
     failedLog(add_NewWindowRequested_HResult);
 
     auto add_WindowCloseRequested_HResult = webView->add_WindowCloseRequested(Callback<ICoreWebView2WindowCloseRequestedEventHandler>(
@@ -898,7 +975,7 @@ namespace drago_inappwebview_plugin
         }
         return S_OK;
       }
-    ).Get(), nullptr);
+    ).Get(), trackEventToken(webView, [](auto* o, EventRegistrationToken t) { return o->remove_WindowCloseRequested(t); }));
     failedLog(add_WindowCloseRequested_HResult);
 
     auto add_PermissionRequested_HResult = webView->add_PermissionRequested(Callback<ICoreWebView2PermissionRequestedEventHandler>(
@@ -912,14 +989,25 @@ namespace drago_inappwebview_plugin
           COREWEBVIEW2_PERMISSION_KIND resource = COREWEBVIEW2_PERMISSION_KIND_UNKNOWN_PERMISSION;
           failedLog(args->get_PermissionKind(&resource));
 
+          // completes the deferral if the callback is dropped without an answer
+          // (e.g. the WebView has been disposed), so WebView2 never hangs
+          auto deferralGuard = std::make_shared<DeferralCompleter>(deferral);
+          wil::com_ptr<ICoreWebView2PermissionRequestedEventArgs> argsRef = args;
           auto callback = std::make_unique<WebViewChannelDelegate::PermissionRequestCallback>();
-          auto defaultBehaviour = [this, deferral, args](const std::optional<const std::shared_ptr<PermissionResponse>> permissionResponse)
+          auto defaultBehaviour = [alive = alive_, deferralGuard, argsRef](const std::optional<const std::shared_ptr<PermissionResponse>> permissionResponse)
             {
-              failedLog(args->put_State(COREWEBVIEW2_PERMISSION_STATE_DENY));
-              failedLog(deferral->Complete());
+              if (*alive) {
+                failedLog(argsRef->put_State(COREWEBVIEW2_PERMISSION_STATE_DENY));
+              }
+              deferralGuard->complete();
             };
-          callback->nonNullSuccess = [this, deferral, args](const std::shared_ptr<PermissionResponse> permissionResponse)
+          callback->nonNullSuccess = [alive = alive_, deferralGuard, argsRef](const std::shared_ptr<PermissionResponse> permissionResponse)
             {
+              if (!*alive) {
+                deferralGuard->complete();
+                return false;
+              }
+              auto args = argsRef.get();
               auto action = permissionResponse->action;
               if (action.has_value()) {
                 switch (action.value()) {
@@ -933,13 +1021,13 @@ namespace drago_inappwebview_plugin
                   failedLog(args->put_State(COREWEBVIEW2_PERMISSION_STATE_DENY));
                   break;
                 }
-                failedLog(deferral->Complete());
+                deferralGuard->complete();
                 return false;
               }
               return true;
             };
           callback->defaultBehaviour = defaultBehaviour;
-          callback->error = [this, defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
+          callback->error = [defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
             {
               debugLog(error_code + ", " + error_message);
               defaultBehaviour(std::nullopt);
@@ -948,7 +1036,7 @@ namespace drago_inappwebview_plugin
         }
         return S_OK;
       }
-    ).Get(), nullptr);
+    ).Get(), trackEventToken(webView, [](auto* o, EventRegistrationToken t) { return o->remove_PermissionRequested(t); }));
     failedLog(add_PermissionRequested_HResult);
 
     if (auto webView22 = webView.try_query<ICoreWebView2_22>()) {
@@ -976,23 +1064,35 @@ namespace drago_inappwebview_plugin
             auto url = request->url.has_value() ? request->url.value() : "";
             auto isCustomScheme = !url.empty() && !starts_with(url, std::string{ "file://" }) && !starts_with(url, std::string{ "http://" }) && !starts_with(url, std::string{ "https://" });
 
-            auto onLoadResourceWithCustomSchemeCallback = [this, deferral, request, args]()
+            auto onLoadResourceWithCustomSchemeCallback = [this, alive = alive_, deferral, request, args]()
               {
+                if (!*alive) {
+                  return;
+                }
                 if (channelDelegate) {
                   auto callback = std::make_unique<WebViewChannelDelegate::LoadResourceWithCustomSchemeCallback>();
-                  auto defaultBehaviour = [this, deferral, args](const std::optional<std::shared_ptr<CustomSchemeResponse>> response)
+                  auto defaultBehaviour = [this, alive = alive_, deferral, args](const std::optional<std::shared_ptr<CustomSchemeResponse>> response)
                     {
+                      if (!*alive) {
+                        return;
+                      }
                       failedLog(deferral->Complete());
                     };
-                  callback->nonNullSuccess = [this, deferral, args](const std::shared_ptr<CustomSchemeResponse> response)
+                  callback->nonNullSuccess = [this, alive = alive_, deferral, args](const std::shared_ptr<CustomSchemeResponse> response)
                     {
+                      if (!*alive) {
+                        return false;
+                      }
                       args->put_Response(response->toWebView2Response(webViewEnv));
                       failedLog(deferral->Complete());
                       return false;
                     };
                   callback->defaultBehaviour = defaultBehaviour;
-                  callback->error = [this, defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
+                  callback->error = [this, alive = alive_, defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
                     {
+                      if (!*alive) {
+                        return;
+                      }
                       debugLog(error_code + ", " + error_message);
                       defaultBehaviour(std::nullopt);
                     };
@@ -1005,18 +1105,27 @@ namespace drago_inappwebview_plugin
 
             if (settings->useShouldInterceptRequest) {
               auto callback = std::make_unique<WebViewChannelDelegate::ShouldInterceptRequestCallback>();
-              auto defaultBehaviour = [this, deferral, args](const std::optional<std::shared_ptr<WebResourceResponse>> response)
+              auto defaultBehaviour = [this, alive = alive_, deferral, args](const std::optional<std::shared_ptr<WebResourceResponse>> response)
                 {
+                  if (!*alive) {
+                    return;
+                  }
                   failedLog(deferral->Complete());
                 };
-              callback->nonNullSuccess = [this, deferral, args](const std::shared_ptr<WebResourceResponse> response)
+              callback->nonNullSuccess = [this, alive = alive_, deferral, args](const std::shared_ptr<WebResourceResponse> response)
                 {
+                  if (!*alive) {
+                    return false;
+                  }
                   args->put_Response(response->toWebView2Response(webViewEnv));
                   failedLog(deferral->Complete());
                   return false;
                 };
-              callback->nullSuccess = [this, deferral, args, isCustomScheme, onLoadResourceWithCustomSchemeCallback]()
+              callback->nullSuccess = [this, alive = alive_, deferral, args, isCustomScheme, onLoadResourceWithCustomSchemeCallback]()
                 {
+                  if (!*alive) {
+                    return false;
+                  }
                   if (isCustomScheme) {
                     onLoadResourceWithCustomSchemeCallback();
                   }
@@ -1026,8 +1135,11 @@ namespace drago_inappwebview_plugin
                   return false;
                 };
               callback->defaultBehaviour = defaultBehaviour;
-              callback->error = [this, defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
+              callback->error = [this, alive = alive_, defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
                 {
+                  if (!*alive) {
+                    return;
+                  }
                   debugLog(error_code + ", " + error_message);
                   defaultBehaviour(std::nullopt);
                 };
@@ -1042,7 +1154,7 @@ namespace drago_inappwebview_plugin
           }
           return S_OK;
         }
-      ).Get(), nullptr);
+      ).Get(), trackEventToken(webView, [](auto* o, EventRegistrationToken t) { return o->remove_WebResourceRequested(t); }));
     failedLog(add_WebResourceRequested_HResult);
 
     auto add_ProcessFailed_HResult = webView->add_ProcessFailed(
@@ -1110,7 +1222,7 @@ namespace drago_inappwebview_plugin
           }
           return S_OK;
         }
-      ).Get(), nullptr);
+      ).Get(), trackEventToken(webView, [](auto* o, EventRegistrationToken t) { return o->remove_ProcessFailed(t); }));
     failedLog(add_ProcessFailed_HResult);
 
     wil::com_ptr<ICoreWebView2_2> webView2;
@@ -1128,7 +1240,7 @@ namespace drago_inappwebview_plugin
             }
             return S_OK;
           }
-        ).Get(), nullptr);
+        ).Get(), trackEventToken(webView2, [](auto* o, EventRegistrationToken t) { return o->remove_DOMContentLoaded(t); }));
       failedLog(add_DOMContentLoaded_HResult);
     }
 
@@ -1150,7 +1262,7 @@ namespace drago_inappwebview_plugin
             }
             return S_OK;
           }
-        ).Get(), nullptr);
+        ).Get(), trackEventToken(webView4, [](auto* o, EventRegistrationToken t) { return o->remove_FrameCreated(t); }));
       failedLog(add_FrameCreated_HResult);
 
       auto add_DownloadStarting_HResult = webView4->add_DownloadStarting(
@@ -1185,12 +1297,18 @@ namespace drago_inappwebview_plugin
               );
 
               auto callback = std::make_unique<WebViewChannelDelegate::DownloadStartRequestCallback>();
-              auto defaultBehaviour = [this, deferral, args](const std::optional<const std::shared_ptr<DownloadStartResponse>> response)
+              auto defaultBehaviour = [this, alive = alive_, deferral, args](const std::optional<const std::shared_ptr<DownloadStartResponse>> response)
                 {
+                  if (!*alive) {
+                    return;
+                  }
                   failedLog(deferral->Complete());
                 };
-              callback->nonNullSuccess = [this, deferral, args](const std::shared_ptr<DownloadStartResponse> response)
+              callback->nonNullSuccess = [this, alive = alive_, deferral, args](const std::shared_ptr<DownloadStartResponse> response)
                 {
+                  if (!*alive) {
+                    return false;
+                  }
                   failedLog(args->put_Handled(response->handled));
                   auto resultFilePath = response->resultFilePath;
                   if (resultFilePath.has_value()) {
@@ -1208,8 +1326,11 @@ namespace drago_inappwebview_plugin
                   return false;
                 };
               callback->defaultBehaviour = defaultBehaviour;
-              callback->error = [this, defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
+              callback->error = [this, alive = alive_, defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
                 {
+                  if (!*alive) {
+                    return;
+                  }
                   debugLog(error_code + ", " + error_message);
                   defaultBehaviour(std::nullopt);
                 };
@@ -1217,7 +1338,7 @@ namespace drago_inappwebview_plugin
             }
             return S_OK;
           }
-        ).Get(), nullptr);
+        ).Get(), trackEventToken(webView4, [](auto* o, EventRegistrationToken t) { return o->remove_DownloadStarting(t); }));
       failedLog(add_DownloadStarting_HResult);
     }
 
@@ -1292,12 +1413,18 @@ namespace drago_inappwebview_plugin
               );
 
               auto callback = std::make_unique<WebViewChannelDelegate::ReceivedClientCertRequestCallback>();
-              auto defaultBehaviour = [this, deferral, args](const std::optional<std::shared_ptr<ClientCertResponse>> response)
+              auto defaultBehaviour = [this, alive = alive_, deferral, args](const std::optional<std::shared_ptr<ClientCertResponse>> response)
                 {
+                  if (!*alive) {
+                    return;
+                  }
                   failedLog(deferral->Complete());
                 };
-              callback->nonNullSuccess = [this, deferral, certCount, certificateCollection, args](const std::shared_ptr<ClientCertResponse> response)
+              callback->nonNullSuccess = [this, alive = alive_, deferral, certCount, certificateCollection, args](const std::shared_ptr<ClientCertResponse> response)
                 {
+                  if (!*alive) {
+                    return false;
+                  }
                   auto action = response->action;
 
                   if (action.has_value()) {
@@ -1327,8 +1454,11 @@ namespace drago_inappwebview_plugin
                   return true;
                 };
               callback->defaultBehaviour = defaultBehaviour;
-              callback->error = [this, defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
+              callback->error = [this, alive = alive_, defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
                 {
+                  if (!*alive) {
+                    return;
+                  }
                   debugLog(error_code + ", " + error_message);
                   defaultBehaviour(std::nullopt);
                 };
@@ -1336,7 +1466,7 @@ namespace drago_inappwebview_plugin
             }
             return S_OK;
           })
-        .Get(), nullptr);
+        .Get(), trackEventToken(webView5, [](auto* o, EventRegistrationToken t) { return o->remove_ClientCertificateRequested(t); }));
       failedLog(add_ClientCertificateRequested_HResult);
     }
 
@@ -1383,12 +1513,18 @@ namespace drago_inappwebview_plugin
                 );
 
                 auto callback = std::make_unique<WebViewChannelDelegate::ReceivedHttpAuthRequestCallback>();
-                auto defaultBehaviour = [this, deferral, args](const std::optional<std::shared_ptr<HttpAuthResponse>> response)
+                auto defaultBehaviour = [this, alive = alive_, deferral, args](const std::optional<std::shared_ptr<HttpAuthResponse>> response)
                   {
+                    if (!*alive) {
+                      return;
+                    }
                     failedLog(deferral->Complete());
                   };
-                callback->nonNullSuccess = [this, deferral, basicAuthenticationResponse, args](const std::shared_ptr<HttpAuthResponse> response)
+                callback->nonNullSuccess = [this, alive = alive_, deferral, basicAuthenticationResponse, args](const std::shared_ptr<HttpAuthResponse> response)
                   {
+                    if (!*alive) {
+                      return false;
+                    }
                     auto action = response->action;
                     std::wstring username = utf8_to_wide(response->username);
                     std::wstring password = utf8_to_wide(response->password);
@@ -1410,8 +1546,11 @@ namespace drago_inappwebview_plugin
                     return true;
                   };
                 callback->defaultBehaviour = defaultBehaviour;
-                callback->error = [this, defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
+                callback->error = [this, alive = alive_, defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
                   {
+                    if (!*alive) {
+                      return;
+                    }
                     debugLog(error_code + ", " + error_message);
                     defaultBehaviour(std::nullopt);
                   };
@@ -1423,7 +1562,7 @@ namespace drago_inappwebview_plugin
             }
             return S_OK;
           })
-        .Get(), nullptr);
+        .Get(), trackEventToken(webView10, [](auto* o, EventRegistrationToken t) { return o->remove_BasicAuthenticationRequested(t); }));
       failedLog(add_BasicAuthenticationRequested_HResult);
     }
 
@@ -1470,12 +1609,18 @@ namespace drago_inappwebview_plugin
                 );
 
                 auto callback = std::make_unique<WebViewChannelDelegate::ReceivedServerTrustAuthRequestCallback>();
-                auto defaultBehaviour = [this, deferral, args](const std::optional<std::shared_ptr<ServerTrustAuthResponse>> response)
+                auto defaultBehaviour = [this, alive = alive_, deferral, args](const std::optional<std::shared_ptr<ServerTrustAuthResponse>> response)
                   {
+                    if (!*alive) {
+                      return;
+                    }
                     failedLog(deferral->Complete());
                   };
-                callback->nonNullSuccess = [this, deferral, args](const std::shared_ptr<ServerTrustAuthResponse> response)
+                callback->nonNullSuccess = [this, alive = alive_, deferral, args](const std::shared_ptr<ServerTrustAuthResponse> response)
                   {
+                    if (!*alive) {
+                      return false;
+                    }
                     auto action = response->action;
 
                     if (action.has_value()) {
@@ -1495,8 +1640,11 @@ namespace drago_inappwebview_plugin
                     return true;
                   };
                 callback->defaultBehaviour = defaultBehaviour;
-                callback->error = [this, defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
+                callback->error = [this, alive = alive_, defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
                   {
+                    if (!*alive) {
+                      return;
+                    }
                     debugLog(error_code + ", " + error_message);
                     defaultBehaviour(std::nullopt);
                   };
@@ -1508,7 +1656,7 @@ namespace drago_inappwebview_plugin
             }
             return S_OK;
           }
-        ).Get(), nullptr);
+        ).Get(), trackEventToken(webView14, [](auto* o, EventRegistrationToken t) { return o->remove_ServerCertificateErrorDetected(t); }));
       failedLog(add_ServerCertificateErrorDetected_HResult);
     }
 
@@ -1527,8 +1675,11 @@ namespace drago_inappwebview_plugin
 
             auto hr = webView15->GetFavicon(COREWEBVIEW2_FAVICON_IMAGE_FORMAT_PNG,
               Callback<ICoreWebView2GetFaviconCompletedHandler>(
-                [this, faviconUrl](HRESULT errorCode, IStream* faviconStream)
+                [this, alive = alive_, faviconUrl](HRESULT errorCode, IStream* faviconStream)
                 {
+                  if (!*alive) {
+                    return S_OK;
+                  }
                   std::optional<std::vector<uint8_t>> icon = std::nullopt;
                   if (succeededOrLog(errorCode) && faviconStream) {
                     icon = readStreamBytes(faviconStream);
@@ -1550,7 +1701,7 @@ namespace drago_inappwebview_plugin
 
             return S_OK;
           })
-        .Get(), nullptr);
+        .Get(), trackEventToken(webView15, [](auto* o, EventRegistrationToken t) { return o->remove_FaviconChanged(t); }));
       failedLog(add_FaviconChanged_HResult);
     }
 
@@ -1610,7 +1761,7 @@ namespace drago_inappwebview_plugin
             channelDelegate->onLaunchingExternalUriScheme(std::move(request), std::move(callback));
             return S_OK;
           })
-        .Get(), nullptr);
+        .Get(), trackEventToken(webView18, [](auto* o, EventRegistrationToken t) { return o->remove_LaunchingExternalUriScheme(t); }));
       failedLog(add_LaunchingExternalUriScheme_HResult);
     }
 
@@ -1729,7 +1880,7 @@ namespace drago_inappwebview_plugin
             channelDelegate->onNotificationReceived(std::move(request), std::move(callback));
             return S_OK;
           })
-        .Get(), nullptr);
+        .Get(), trackEventToken(webView24, [](auto* o, EventRegistrationToken t) { return o->remove_NotificationReceived(t); }));
       failedLog(add_NotificationReceived_HResult);
     }
 
@@ -1808,7 +1959,7 @@ namespace drago_inappwebview_plugin
             channelDelegate->onSaveAsUIShowing(std::move(request), std::move(callback));
             return S_OK;
           })
-        .Get(), nullptr);
+        .Get(), trackEventToken(webView25, [](auto* o, EventRegistrationToken t) { return o->remove_SaveAsUIShowing(t); }));
       failedLog(add_SaveAsUIShowing_HResult);
     }
 
@@ -1875,7 +2026,7 @@ namespace drago_inappwebview_plugin
             channelDelegate->onSaveFileSecurityCheckStarting(std::move(request), std::move(callback));
             return S_OK;
           })
-        .Get(), nullptr);
+        .Get(), trackEventToken(webView26, [](auto* o, EventRegistrationToken t) { return o->remove_SaveFileSecurityCheckStarting(t); }));
       failedLog(add_SaveFileSecurityCheckStarting_HResult);
     }
 
@@ -1942,7 +2093,7 @@ namespace drago_inappwebview_plugin
             channelDelegate->onScreenCaptureStarting(std::move(request), std::move(callback));
             return S_OK;
           })
-        .Get(), nullptr);
+        .Get(), trackEventToken(webView27, [](auto* o, EventRegistrationToken t) { return o->remove_ScreenCaptureStarting(t); }));
       failedLog(add_ScreenCaptureStarting_HResult);
     }
 
@@ -1969,7 +2120,7 @@ namespace drago_inappwebview_plugin
           }
           return S_OK;
         })
-      .Get(), nullptr));
+      .Get(), trackEventToken(webViewCompositionController, [](auto* o, EventRegistrationToken t) { return o->remove_CursorChanged(t); })));
   }
 
   std::optional<std::string> InAppWebView::getUrl() const
@@ -2198,8 +2349,11 @@ namespace drago_inappwebview_plugin
   void InAppWebView::goBackOrForward(const int64_t& steps)
   {
     getCopyBackForwardList(
-      [this, steps](std::unique_ptr<WebHistory> webHistory)
+      [this, alive = alive_, steps](std::unique_ptr<WebHistory> webHistory)
       {
+        if (!*alive) {
+          return;
+        }
         if (webHistory && webHistory->currentIndex.has_value() && webHistory->list.has_value()) {
           auto currentIndex = webHistory->currentIndex.value();
           auto items = &webHistory->list.value();
@@ -2209,8 +2363,11 @@ namespace drago_inappwebview_plugin
             auto entryId = items->at(nextIndex)->entryId;
             if (entryId.has_value()) {
               failedAndLog(webView->CallDevToolsProtocolMethod(L"Page.navigateToHistoryEntry", utf8_to_wide("{\"entryId\": " + std::to_string(entryId.value()) + "}").c_str(), Callback<ICoreWebView2CallDevToolsProtocolMethodCompletedHandler>(
-                [this](HRESULT errorCode, LPCWSTR returnObjectAsJson)
+                [this, alive = alive_](HRESULT errorCode, LPCWSTR returnObjectAsJson)
                 {
+                  if (!*alive) {
+                    return S_OK;
+                  }
                   failedLog(errorCode);
                   return S_OK;
                 }
@@ -2312,8 +2469,11 @@ namespace drago_inappwebview_plugin
     }
 
     userContentController->createContentWorld(contentWorld,
-      [=](const int& contextId)
+      [=, alive = alive_](const int& contextId)
       {
+        if (!*alive) {
+          return;
+        }
         nlohmann::json parameters = {
           {"expression", source},
           { "returnByValue", true }
@@ -2324,8 +2484,11 @@ namespace drago_inappwebview_plugin
         }
 
         auto hr = webView->CallDevToolsProtocolMethod(L"Runtime.evaluate", utf8_to_wide(parameters.dump()).c_str(), Callback<ICoreWebView2CallDevToolsProtocolMethodCompletedHandler>(
-          [this, completionHandler](HRESULT errorCode, LPCWSTR returnObjectAsJson)
+          [this, alive = alive_, completionHandler](HRESULT errorCode, LPCWSTR returnObjectAsJson)
           {
+            if (!*alive) {
+              return S_OK;
+            }
             nlohmann::json result;
             if (succeededOrLog(errorCode)) {
               nlohmann::json json = nlohmann::json::parse(wide_to_utf8(returnObjectAsJson));
@@ -2365,8 +2528,11 @@ namespace drago_inappwebview_plugin
     }
 
     userContentController->createContentWorld(contentWorld,
-      [=](const int& contextId)
+      [=, alive = alive_](const int& contextId)
       {
+        if (!*alive) {
+          return;
+        }
         std::vector<std::string> functionArgumentNamesList;
         std::vector<std::string> functionArgumentValuesList;
 
@@ -2391,8 +2557,11 @@ namespace drago_inappwebview_plugin
         }
 
         auto hr = webView->CallDevToolsProtocolMethod(L"Runtime.evaluate", utf8_to_wide(parameters.dump()).c_str(), Callback<ICoreWebView2CallDevToolsProtocolMethodCompletedHandler>(
-          [this, completionHandler](HRESULT errorCode, LPCWSTR returnObjectAsJson)
+          [this, alive = alive_, completionHandler](HRESULT errorCode, LPCWSTR returnObjectAsJson)
           {
+            if (!*alive) {
+              return S_OK;
+            }
             nlohmann::json result = {
               {"value", nlohmann::json{}},
               {"error", nlohmann::json{}}
@@ -2564,8 +2733,11 @@ namespace drago_inappwebview_plugin
     std::string channelId = get_uuid();
     std::string js = WebMessageChannelJS::createWebMessageChannelJs(channelId);
 
-    evaluateJavascript(js, ContentWorld::page(), [this, callback, channelId](const std::string& result)
+    evaluateJavascript(js, ContentWorld::page(), [this, alive = alive_, callback, channelId](const std::string& result)
       {
+        if (!*alive) {
+          return;
+        }
         if (!result.empty() && result != "null") {
           auto channel = std::make_unique<WebMessageChannel>(
             plugin->registrar->messenger(), channelId, this);
@@ -2836,8 +3008,11 @@ namespace drago_inappwebview_plugin
     auto printJobControllerCapture = printJobController;
 
     HRESULT printHr = webView16->Print(wv2PrintSettings.get(), Callback<ICoreWebView2PrintCompletedHandler>(
-      [this, printJobId, printJobControllerCapture](HRESULT errorCode, COREWEBVIEW2_PRINT_STATUS printStatus) -> HRESULT
+      [this, alive = alive_, printJobId, printJobControllerCapture](HRESULT errorCode, COREWEBVIEW2_PRINT_STATUS printStatus) -> HRESULT
       {
+        if (!*alive) {
+          return S_OK;
+        }
         bool success = SUCCEEDED(errorCode) && printStatus == COREWEBVIEW2_PRINT_STATUS_SUCCEEDED;
 
         if (printJobControllerCapture) {
@@ -2975,8 +3150,11 @@ namespace drago_inappwebview_plugin
     }
 
     auto hr = webView->CallDevToolsProtocolMethod(L"Page.captureScreenshot", utf8_to_wide(parameters.dump()).c_str(), Callback<ICoreWebView2CallDevToolsProtocolMethodCompletedHandler>(
-      [this, completionHandler](HRESULT errorCode, LPCWSTR returnObjectAsJson)
+      [this, alive = alive_, completionHandler](HRESULT errorCode, LPCWSTR returnObjectAsJson)
       {
+        if (!*alive) {
+          return S_OK;
+        }
         std::optional<std::string> result = std::nullopt;
         if (succeededOrLog(errorCode)) {
           nlohmann::json json = nlohmann::json::parse(wide_to_utf8(returnObjectAsJson));
@@ -3105,7 +3283,7 @@ namespace drago_inappwebview_plugin
   {
     if (!webView) {
       if (completionHandler) {
-        completionHandler(S_OK, std::nullopt);
+        completionHandler(E_POINTER, std::nullopt);
       }
       return;
     }
@@ -3131,7 +3309,7 @@ namespace drago_inappwebview_plugin
 
   void InAppWebView::addDevToolsProtocolEventListener(const std::string& eventName)
   {
-    if (map_contains(devToolsProtocolEventListener_, eventName)) {
+    if (!webView || map_contains(devToolsProtocolEventListener_, eventName)) {
       return;
     }
 
@@ -3177,8 +3355,11 @@ namespace drago_inappwebview_plugin
     wil::com_ptr<ICoreWebView2_3> webView3;
     if (SUCCEEDED(webView->QueryInterface(IID_PPV_ARGS(&webView3))) && succeededOrLog(webViewController->put_IsVisible(false))) {
       failedLog(webView3->TrySuspend(Callback<ICoreWebView2TrySuspendCompletedHandler>(
-        [this](HRESULT errorCode, BOOL isSuccessful) -> HRESULT
+        [this, alive = alive_](HRESULT errorCode, BOOL isSuccessful) -> HRESULT
         {
+          if (!*alive) {
+            return S_OK;
+          }
           failedLog(errorCode);
           return S_OK;
         })
@@ -3210,8 +3391,11 @@ namespace drago_inappwebview_plugin
     };
 
     auto hr = webView->CallDevToolsProtocolMethod(L"Network.getCertificate", utf8_to_wide(parameters.dump()).c_str(), Callback<ICoreWebView2CallDevToolsProtocolMethodCompletedHandler>(
-      [this, completionHandler](HRESULT errorCode, LPCWSTR returnObjectAsJson)
+      [this, alive = alive_, completionHandler](HRESULT errorCode, LPCWSTR returnObjectAsJson)
       {
+        if (!*alive) {
+          return S_OK;
+        }
         std::optional<std::unique_ptr<SslCertificate>> result = std::nullopt;
         if (succeededOrLog(errorCode)) {
           nlohmann::json json = nlohmann::json::parse(wide_to_utf8(returnObjectAsJson));
@@ -3976,8 +4160,11 @@ namespace drago_inappwebview_plugin
             return S_OK;
           }
 
-          auto resolveInternalHandler = [this, callHandlerID]()
+          auto resolveInternalHandler = [this, alive = alive_, callHandlerID]()
             {
+              if (!*alive) {
+                return;
+              }
               evaluateJavascript("if (window." + JavaScriptBridgeJS::get_JAVASCRIPT_BRIDGE_NAME() + "[" + std::to_string(callHandlerID) + "] != null) { \
                       window." + JavaScriptBridgeJS::get_JAVASCRIPT_BRIDGE_NAME() + "[" + std::to_string(callHandlerID) + "].resolve(null); \
                       delete window." + JavaScriptBridgeJS::get_JAVASCRIPT_BRIDGE_NAME() + "[" + std::to_string(callHandlerID) + "]; \
@@ -4141,8 +4328,11 @@ namespace drago_inappwebview_plugin
           */
 
           auto callback = std::make_unique<WebViewChannelDelegate::CallJsHandlerCallback>();
-          callback->defaultBehaviour = [this, callHandlerID](const std::optional<const flutter::EncodableValue*> response)
+          callback->defaultBehaviour = [this, alive = alive_, callHandlerID](const std::optional<const flutter::EncodableValue*> response)
             {
+              if (!*alive) {
+                return;
+              }
               std::string json = "null";
               if (response.has_value() && !response.value()->IsNull()) {
                 json = std::get<std::string>(*(response.value()));
@@ -4153,8 +4343,11 @@ namespace drago_inappwebview_plugin
                       delete window." + JavaScriptBridgeJS::get_JAVASCRIPT_BRIDGE_NAME() + "[" + std::to_string(callHandlerID) + "]; \
                     }", ContentWorld::page(), nullptr);
             };
-          callback->error = [this, callHandlerID](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
+          callback->error = [this, alive = alive_, callHandlerID](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
             {
+              if (!*alive) {
+                return;
+              }
               auto errorMessage = error_code + ", " + error_message;
               debugLog(errorMessage);
 
@@ -4179,6 +4372,22 @@ namespace drago_inappwebview_plugin
   InAppWebView::~InAppWebView()
   {
     debugLog("dealloc InAppWebView");
+    // any pending async completion / Flutter callback capturing this becomes a no-op
+    *alive_ = false;
+    // remove all the WebView2 event handlers capturing this before closing the WebView
+    for (auto& [eventName, listener] : devToolsProtocolEventListener_) {
+      if (listener.first) {
+        failedLog(listener.first->remove_DevToolsProtocolEventReceived(listener.second));
+      }
+    }
+    devToolsProtocolEventListener_.clear();
+    for (auto it = eventTokens_.rbegin(); it != eventTokens_.rend(); ++it) {
+      auto& entry = *it;
+      if (entry && entry->remove && entry->token.value != 0) {
+        entry->remove(entry->token);
+      }
+    }
+    eventTokens_.clear();
     userContentController = nullptr;
     if (webView) {
       failedLog(webView->Stop());

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.pichillilorenzo.drago_inappwebview">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
         <activity
             android:theme="@style/AppTheme"
@@ -29,6 +28,15 @@
             android:name="com.pichillilorenzo.drago_inappwebview.chrome_custom_tabs.ActionBroadcastReceiver"
             android:enabled="true"
             android:exported="false" />
+        <provider
+            android:name="com.pichillilorenzo.drago_inappwebview.InAppWebViewFileProvider"
+            android:authorities="${applicationId}.drago_inappwebview.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
         <meta-data
             android:name="io.flutter.embedded_views_preview"
             android:value="true" />

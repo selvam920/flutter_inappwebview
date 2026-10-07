@@ -120,25 +120,27 @@ namespace drago_inappwebview_plugin
     : hwnd_(hwnd), view(std::move(webView)), texture_registrar_(texture_registrar)
   {
 #ifdef HAVE_FLUTTER_D3D_TEXTURE
-    texture_bridge_ =
-      std::make_unique<TextureBridgeGpu>(graphics_context, view->surface());
+    auto gpu_bridge =
+      std::make_shared<TextureBridgeGpu>(graphics_context, view->surface());
+    texture_bridge_ = gpu_bridge;
 
     flutter_texture_ =
-      std::make_unique<flutter::TextureVariant>(flutter::GpuSurfaceTexture(
+      std::make_shared<flutter::TextureVariant>(flutter::GpuSurfaceTexture(
         kFlutterDesktopGpuSurfaceTypeDxgiSharedHandle,
-        [bridge = static_cast<TextureBridgeGpu*>(texture_bridge_.get())](
+        [bridge = gpu_bridge](
           size_t width,
           size_t height) -> const FlutterDesktopGpuSurfaceDescriptor*
         {
           return bridge->GetSurfaceDescriptor(width, height);
         }));
 #else
-    texture_bridge_ = std::make_unique<TextureBridgeFallback>(
+    auto fallback_bridge = std::make_shared<TextureBridgeFallback>(
       graphics_context, view->surface());
+    texture_bridge_ = fallback_bridge;
 
     flutter_texture_ =
-      std::make_unique<flutter::TextureVariant>(flutter::PixelBufferTexture(
-        [bridge = static_cast<TextureBridgeFallback*>(texture_bridge_.get())](
+      std::make_shared<flutter::TextureVariant>(flutter::PixelBufferTexture(
+        [bridge = fallback_bridge](
           size_t width, size_t height) -> const FlutterDesktopPixelBuffer*
         {
           return bridge->CopyPixelBuffer(width, height);
@@ -200,7 +202,20 @@ namespace drago_inappwebview_plugin
   {
     debugLog("dealloc CustomPlatformView");
     event_sink_ = nullptr;
-    texture_registrar_->UnregisterTexture(texture_id_, nullptr);
+    if (view) {
+      // the InAppWebView is shared and may outlive this view
+      view->onSurfaceSizeChanged(nullptr);
+      view->onCursorChanged(nullptr);
+    }
+    if (texture_bridge_) {
+      // stop capturing first, then drop the callback capturing this
+      texture_bridge_->Stop();
+      texture_bridge_->SetOnFrameAvailable(nullptr);
+    }
+    // the engine may still read the texture until the unregistration completes,
+    // so keep the texture and its bridge alive until then
+    texture_registrar_->UnregisterTexture(texture_id_,
+      [bridge = std::move(texture_bridge_), texture = std::move(flutter_texture_)]() {});
   }
 
   void CustomPlatformView::RegisterEventHandlers()

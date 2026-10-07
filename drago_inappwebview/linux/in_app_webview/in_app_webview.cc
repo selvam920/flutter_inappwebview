@@ -386,6 +386,32 @@ InAppWebView::~InAppWebView() {
 
   live_webviews_by_id().erase(id_);
 
+  // Invalidate weak handles held by pending async callbacks.
+  lifetime_token_.reset();
+
+  // Disconnect every handler connected with `this` as user data, and the
+  // frame-displayed callback, before anything else is torn down.
+  if (webview_ != nullptr) {
+    if (frame_displayed_callback_id_ != 0) {
+      webkit_web_view_remove_frame_displayed_callback(webview_, frame_displayed_callback_id_);
+      frame_displayed_callback_id_ = 0;
+    }
+    WebKitBackForwardList* bf_list = webkit_web_view_get_back_forward_list(webview_);
+    if (bf_list != nullptr) {
+      g_signal_handlers_disconnect_by_data(bf_list, this);
+    }
+    g_signal_handlers_disconnect_by_data(webview_, this);
+  }
+
+  // Close and release any script dialogs still waiting for a Dart reply.
+  for (auto& pair : pending_script_dialogs_) {
+    if (pair.second != nullptr) {
+      webkit_script_dialog_close(pair.second);
+      webkit_script_dialog_unref(pair.second);
+    }
+  }
+  pending_script_dialogs_.clear();
+
   CleanupMonitorChangeHandlers();
 
   context_menu_popup_.reset();
@@ -475,18 +501,10 @@ InAppWebView::~InAppWebView() {
   {
     std::lock_guard<std::mutex> lock(wpe_buffer_mutex_);
     
-    // Clean up EGL image first (while display is still valid)
-    if (current_egl_image_ != nullptr && egl_display_ != nullptr) {
-      static PFNEGLDESTROYIMAGEKHRPROC eglDestroyImageKHR = nullptr;
-      if (eglDestroyImageKHR == nullptr) {
-        eglDestroyImageKHR = (PFNEGLDESTROYIMAGEKHRPROC)eglGetProcAddress("eglDestroyImageKHR");
-      }
-      if (eglDestroyImageKHR != nullptr) {
-        eglDestroyImageKHR(static_cast<EGLDisplay>(egl_display_), 
-                           static_cast<EGLImageKHR>(current_egl_image_));
-      }
-      current_egl_image_ = nullptr;
-    }
+    // The EGLImage came from wpe_buffer_import_to_egl_image (transfer none):
+    // it is owned and cached by the WPEBuffer and destroyed with it, so we
+    // must not eglDestroyImage it ourselves - just drop our pointer.
+    current_egl_image_ = nullptr;
     
     // Release pending buffer back to WPE
     if (current_buffer_ != nullptr && wpe_view_ != nullptr) {
@@ -1022,7 +1040,7 @@ void InAppWebView::RegisterEventHandlers() {
   g_signal_connect(webview_, "notify::microphone-capture-state",
                    G_CALLBACK(OnNotifyMicrophoneCaptureState), this);
 
-  webkit_web_view_add_frame_displayed_callback(
+  frame_displayed_callback_id_ = webkit_web_view_add_frame_displayed_callback(
       webview_,
       [](WebKitWebView*, gpointer data) {
         auto* self = static_cast<InAppWebView*>(data);
@@ -1306,9 +1324,7 @@ void InAppWebView::OnWpePlatformBufferRendered(WPEBuffer* buffer) {
   WPEBuffer* previous_buffer = nullptr;
   bool buffer_handled = false;
   
-  // Track EGL import failures to avoid repeated attempts
-  // Static because if EGL fails once, it will likely keep failing (e.g., no GPU)
-  static bool egl_import_failed_permanently = false;
+  // EGL import failures are tracked per instance in egl_import_failed_permanently_
   
   {
     std::lock_guard<std::mutex> lock(wpe_buffer_mutex_);
@@ -1317,18 +1333,9 @@ void InAppWebView::OnWpePlatformBufferRendered(WPEBuffer* buffer) {
     // This ensures the EGL image's backing memory stays valid until we have a new frame
     previous_buffer = current_buffer_;
     
-    // Destroy previous EGL image if we created one
-    if (current_egl_image_ != nullptr && egl_display_ != nullptr) {
-      static PFNEGLDESTROYIMAGEKHRPROC eglDestroyImageKHR = nullptr;
-      if (eglDestroyImageKHR == nullptr) {
-        eglDestroyImageKHR = (PFNEGLDESTROYIMAGEKHRPROC)eglGetProcAddress("eglDestroyImageKHR");
-      }
-      if (eglDestroyImageKHR != nullptr) {
-        eglDestroyImageKHR(static_cast<EGLDisplay>(egl_display_), 
-                           static_cast<EGLImageKHR>(current_egl_image_));
-      }
-      current_egl_image_ = nullptr;
-    }
+    // Previous EGLImage is owned by its WPEBuffer (wpe_buffer_import_to_egl_image
+    // is transfer none) - never eglDestroyImage it; just drop our pointer.
+    current_egl_image_ = nullptr;
     
     // Check buffer type to determine best rendering path
     bool is_dma_buf = WPE_IS_BUFFER_DMA_BUF(buffer);
@@ -1338,7 +1345,7 @@ void InAppWebView::OnWpePlatformBufferRendered(WPEBuffer* buffer) {
     // Only attempt EGL for DMA-BUF buffers (SHM buffers cannot be imported via EGL)
     // Skip if previous EGL attempts failed
     if (egl_display_ != nullptr && 
-        is_dma_buf && !egl_import_failed_permanently) {
+        is_dma_buf && !egl_import_failed_permanently_) {
       GError* error = nullptr;
       void* egl_image = wpe_buffer_import_to_egl_image(buffer, &error);
       
@@ -1350,7 +1357,7 @@ void InAppWebView::OnWpePlatformBufferRendered(WPEBuffer* buffer) {
       } else {
         // Mark EGL as permanently failed so we don't keep trying
         // This is common in VMs or software-only environments
-        egl_import_failed_permanently = true;
+        egl_import_failed_permanently_ = true;
         if (error != nullptr) {
           g_clear_error(&error);
         }
@@ -1692,12 +1699,17 @@ void InAppWebView::postUrl(const std::string& url, const std::vector<uint8_t>& p
   // Use evaluateJavascript to run the XHR after the blank page loads
   // We need to wait for the load to complete, so we use a delayed approach
   std::string* js_copy = new std::string(js);
+  struct DelayedJs {
+    InAppWebView* view;
+    std::weak_ptr<int> alive;
+    std::string* js;
+  };
   g_timeout_add(100, [](gpointer user_data) -> gboolean {
-    auto* data = static_cast<std::pair<InAppWebView*, std::string*>*>(user_data);
-    if (data->first->webview() != nullptr) {
+    auto* data = static_cast<DelayedJs*>(user_data);
+    if (!data->alive.expired() && data->view->webview() != nullptr) {
       webkit_web_view_evaluate_javascript(
-          data->first->webview(),
-          data->second->c_str(),
+          data->view->webview(),
+          data->js->c_str(),
           -1,
           nullptr,  // world
           nullptr,  // source_uri
@@ -1705,10 +1717,10 @@ void InAppWebView::postUrl(const std::string& url, const std::vector<uint8_t>& p
           nullptr,  // callback
           nullptr); // user_data
     }
-    delete data->second;
+    delete data->js;
     delete data;
     return G_SOURCE_REMOVE;
-  }, new std::pair<InAppWebView*, std::string*>(this, js_copy));
+  }, new DelayedJs{this, std::weak_ptr<int>(lifetime_token_), js_copy});
 }
 
 void InAppWebView::reload() {
@@ -3877,7 +3889,8 @@ gboolean InAppWebView::OnDecidePolicy(WebKitWebView* web_view, WebKitPolicyDecis
       
       auto callback = std::make_unique<WebViewChannelDelegate::NavigationResponseCallback>();
       
-      callback->nonNullSuccess = [self, decision, is_mime_type_supported](int action) -> bool {
+      std::weak_ptr<int> alive = self->lifetime_token_;
+      callback->nonNullSuccess = [self, alive, decision, is_mime_type_supported](int action) -> bool {
         // NavigationResponseAction: CANCEL=0, ALLOW=1, DOWNLOAD=2
         switch (action) {
           case 0:  // CANCEL
@@ -3888,7 +3901,8 @@ gboolean InAppWebView::OnDecidePolicy(WebKitWebView* web_view, WebKitPolicyDecis
             break;
           case 1:  // ALLOW (default)
           default:
-            if (!is_mime_type_supported && self->settings_ && self->settings_->useOnDownloadStart) {
+            if (!is_mime_type_supported && !alive.expired() && self->settings_ &&
+                self->settings_->useOnDownloadStart) {
               // WebKit can't display this - convert to download
               webkit_policy_decision_download(decision);
             } else {
@@ -3900,9 +3914,10 @@ gboolean InAppWebView::OnDecidePolicy(WebKitWebView* web_view, WebKitPolicyDecis
         return false;  // Don't run defaultBehaviour
       };
       
-      callback->defaultBehaviour = [decision, is_mime_type_supported, self](const std::optional<int>& action) {
+      callback->defaultBehaviour = [decision, is_mime_type_supported, self, alive](const std::optional<int>& action) {
         // Default: allow navigation (or download if MIME not supported and download enabled)
-        if (!is_mime_type_supported && self->settings_ && self->settings_->useOnDownloadStart) {
+        if (!is_mime_type_supported && !alive.expired() && self->settings_ &&
+            self->settings_->useOnDownloadStart) {
           webkit_policy_decision_download(decision);
         } else {
           webkit_policy_decision_use(decision);
@@ -3910,10 +3925,11 @@ gboolean InAppWebView::OnDecidePolicy(WebKitWebView* web_view, WebKitPolicyDecis
         g_object_unref(decision);
       };
       
-      callback->error = [decision, is_mime_type_supported, self](const std::string& code, const std::string& message) {
+      callback->error = [decision, is_mime_type_supported, self, alive](const std::string& code, const std::string& message) {
         debugLog("Error in onNavigationResponse: " + code + " - " + message);
         // On error, allow navigation
-        if (!is_mime_type_supported && self->settings_ && self->settings_->useOnDownloadStart) {
+        if (!is_mime_type_supported && !alive.expired() && self->settings_ &&
+            self->settings_->useOnDownloadStart) {
           webkit_policy_decision_download(decision);
         } else {
           webkit_policy_decision_use(decision);
@@ -4008,14 +4024,23 @@ gboolean InAppWebView::OnDecidePolicy(WebKitWebView* web_view, WebKitPolicyDecis
       
       // CRITICAL: Set error handler to prevent navigation from being blocked on channel errors
       // Allow navigation on error to prevent page from being stuck
-      callback->error = [self, decision_id](const std::string& code, const std::string& message) {
+      // If the view is destroyed first, its destructor already ignored and
+      // released every pending policy decision, so the dead path is a no-op.
+      std::weak_ptr<int> alive = self->lifetime_token_;
+      callback->error = [self, alive, decision_id](const std::string& code, const std::string& message) {
         g_warning("shouldOverrideUrlLoading channel error: %s - %s", code.c_str(), message.c_str());
+        if (alive.expired()) {
+          return;
+        }
         // Allow navigation on error to prevent page from being stuck
         self->OnShouldOverrideUrlLoadingDecision(decision_id, true);
       };
       
       callback->defaultBehaviour =
-          [self, decision_id](const std::optional<NavigationActionPolicy> result) {
+          [self, alive, decision_id](const std::optional<NavigationActionPolicy> result) {
+            if (alive.expired()) {
+              return;
+            }
             bool allow = result.has_value() && result.value() == NavigationActionPolicy::allow;
             self->OnShouldOverrideUrlLoadingDecision(decision_id, allow);
           };
@@ -4315,12 +4340,16 @@ gboolean InAppWebView::OnScriptDialog(WebKitWebView* web_view, WebKitScriptDialo
       auto request = std::make_unique<JsAlertRequest>(url, messageStr, true);
       auto callback = std::make_unique<WebViewChannelDelegate::JsAlertCallback>();
 
-      auto* pendingDialogs = &self->pending_script_dialogs_;
+      InAppWebView* owner = self;
+      std::weak_ptr<int> alive = self->lifetime_token_;
       int64_t capturedId = dialogId;
 
       callback->nonNullSuccess = [](JsAlertResponse response) { return !response.handledByClient; };
 
-      callback->defaultBehaviour = [pendingDialogs, capturedId](std::optional<JsAlertResponse>) {
+      callback->defaultBehaviour = [owner, alive, capturedId](std::optional<JsAlertResponse>) {
+        // Dead view: its destructor already closed and released the dialog.
+        static std::map<int64_t, WebKitScriptDialog*> no_dialogs;
+        auto* pendingDialogs = alive.expired() ? &no_dialogs : &owner->pending_script_dialogs_;
         auto it = pendingDialogs->find(capturedId);
         if (it != pendingDialogs->end()) {
           webkit_script_dialog_close(it->second);
@@ -4337,10 +4366,14 @@ gboolean InAppWebView::OnScriptDialog(WebKitWebView* web_view, WebKitScriptDialo
       auto request = std::make_unique<JsConfirmRequest>(url, messageStr, true);
       auto callback = std::make_unique<WebViewChannelDelegate::JsConfirmCallback>();
 
-      auto* pendingDialogs = &self->pending_script_dialogs_;
+      InAppWebView* owner = self;
+      std::weak_ptr<int> alive = self->lifetime_token_;
       int64_t capturedId = dialogId;
 
-      callback->nonNullSuccess = [pendingDialogs, capturedId](JsConfirmResponse response) {
+      callback->nonNullSuccess = [owner, alive, capturedId](JsConfirmResponse response) {
+        // Dead view: its destructor already closed and released the dialog.
+        static std::map<int64_t, WebKitScriptDialog*> no_dialogs;
+        auto* pendingDialogs = alive.expired() ? &no_dialogs : &owner->pending_script_dialogs_;
         auto it = pendingDialogs->find(capturedId);
         if (it != pendingDialogs->end()) {
           webkit_script_dialog_confirm_set_confirmed(
@@ -4352,7 +4385,10 @@ gboolean InAppWebView::OnScriptDialog(WebKitWebView* web_view, WebKitScriptDialo
         return false;
       };
 
-      callback->defaultBehaviour = [pendingDialogs, capturedId](std::optional<JsConfirmResponse>) {
+      callback->defaultBehaviour = [owner, alive, capturedId](std::optional<JsConfirmResponse>) {
+        // Dead view: its destructor already closed and released the dialog.
+        static std::map<int64_t, WebKitScriptDialog*> no_dialogs;
+        auto* pendingDialogs = alive.expired() ? &no_dialogs : &owner->pending_script_dialogs_;
         auto it = pendingDialogs->find(capturedId);
         if (it != pendingDialogs->end()) {
           webkit_script_dialog_confirm_set_confirmed(it->second, FALSE);
@@ -4376,10 +4412,14 @@ gboolean InAppWebView::OnScriptDialog(WebKitWebView* web_view, WebKitScriptDialo
       auto request = std::make_unique<JsPromptRequest>(url, messageStr, defaultValueStr, true);
       auto callback = std::make_unique<WebViewChannelDelegate::JsPromptCallback>();
 
-      auto* pendingDialogs = &self->pending_script_dialogs_;
+      InAppWebView* owner = self;
+      std::weak_ptr<int> alive = self->lifetime_token_;
       int64_t capturedId = dialogId;
 
-      callback->nonNullSuccess = [pendingDialogs, capturedId](JsPromptResponse response) {
+      callback->nonNullSuccess = [owner, alive, capturedId](JsPromptResponse response) {
+        // Dead view: its destructor already closed and released the dialog.
+        static std::map<int64_t, WebKitScriptDialog*> no_dialogs;
+        auto* pendingDialogs = alive.expired() ? &no_dialogs : &owner->pending_script_dialogs_;
         auto it = pendingDialogs->find(capturedId);
         if (it != pendingDialogs->end()) {
           if (response.action == JsPromptResponseAction::CONFIRM && response.value.has_value()) {
@@ -4392,7 +4432,10 @@ gboolean InAppWebView::OnScriptDialog(WebKitWebView* web_view, WebKitScriptDialo
         return false;
       };
 
-      callback->defaultBehaviour = [pendingDialogs, capturedId](std::optional<JsPromptResponse>) {
+      callback->defaultBehaviour = [owner, alive, capturedId](std::optional<JsPromptResponse>) {
+        // Dead view: its destructor already closed and released the dialog.
+        static std::map<int64_t, WebKitScriptDialog*> no_dialogs;
+        auto* pendingDialogs = alive.expired() ? &no_dialogs : &owner->pending_script_dialogs_;
         auto it = pendingDialogs->find(capturedId);
         if (it != pendingDialogs->end()) {
           webkit_script_dialog_close(it->second);
@@ -4408,10 +4451,14 @@ gboolean InAppWebView::OnScriptDialog(WebKitWebView* web_view, WebKitScriptDialo
     case WEBKIT_SCRIPT_DIALOG_BEFORE_UNLOAD_CONFIRM: {
       auto callback = std::make_unique<WebViewChannelDelegate::JsBeforeUnloadCallback>();
 
-      auto* pendingDialogs = &self->pending_script_dialogs_;
+      InAppWebView* owner = self;
+      std::weak_ptr<int> alive = self->lifetime_token_;
       int64_t capturedId = dialogId;
 
-      callback->nonNullSuccess = [pendingDialogs, capturedId](JsBeforeUnloadResponse response) {
+      callback->nonNullSuccess = [owner, alive, capturedId](JsBeforeUnloadResponse response) {
+        // Dead view: its destructor already closed and released the dialog.
+        static std::map<int64_t, WebKitScriptDialog*> no_dialogs;
+        auto* pendingDialogs = alive.expired() ? &no_dialogs : &owner->pending_script_dialogs_;
         auto it = pendingDialogs->find(capturedId);
         if (it != pendingDialogs->end()) {
           webkit_script_dialog_confirm_set_confirmed(it->second, response.shouldAllowNavigation);
@@ -4422,8 +4469,11 @@ gboolean InAppWebView::OnScriptDialog(WebKitWebView* web_view, WebKitScriptDialo
         return false;
       };
 
-      callback->defaultBehaviour = [pendingDialogs,
+      callback->defaultBehaviour = [owner, alive,
                                     capturedId](std::optional<JsBeforeUnloadResponse>) {
+        // Dead view: its destructor already closed and released the dialog.
+        static std::map<int64_t, WebKitScriptDialog*> no_dialogs;
+        auto* pendingDialogs = alive.expired() ? &no_dialogs : &owner->pending_script_dialogs_;
         auto it = pendingDialogs->find(capturedId);
         if (it != pendingDialogs->end()) {
           webkit_script_dialog_confirm_set_confirmed(it->second, TRUE);

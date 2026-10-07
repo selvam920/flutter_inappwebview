@@ -611,6 +611,17 @@ class InAppWebView {
   // Disposing flag to prevent callbacks during destruction
   std::atomic<bool> is_disposing_{false};
 
+  // Liveness token: async callbacks (Dart replies, GLib timeouts) hold a
+  // weak_ptr to this and bail out once the InAppWebView has been destroyed.
+  // (FindById is not usable for this: headless/browser webviews share id 0.)
+  std::shared_ptr<int> lifetime_token_ = std::make_shared<int>(0);
+
+  // Per-instance: set once wpe_buffer_import_to_egl_image fails so we stop retrying.
+  bool egl_import_failed_permanently_ = false;
+
+  // Id returned by webkit_web_view_add_frame_displayed_callback (0 = none).
+  unsigned frame_displayed_callback_id_ = 0;
+
   // Mouse state
   double cursor_x_ = 0;
   double cursor_y_ = 0;

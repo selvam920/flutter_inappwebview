@@ -6,4 +6,12 @@ namespace drago_inappwebview_plugin
     wil::com_ptr<ICoreWebView2Deferral> deferral)
     : args(std::move(args)), deferral(std::move(deferral))
   {}
+
+  NewWindowRequestedArgs::~NewWindowRequestedArgs()
+  {
+    // never leave WebView2 waiting on an unanswered new window request
+    if (deferral) {
+      deferral->Complete();
+    }
+  }
 }

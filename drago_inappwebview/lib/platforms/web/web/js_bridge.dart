@@ -42,6 +42,7 @@ extension type JSWebView._(JSObject _) implements JSObject {
   external JSBoolean canScrollVertically();
   external JSBoolean canScrollHorizontally();
   external JSSize getSize();
+  external void dispose();
 }
 
 @JS('window.drago_inappwebview_plugin')

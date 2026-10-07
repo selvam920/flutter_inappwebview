@@ -764,7 +764,12 @@ class InAppWebViewWebElement implements Disposable {
         settings?.javaScriptHandlersOriginAllowList;
     if (javaScriptHandlersOriginAllowList != null) {
       for (String allowedOrigin in javaScriptHandlersOriginAllowList) {
-        if (RegExp(allowedOrigin).hasMatch(origin)) {
+        if (allowedOrigin == '*' ||
+            RegExp(
+              allowedOrigin.startsWith('^') || allowedOrigin.endsWith(r'$')
+                  ? allowedOrigin
+                  : '^(?:$allowedOrigin)\$',
+            ).hasMatch(origin)) {
           isOriginAllowed = true;
           break;
         }
@@ -793,6 +798,12 @@ class InAppWebViewWebElement implements Disposable {
         InAppWebViewManager.windowActions.containsKey(windowId)) {
       InAppWebViewManager.windowActions.remove(windowId);
     }
+    try {
+      jsWebView?.dispose();
+    } catch (_) {}
+    jsWebView = null;
+    userContentController.dispose();
+    iframe.src = 'about:blank';
     iframeContainer.remove();
     if (InAppWebViewManager.webViews.containsKey(_viewId)) {
       InAppWebViewManager.webViews.remove(_viewId);

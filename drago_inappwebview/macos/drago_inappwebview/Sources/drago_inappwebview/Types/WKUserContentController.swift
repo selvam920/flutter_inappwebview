@@ -110,7 +110,7 @@ extension WKUserContentController {
                 addUserScript(pluginScript)
                 for messageHandlerName in pluginScript.messageHandlerNames {
                     removeScriptMessageHandler(forName: messageHandlerName)
-                    add(scriptMessageHandler, name: messageHandlerName)
+                    add(WeakScriptMessageHandler(delegate: scriptMessageHandler), name: messageHandlerName)
                 }
             }
             if #available(macOS 11.0, *), pluginScript.requiredInAllContentWorlds {
@@ -120,7 +120,7 @@ extension WKUserContentController {
                         addUserScript(pluginScriptWithContentWorld)
                         for messageHandlerName in pluginScriptWithContentWorld.messageHandlerNames {
                             removeScriptMessageHandler(forName: messageHandlerName, contentWorld: contentWorld)
-                            add(scriptMessageHandler, contentWorld: contentWorld, name: messageHandlerName)
+                            add(WeakScriptMessageHandler(delegate: scriptMessageHandler), contentWorld: contentWorld, name: messageHandlerName)
                         }
                     }
                 }
@@ -177,7 +177,7 @@ extension WKUserContentController {
                 generatedCode += pluginScript.source + "\n"
                 for messageHandlerName in pluginScript.messageHandlerNames {
                     removeScriptMessageHandler(forName: messageHandlerName, contentWorld: contentWorld)
-                    add(scriptMessageHandler, contentWorld: contentWorld, name: messageHandlerName)
+                    add(WeakScriptMessageHandler(delegate: scriptMessageHandler), contentWorld: contentWorld, name: messageHandlerName)
                 }
             }
             if let windowId = contentWorld.windowId {

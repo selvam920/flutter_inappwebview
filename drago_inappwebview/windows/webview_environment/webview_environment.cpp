@@ -90,8 +90,11 @@ namespace drago_inappwebview_plugin
       settings && settings->userDataFolder.has_value() ? utf8_to_wide(settings->userDataFolder.value()).c_str() : nullptr,
       options.Get(),
       Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
-        [this, hwnd, completionHandler](HRESULT result, wil::com_ptr<ICoreWebView2Environment> environment) -> HRESULT
+        [this, alive = alive_, hwnd, completionHandler](HRESULT result, wil::com_ptr<ICoreWebView2Environment> environment) -> HRESULT
         {
+          if (!*alive) {
+            return S_OK;
+          }
           if (succeededOrLog(result)) {
             environment_ = std::move(environment);
 
@@ -135,9 +138,12 @@ namespace drago_inappwebview_plugin
                   }
                   if (auto environment13 = environment_.try_query<ICoreWebView2Environment13>()) {
                     auto hr = environment13->GetProcessExtendedInfos(Callback<ICoreWebView2GetProcessExtendedInfosCompletedHandler>(
-                      [this](HRESULT error, wil::com_ptr<ICoreWebView2ProcessExtendedInfoCollection> processCollection) -> HRESULT
+                      [this, alive = alive_](HRESULT error, wil::com_ptr<ICoreWebView2ProcessExtendedInfoCollection> processCollection) -> HRESULT
                       {
-                        if (succeededOrLog(error) && processCollection) {
+                        if (!*alive) {
+                          return S_OK;
+                        }
+                        if (channelDelegate && succeededOrLog(error) && processCollection) {
                           auto browserProcessInfosChangedDetail = BrowserProcessInfosChangedDetail::fromICoreWebView2ProcessExtendedInfoCollection(processCollection);
                           channelDelegate->onProcessInfosChanged(std::move(browserProcessInfosChangedDetail));
                         }
@@ -183,7 +189,7 @@ namespace drago_inappwebview_plugin
     }
 
     auto hr = environment_->CreateCoreWebView2Controller(hwnd, Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler>(
-      [this, completionHandler](HRESULT result, wil::com_ptr<ICoreWebView2Controller> controller) -> HRESULT
+      [completionHandler](HRESULT result, wil::com_ptr<ICoreWebView2Controller> controller) -> HRESULT
       {
         if (succeededOrLog(result)) {
           controller->put_IsVisible(false);
@@ -311,6 +317,8 @@ namespace drago_inappwebview_plugin
   WebViewEnvironment::~WebViewEnvironment()
   {
     debugLog("dealloc WebViewEnvironment");
+    // pending async completions capturing this become a no-op
+    *alive_ = false;
     if (environment_) {
       environment_->remove_NewBrowserVersionAvailable(newBrowserVersionAvailableToken_);
       if (auto environment5 = environment_.try_query<ICoreWebView2Environment5>()) {

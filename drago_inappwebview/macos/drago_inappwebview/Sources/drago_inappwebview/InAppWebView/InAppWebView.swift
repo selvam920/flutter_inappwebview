@@ -76,8 +76,8 @@ public class InAppWebView: WKWebView, WKUIDelegate,
     weak var fullscreenWindow: NSWindow? // Track the window that entered fullscreen
     private var printJobCompletionHandler: PrintJobController.CompletionHandler?
     
-    static var sslCertificatesMap: [String: SslCertificate] = [:] // [URL host name : SslCertificate]
-    static var credentialsProposed: [URLCredential] = []
+    var sslCertificatesMap: [String: SslCertificate] = [:] // [URL host name : SslCertificate]
+    var credentialsProposed: [URLCredential] = []
     
     var lastScrollX: CGFloat = 0
     var lastScrollY: CGFloat = 0
@@ -1390,7 +1390,7 @@ public class InAppWebView: WKWebView, WKUIDelegate,
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         initializeWindowIdJS()
         
-        InAppWebView.credentialsProposed = []
+        self.credentialsProposed = []
         evaluateJavaScript(JavaScriptBridgeJS.PLATFORM_READY_JS_SOURCE, completionHandler: nil)
 
         channelDelegate?.onLoadStop(url: url?.absoluteString)
@@ -1405,7 +1405,7 @@ public class InAppWebView: WKWebView, WKUIDelegate,
     }
     
     public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        InAppWebView.credentialsProposed = []
+        self.credentialsProposed = []
         
         var urlError: URL = url ?? URL(string: "about:blank")!
         var errorCode = -1
@@ -1454,7 +1454,7 @@ public class InAppWebView: WKWebView, WKUIDelegate,
                     completionHandlerCalled = true
                     switch action {
                         case 0:
-                            InAppWebView.credentialsProposed = []
+                            self.credentialsProposed = []
                             // used .performDefaultHandling to maintain consistency with Android
                             // because .cancelAuthenticationChallenge will call webView(_:didFail:withError:)
                             completionHandler(.performDefaultHandling, nil)
@@ -1469,22 +1469,22 @@ public class InAppWebView: WKWebView, WKUIDelegate,
                             completionHandler(.useCredential, credential)
                             break
                         case 2:
-                            if InAppWebView.credentialsProposed.count == 0 {
+                            if self.credentialsProposed.count == 0 {
                                 for (protectionSpace, credentials) in CredentialDatabase.credentialStore.allCredentials {
                                     if protectionSpace.host == host && protectionSpace.realm == realm &&
                                     protectionSpace.protocol == prot && protectionSpace.port == port {
                                         for credential in credentials {
-                                            InAppWebView.credentialsProposed.append(credential.value)
+                                            self.credentialsProposed.append(credential.value)
                                         }
                                         break
                                     }
                                 }
                             }
-                            if InAppWebView.credentialsProposed.count == 0, let credential = challenge.proposedCredential {
-                                InAppWebView.credentialsProposed.append(credential)
+                            if self.credentialsProposed.count == 0, let credential = challenge.proposedCredential {
+                                self.credentialsProposed.append(credential)
                             }
                             
-                            if let credential = InAppWebView.credentialsProposed.popLast() {
+                            if let credential = self.credentialsProposed.popLast() {
                                 completionHandler(.useCredential, credential)
                             }
                             else {
@@ -1492,7 +1492,7 @@ public class InAppWebView: WKWebView, WKUIDelegate,
                             }
                             break
                         default:
-                            InAppWebView.credentialsProposed = []
+                            self.credentialsProposed = []
                             completionHandler(.performDefaultHandling, nil)
                     }
                     return false
@@ -1536,7 +1536,7 @@ public class InAppWebView: WKWebView, WKUIDelegate,
                 DispatchQueue.global().async {
                     if let sslCertificate = challenge.protectionSpace.sslCertificate {
                         DispatchQueue.main.async {
-                            InAppWebView.sslCertificatesMap[challenge.protectionSpace.host] = sslCertificate
+                            self.sslCertificatesMap[challenge.protectionSpace.host] = sslCertificate
                         }
                     }
                 }
@@ -1548,7 +1548,7 @@ public class InAppWebView: WKWebView, WKUIDelegate,
                     completionHandlerCalled = true
                     switch action {
                         case 0:
-                            InAppWebView.credentialsProposed = []
+                            self.credentialsProposed = []
                             completionHandler(.cancelAuthenticationChallenge, nil)
                             break
                         case 1:
@@ -1557,11 +1557,13 @@ public class InAppWebView: WKWebView, WKUIDelegate,
                                 let exceptions = SecTrustCopyExceptions(serverTrust)
                                 SecTrustSetExceptions(serverTrust, exceptions)
                                 let credential = URLCredential(trust: serverTrust)
-                                completionHandler(.useCredential, credential)
+                                DispatchQueue.main.async {
+                                    completionHandler(.useCredential, credential)
+                                }
                             }
                             break
                         default:
-                            InAppWebView.credentialsProposed = []
+                            self.credentialsProposed = []
                             completionHandler(.performDefaultHandling, nil)
                     }
                     return false
@@ -2733,7 +2735,7 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
         guard let scheme = url?.scheme,
               scheme == "https",
               let host = url?.host,
-              let sslCertificate = InAppWebView.sslCertificatesMap[host] else {
+              let sslCertificate = self.sslCertificatesMap[host] else {
             return nil
         }
         return sslCertificate

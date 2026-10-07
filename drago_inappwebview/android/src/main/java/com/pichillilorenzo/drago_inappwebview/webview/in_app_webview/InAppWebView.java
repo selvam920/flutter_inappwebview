@@ -1507,9 +1507,16 @@ final public class InAppWebView extends InputAwareWebView implements InAppWebVie
 
   @Nullable
   public String printCurrentPage(@Nullable PrintJobSettings settings) {
-    if (plugin != null && plugin.activity != null) {
+    // Prefer the plugin activity; fall back to the WebView context (normally the
+    // hosting Activity). PrintManager.print() needs an Activity context.
+    Context printContext = (plugin != null && plugin.activity != null) ? plugin.activity : getContext();
+    if (plugin == null || printContext == null) {
+      Log.e(LOG_TAG, "printCurrentPage: no Activity/Context available, cannot print");
+      return null;
+    }
+    {
       // Get a PrintManager instance
-      PrintManager printManager = (PrintManager) plugin.activity.getSystemService(Context.PRINT_SERVICE);
+      PrintManager printManager = (PrintManager) printContext.getSystemService(Context.PRINT_SERVICE);
 
       if (printManager != null) {
         PrintAttributes.Builder builder = new PrintAttributes.Builder();
@@ -1576,7 +1583,15 @@ final public class InAppWebView extends InputAwareWebView implements InAppWebVie
         }
 
         // Create a printCurrentPage job with name and adapter instance
-        PrintJob job = printManager.print(jobName, printAdapter, builder.build());
+        PrintJob job;
+        try {
+          job = printManager.print(jobName, printAdapter, builder.build());
+        } catch (IllegalStateException e) {
+          // Thrown when the context is not an Activity ("Can print only from an activity").
+          Log.e(LOG_TAG, "printCurrentPage: printing requires an Activity context", e);
+          if (id != null && plugin.printJobManager != null) plugin.printJobManager.jobs.remove(id);
+          return null;
+        }
         if (printJobController != null) printJobController.setJob(job);
 
         return id;

@@ -22,6 +22,20 @@ declare global {
   let _Array_slice = window.Array.prototype.slice;
   _Array_slice.call = window.Function.prototype.call;
 
+  // Origin rules are anchored so a rule like "https://example.com" cannot
+  // match "https://example.com.evil.com". Rules that already carry an
+  // anchor are left untouched.
+  function _anchorOriginRule(rule: string): string {
+    if (rule.startsWith('^') || rule.endsWith('$')) {
+      return rule;
+    }
+    return '^(?:' + rule + ')$';
+  }
+
+  function _isOriginAllowed(rules: string[], origin: string): boolean {
+    return rules.some((rule) => rule === '*' || new RegExp(_anchorOriginRule(rule)).test(origin));
+  }
+
   window.drago_inappwebview_plugin = {
     createDragoInAppWebView: function (viewId: number | string, iframe: HTMLIFrameElement, iframeContainer: HTMLDivElement, bridgeSecret: string) {
       const iframeId = iframe.id;
@@ -52,7 +66,10 @@ declare global {
             }
           }
 
-          document.addEventListener('fullscreenchange', function (event: Event) {
+          if (webView.fullscreenChangeHandler != null) {
+            document.removeEventListener('fullscreenchange', webView.fullscreenChangeHandler);
+          }
+          webView.fullscreenChangeHandler = function (event: Event) {
             // document.fullscreenElement will point to the element that
             // is in fullscreen mode if there is one. If there isn't one,
             // the value of the property is null.
@@ -65,12 +82,16 @@ declare global {
             } else {
               webView.isFullscreen = false;
             }
-          });
+          };
+          document.addEventListener('fullscreenchange', webView.fullscreenChangeHandler);
 
           if (iframe != null) {
             webView.iframe = iframe;
             webView.iframeContainer = iframeContainer;
-            iframe.addEventListener('load', function (event: Event) {
+            if (webView.iframeLoadHandler != null) {
+              iframe.removeEventListener('load', webView.iframeLoadHandler);
+            }
+            webView.iframeLoadHandler = function (event: Event) {
               if (iframe.contentWindow == null) {
                 return;
               }
@@ -81,11 +102,14 @@ declare global {
               try {
                 let javaScriptBridgeEnabled = webView.javaScriptBridgeEnabled;
                 if (javaScriptBridgeOriginAllowList != null) {
-                  javaScriptBridgeEnabled = javaScriptBridgeOriginAllowList
-                      .map(allowedOriginRule => new RegExp(allowedOriginRule))
-                      .some((rx) => {
-                        return rx.test(iframe.contentWindow!.location.origin);
-                      })
+                  let iframeOrigin: string | null = null;
+                  try {
+                    iframeOrigin = iframe.contentWindow!.location.origin;
+                  } catch (_) {
+                    // cross-origin iframe: origin is not readable.
+                    iframeOrigin = null;
+                  }
+                  javaScriptBridgeEnabled = iframeOrigin != null && _isOriginAllowed(javaScriptBridgeOriginAllowList, iframeOrigin);
                 }
                 if (javaScriptBridgeEnabled) {
                   const javaScriptBridgeName = _nativeCommunication<string>('getJavaScriptBridgeName', viewId);
@@ -132,7 +156,7 @@ declare global {
                     if (jsRegExpArray.length > 1) {
                       jsRegExpArray += ",";
                     }
-                    jsRegExpArray += `new RegExp('${allowedOriginRule.replace("\'", "\\'")}')`;
+                    jsRegExpArray += `new RegExp(${_JSON_stringify(_anchorOriginRule(allowedOriginRule))})`;
                   }
                   if (jsRegExpArray.length > 1) {
                     jsRegExpArray += "]";
@@ -346,7 +370,8 @@ declare global {
                 console.log(e);
               }
 
-            });
+            };
+            iframe.addEventListener('load', webView.iframeLoadHandler);
           }
         },
         setSettings: function (newSettings: InAppWebViewSettings) {
@@ -724,6 +749,25 @@ declare global {
             height: height
           };
         }
+      };
+
+      webView.dispose = function () {
+        if (webView.fullscreenChangeHandler != null) {
+          document.removeEventListener('fullscreenchange', webView.fullscreenChangeHandler);
+          webView.fullscreenChangeHandler = null;
+        }
+        const disposedIframe = webView.iframe ?? iframe;
+        if (disposedIframe != null && webView.iframeLoadHandler != null) {
+          disposedIframe.removeEventListener('load', webView.iframeLoadHandler);
+        }
+        webView.iframeLoadHandler = null;
+        try {
+          disposedIframe?.contentWindow?.removeEventListener('contextmenu', webView.disableContextMenuHandler);
+        } catch (_) {
+        }
+        webView.functionMap = {};
+        webView.iframe = null;
+        webView.iframeContainer = null;
       };
 
       return webView;

@@ -181,7 +181,10 @@ namespace drago_inappwebview_plugin
             auto windowWebViewArgs = windowWebViews.at(windowId.value()).get();
             windowWebViewArgs->args->put_NewWindow(inAppWebView->webView.get());
             windowWebViewArgs->args->put_Handled(TRUE);
-            windowWebViewArgs->deferral->Complete();
+            if (windowWebViewArgs->deferral) {
+              windowWebViewArgs->deferral->Complete();
+              windowWebViewArgs->deferral = nullptr;
+            }
             windowWebViews.erase(windowId.value());
           }
 

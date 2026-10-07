@@ -2,6 +2,7 @@
 #define DRAGO_INAPPWEBVIEW_PLUGIN_WEBVIEW_ENVIRONMENT_H_
 
 #include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 #include <WebView2.h>
@@ -40,6 +41,8 @@ namespace drago_inappwebview_plugin
 
   private:
     wil::com_ptr<ICoreWebView2Environment> environment_;
+    // set to false in the destructor, captured by async completion handlers
+    std::shared_ptr<bool> alive_ = std::make_shared<bool>(true);
     EventRegistrationToken processInfosChangedToken_ = { 0 };
     EventRegistrationToken browserProcessExitedToken_ = { 0 };
     EventRegistrationToken newBrowserVersionAvailableToken_ = { 0 };

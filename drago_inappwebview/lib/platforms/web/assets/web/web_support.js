@@ -3,6 +3,15 @@
   let _JSON_stringify = window.JSON.stringify;
   let _Array_slice = window.Array.prototype.slice;
   _Array_slice.call = window.Function.prototype.call;
+  function _anchorOriginRule(rule) {
+    if (rule.startsWith("^") || rule.endsWith("$")) {
+      return rule;
+    }
+    return "^(?:" + rule + ")$";
+  }
+  function _isOriginAllowed(rules, origin) {
+    return rules.some((rule) => rule === "*" || new RegExp(_anchorOriginRule(rule)).test(origin));
+  }
   window.drago_inappwebview_plugin = {
     createDragoInAppWebView: function(viewId, iframe, iframeContainer, bridgeSecret) {
       const iframeId = iframe.id;
@@ -30,7 +39,10 @@
               webView.javaScriptBridgeEnabled = false;
             }
           }
-          document.addEventListener("fullscreenchange", function(event) {
+          if (webView.fullscreenChangeHandler != null) {
+            document.removeEventListener("fullscreenchange", webView.fullscreenChangeHandler);
+          }
+          webView.fullscreenChangeHandler = function(event) {
             if (document.fullscreenElement && document.fullscreenElement.id == iframeId) {
               webView.isFullscreen = true;
               _nativeCommunication("onEnterFullscreen", viewId);
@@ -40,11 +52,15 @@
             } else {
               webView.isFullscreen = false;
             }
-          });
+          };
+          document.addEventListener("fullscreenchange", webView.fullscreenChangeHandler);
           if (iframe != null) {
             webView.iframe = iframe;
             webView.iframeContainer = iframeContainer;
-            iframe.addEventListener("load", function(event) {
+            if (webView.iframeLoadHandler != null) {
+              iframe.removeEventListener("load", webView.iframeLoadHandler);
+            }
+            webView.iframeLoadHandler = function(event) {
               if (iframe.contentWindow == null) {
                 return;
               }
@@ -53,9 +69,13 @@
               try {
                 let javaScriptBridgeEnabled = webView.javaScriptBridgeEnabled;
                 if (javaScriptBridgeOriginAllowList != null) {
-                  javaScriptBridgeEnabled = javaScriptBridgeOriginAllowList.map((allowedOriginRule) => new RegExp(allowedOriginRule)).some((rx) => {
-                    return rx.test(iframe.contentWindow.location.origin);
-                  });
+                  let iframeOrigin = null;
+                  try {
+                    iframeOrigin = iframe.contentWindow.location.origin;
+                  } catch (_) {
+                    iframeOrigin = null;
+                  }
+                  javaScriptBridgeEnabled = iframeOrigin != null && _isOriginAllowed(javaScriptBridgeOriginAllowList, iframeOrigin);
                 }
                 if (javaScriptBridgeEnabled) {
                   const javaScriptBridgeName = _nativeCommunication("getJavaScriptBridgeName", viewId);
@@ -100,7 +120,7 @@
                     if (jsRegExpArray.length > 1) {
                       jsRegExpArray += ",";
                     }
-                    jsRegExpArray += `new RegExp('${allowedOriginRule.replace("'", "\\'")}')`;
+                    jsRegExpArray += `new RegExp(${_JSON_stringify(_anchorOriginRule(allowedOriginRule))})`;
                   }
                   if (jsRegExpArray.length > 1) {
                     jsRegExpArray += "]";
@@ -290,7 +310,8 @@
               } catch (e) {
                 console.log(e);
               }
-            });
+            };
+            iframe.addEventListener("load", webView.iframeLoadHandler);
           }
         },
         setSettings: function(newSettings) {
@@ -658,6 +679,24 @@
             height
           };
         }
+      };
+      webView.dispose = function() {
+        if (webView.fullscreenChangeHandler != null) {
+          document.removeEventListener("fullscreenchange", webView.fullscreenChangeHandler);
+          webView.fullscreenChangeHandler = null;
+        }
+        const disposedIframe = webView.iframe ?? iframe;
+        if (disposedIframe != null && webView.iframeLoadHandler != null) {
+          disposedIframe.removeEventListener("load", webView.iframeLoadHandler);
+        }
+        webView.iframeLoadHandler = null;
+        try {
+          disposedIframe?.contentWindow?.removeEventListener("contextmenu", webView.disableContextMenuHandler);
+        } catch (_) {
+        }
+        webView.functionMap = {};
+        webView.iframe = null;
+        webView.iframeContainer = null;
       };
       return webView;
     },

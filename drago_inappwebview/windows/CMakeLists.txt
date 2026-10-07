@@ -17,7 +17,7 @@ project(${PROJECT_NAME} LANGUAGES CXX)
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
-cmake_policy(VERSION 3.14...3.25)
+cmake_policy(VERSION 3.14...3.31)
 
 # This value is used when generating builds using this plugin, so it must
 # not be changed
@@ -28,14 +28,29 @@ if(NOT NUGET)
   message(NOTICE "Nuget is not installed! The drago_inappwebview plugin requires it. Check https://inappwebview.dev/docs/intro#setup-windows")
 endif()
 
-add_custom_target(${PROJECT_NAME}_DEPS ALL)
-add_custom_command(
-  TARGET ${PROJECT_NAME}_DEPS PRE_BUILD
-  COMMAND ${NUGET} install Microsoft.Windows.ImplementationLibrary -Version ${WIL_VERSION} -ExcludeVersion -OutputDirectory ${CMAKE_BINARY_DIR}/packages
-  COMMAND ${NUGET} install Microsoft.Windows.CppWinRT -Version ${CPP_WINRT_VERSION} -ExcludeVersion -OutputDirectory ${CMAKE_BINARY_DIR}/packages
-  COMMAND ${NUGET} install Microsoft.Web.WebView2 -Version ${WEBVIEW_VERSION} -ExcludeVersion -OutputDirectory ${CMAKE_BINARY_DIR}/packages
-  COMMAND ${NUGET} install nlohmann.json -Version ${NLOHMANN_JSON_VERSION} -ExcludeVersion -OutputDirectory ${CMAKE_BINARY_DIR}/packages
-)
+# Install the NuGet packages once, at configure time (not on every build).
+# A package is downloaded again only when its folder is missing.
+function(drago_inappwebview_nuget_install PACKAGE_NAME PACKAGE_VERSION)
+  if(NOT EXISTS "${CMAKE_BINARY_DIR}/packages/${PACKAGE_NAME}")
+    if(NOT NUGET)
+      message(NOTICE "Nuget is not installed! Cannot install ${PACKAGE_NAME} ${PACKAGE_VERSION}.")
+      return()
+    endif()
+    message(STATUS "Installing NuGet package ${PACKAGE_NAME} ${PACKAGE_VERSION}")
+    execute_process(
+      COMMAND ${NUGET} install ${PACKAGE_NAME} -Version ${PACKAGE_VERSION} -ExcludeVersion -OutputDirectory ${CMAKE_BINARY_DIR}/packages
+      RESULT_VARIABLE NUGET_RESULT
+    )
+    if(NOT NUGET_RESULT EQUAL 0)
+      message(FATAL_ERROR "Failed to install NuGet package ${PACKAGE_NAME} ${PACKAGE_VERSION}")
+    endif()
+  endif()
+endfunction()
+
+drago_inappwebview_nuget_install(Microsoft.Windows.ImplementationLibrary ${WIL_VERSION})
+drago_inappwebview_nuget_install(Microsoft.Windows.CppWinRT ${CPP_WINRT_VERSION})
+drago_inappwebview_nuget_install(Microsoft.Web.WebView2 ${WEBVIEW_VERSION})
+drago_inappwebview_nuget_install(nlohmann.json ${NLOHMANN_JSON_VERSION})
 
 # Any new source files that you add to the plugin should be added here.
 list(APPEND PLUGIN_SOURCES
@@ -362,7 +377,6 @@ target_compile_options(${TEST_RUNNER} PRIVATE /WX-)
 target_include_directories(${TEST_RUNNER} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(${TEST_RUNNER} PRIVATE flutter_wrapper_plugin)
 target_link_libraries(${TEST_RUNNER} PRIVATE gtest_main gmock)
-add_dependencies(${TEST_RUNNER} ${PROJECT_NAME}_DEPS)
 target_link_libraries(${TEST_RUNNER} PRIVATE ${CMAKE_BINARY_DIR}/packages/Microsoft.Web.WebView2/build/native/Microsoft.Web.WebView2.targets)
 target_link_libraries(${TEST_RUNNER} PRIVATE ${CMAKE_BINARY_DIR}/packages/Microsoft.Windows.ImplementationLibrary/build/native/Microsoft.Windows.ImplementationLibrary.targets)
 target_link_libraries(${TEST_RUNNER} PRIVATE ${CMAKE_BINARY_DIR}/packages/nlohmann.json/build/native/nlohmann.json.targets)

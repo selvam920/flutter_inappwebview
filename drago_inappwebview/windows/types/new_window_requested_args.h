@@ -13,7 +13,7 @@ namespace drago_inappwebview_plugin
     wil::com_ptr<ICoreWebView2Deferral> deferral;
 
     NewWindowRequestedArgs(wil::com_ptr<ICoreWebView2NewWindowRequestedEventArgs> args, wil::com_ptr<ICoreWebView2Deferral> deferral);
-    ~NewWindowRequestedArgs() = default;
+    ~NewWindowRequestedArgs();
   };
 }
 

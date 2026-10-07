@@ -271,6 +271,39 @@ namespace drago_inappwebview_plugin
     std::map<std::string, std::shared_ptr<WebNotificationController>> webNotificationControllers_;
     std::map<std::string, std::shared_ptr<PrintJobController>> printJobControllers_;
 
+    // set to false in the destructor: async completions and Flutter callbacks
+    // capture a copy of it and become a no-op once the InAppWebView is gone
+    std::shared_ptr<bool> alive_ = std::make_shared<bool>(true);
+
+    struct EventTokenEntry {
+      EventRegistrationToken token = {};
+      std::function<void(EventRegistrationToken)> remove;
+    };
+    // WebView2 event registrations, removed in the destructor
+    std::vector<std::unique_ptr<EventTokenEntry>> eventTokens_;
+
+    template<typename T, typename F>
+    EventRegistrationToken* trackEventToken(T* source, F remove)
+    {
+      auto entry = std::make_unique<EventTokenEntry>();
+      wil::com_ptr<T> sourceRef(source);
+      entry->remove = [sourceRef, remove](EventRegistrationToken token)
+        {
+          if (sourceRef) {
+            remove(sourceRef.get(), token);
+          }
+        };
+      auto token = &entry->token;
+      eventTokens_.push_back(std::move(entry));
+      return token;
+    }
+
+    template<typename T, typename F>
+    EventRegistrationToken* trackEventToken(const wil::com_ptr<T>& source, F remove)
+    {
+      return trackEventToken(source.get(), remove);
+    }
+
     void registerEventHandlers();
     void registerSurfaceEventHandlers();
     HRESULT onCallJsHandler(const bool& isMainFrame, ICoreWebView2WebMessageReceivedEventArgs* args);
