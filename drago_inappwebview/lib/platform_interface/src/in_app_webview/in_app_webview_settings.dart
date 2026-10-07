@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:drago_inappwebview_internal_annotations/drago_inappwebview_internal_annotations.dart';
+import 'package:drago_inappwebview/src/internal_annotations/internal_annotations.dart';
 import 'package:drago_inappwebview/platform_interface/platform_interface.dart';
 
 import '../types/action_mode_menu_item.dart';

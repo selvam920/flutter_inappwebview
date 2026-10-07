@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:drago_inappwebview_internal_annotations/drago_inappwebview_internal_annotations.dart';
+import 'package:drago_inappwebview/src/internal_annotations/internal_annotations.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'in_app_webview/platform_headless_in_app_webview.dart';

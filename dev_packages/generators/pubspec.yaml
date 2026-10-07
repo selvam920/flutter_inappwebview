@@ -14,8 +14,8 @@ dependencies:
   source_gen: ^4.0.0
   analyzer: ^14.1.0
   collection: any
-  drago_inappwebview_internal_annotations:
-    path: ../drago_inappwebview_internal_annotations
+  drago_inappwebview:
+    path: ../../drago_inappwebview
 
 dev_dependencies:
   build_runner: ^2.4.12

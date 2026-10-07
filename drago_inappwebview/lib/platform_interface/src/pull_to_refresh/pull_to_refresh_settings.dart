@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
-import 'package:drago_inappwebview_internal_annotations/drago_inappwebview_internal_annotations.dart';
+import 'package:drago_inappwebview/src/internal_annotations/internal_annotations.dart';
 
 import '../types/attributed_string.dart';
 import '../types/pull_to_refresh_size.dart';

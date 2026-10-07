@@ -3,7 +3,7 @@ import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:drago_inappwebview_internal_annotations/drago_inappwebview_internal_annotations.dart';
+import 'package:drago_inappwebview/src/internal_annotations/internal_annotations.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import '../context_menu/context_menu.dart';

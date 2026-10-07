@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:drago_inappwebview_internal_annotations/drago_inappwebview_internal_annotations.dart';
+import 'package:drago_inappwebview/src/internal_annotations/internal_annotations.dart';
 import 'show_file_chooser_request.dart';
 
 part 'show_file_chooser_request_mode.g.dart';

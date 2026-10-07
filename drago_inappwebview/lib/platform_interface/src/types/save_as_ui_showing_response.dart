@@ -1,4 +1,4 @@
-import 'package:drago_inappwebview_internal_annotations/drago_inappwebview_internal_annotations.dart';
+import 'package:drago_inappwebview/src/internal_annotations/internal_annotations.dart';
 
 import 'save_as_kind.dart';
 import 'enum_method.dart';

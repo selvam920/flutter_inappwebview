@@ -1,4 +1,4 @@
-import 'package:drago_inappwebview_internal_annotations/drago_inappwebview_internal_annotations.dart';
+import 'package:drago_inappwebview/src/internal_annotations/internal_annotations.dart';
 
 part 'in_app_webview_hit_test_result_type.g.dart';
 

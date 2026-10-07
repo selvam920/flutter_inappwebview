@@ -1,4 +1,4 @@
-import 'package:drago_inappwebview_internal_annotations/drago_inappwebview_internal_annotations.dart';
+import 'package:drago_inappwebview/src/internal_annotations/internal_annotations.dart';
 
 part 'trusted_web_activity_screen_orientation.g.dart';
 

@@ -1,4 +1,4 @@
-import 'package:drago_inappwebview_internal_annotations/drago_inappwebview_internal_annotations.dart';
+import 'package:drago_inappwebview/src/internal_annotations/internal_annotations.dart';
 
 import '../x509_certificate/x509_certificate.dart';
 import '../x509_certificate/asn1_distinguished_names.dart';

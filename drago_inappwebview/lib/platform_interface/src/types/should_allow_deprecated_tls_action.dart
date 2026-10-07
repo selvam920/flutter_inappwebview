@@ -1,4 +1,4 @@
-import 'package:drago_inappwebview_internal_annotations/drago_inappwebview_internal_annotations.dart';
+import 'package:drago_inappwebview/src/internal_annotations/internal_annotations.dart';
 import '../in_app_webview/platform_webview.dart';
 part 'should_allow_deprecated_tls_action.g.dart';
 

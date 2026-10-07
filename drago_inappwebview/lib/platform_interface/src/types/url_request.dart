@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import 'package:drago_inappwebview_internal_annotations/drago_inappwebview_internal_annotations.dart';
+import 'package:drago_inappwebview/src/internal_annotations/internal_annotations.dart';
 
 import '../web_uri.dart';
 import 'url_request_cache_policy.dart';
