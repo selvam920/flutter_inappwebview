@@ -4736,9 +4736,6 @@ namespace drago_inappwebview_plugin
     }
     eventTokens_.clear();
     userContentController = nullptr;
-    if (webView) {
-      failedLog(webView->Stop());
-    }
     HWND parentWindow = nullptr;
     if (webViewCompositionController && webViewController && succeededOrLog(webViewController->get_ParentWindow(&parentWindow))) {
       // if it's an InAppWebView (so webViewCompositionController will be not a nullptr!),

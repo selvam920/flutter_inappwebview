@@ -460,10 +460,12 @@ namespace drago_inappwebview_plugin
   UserContentController::~UserContentController()
   {
     debugLog("dealloc UserContentController");
+    // The scripts go away with the WebView; calling DevTools to remove them
+    // while it is being closed only fails with ERROR_INVALID_STATE.
+    webView_ = nullptr;
     removeAllUserOnlyScripts();
     removeAllPluginScripts();
     contentWorlds_.clear();
     pluginScriptsInContentWorlds_.clear();
-    webView_ = nullptr;
   }
 }
