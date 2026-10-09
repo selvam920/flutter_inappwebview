@@ -24,6 +24,9 @@ namespace drago_inappwebview_plugin
     isInspectable = get_fl_map_value(encodableMap, "isInspectable", isInspectable);
     disableContextMenu = get_fl_map_value(encodableMap, "disableContextMenu", disableContextMenu);
     incognito = get_fl_map_value(encodableMap, "incognito", incognito);
+    if (fl_map_contains_not_null(encodableMap, "containerId")) {
+      containerId = get_optional_fl_map_value<std::string>(encodableMap, "containerId");
+    }
     if (fl_map_contains_not_null(encodableMap, "javaScriptHandlersOriginAllowList")) {
       javaScriptHandlersOriginAllowList = get_optional_fl_map_value<std::vector<std::string>>(encodableMap, "javaScriptHandlersOriginAllowList");
     }
@@ -70,6 +73,7 @@ namespace drago_inappwebview_plugin
       {"isInspectable", isInspectable},
       {"disableContextMenu", disableContextMenu},
       {"incognito", incognito},
+      {"containerId", make_fl_value(containerId)},
       {"javaScriptHandlersOriginAllowList", make_fl_value(javaScriptHandlersOriginAllowList)},
       {"javaScriptHandlersForMainFrameOnly", javaScriptHandlersForMainFrameOnly},
       {"javaScriptBridgeEnabled", javaScriptBridgeEnabled},

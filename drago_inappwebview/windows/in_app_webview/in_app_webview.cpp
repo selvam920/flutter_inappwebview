@@ -158,6 +158,12 @@ namespace drago_inappwebview_plugin
         wil::com_ptr<ICoreWebView2ControllerOptions> options;
         if (initialSettings && succeededOrLog(env->QueryInterface(IID_PPV_ARGS(&webViewEnv10))) && succeededOrLog(webViewEnv10->CreateCoreWebView2ControllerOptions(&options))) {
           options->put_IsInPrivateModeEnabled(initialSettings->incognito);
+          // A named profile inside the environment's user data folder: its
+          // own cookies/storage, but the same browser process as every other
+          // webview on that folder. incognito wins, as on other platforms.
+          if (!initialSettings->incognito && initialSettings->containerId.has_value() && !initialSettings->containerId.value().empty()) {
+            failedLog(options->put_ProfileName(utf8_to_wide(initialSettings->containerId.value()).c_str()));
+          }
         }
         else {
           webViewEnv10 = nullptr;

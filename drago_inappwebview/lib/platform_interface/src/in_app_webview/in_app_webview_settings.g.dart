@@ -389,6 +389,8 @@ class InAppWebViewSettings {
   ///    - Apple's API requires a UUID; the supplied identifier is hashed (SHA-256, first 16 bytes) to derive a stable UUID. Ignored on macOS <14.
   ///- Linux WPE WebKit ([Official API - WebKitNetworkSession](https://wpewebkit.org/reference/stable/wpe-webkit-2.0/class.NetworkSession.html)):
   ///    - Requires WPE WebKit 2.40+. The session's data and cache directories are derived from XDG_DATA_HOME and XDG_CACHE_HOME (`<XDG_DATA_HOME>/drago_inappwebview/containers/<id>/data` and `<XDG_CACHE_HOME>/drago_inappwebview/containers/<id>/cache`). Sessions are cached process-wide by id so multiple WebViews joining the same container share state. Ignored on WPE WebKit <2.40.
+  ///- Windows WebView2 ([Official API - ICoreWebView2ControllerOptions.put_ProfileName](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2controlleroptions#put_profilename)):
+  ///    - A named profile inside the WebViewEnvironment's user data folder (`<userDataFolder>/EBWebView/<id>`). WebViews whose environments share a user data folder and options share one browser process, whatever their profile. Letters, digits and `#@\$()+-_~.` and space only, at most 64 characters.
   String? containerId;
 
   ///List of [ContentBlocker] that are a set of rules used to block content in the browser window.
@@ -3456,6 +3458,8 @@ enum InAppWebViewSettingsProperty {
   ///    - Apple's API requires a UUID; the supplied identifier is hashed (SHA-256, first 16 bytes) to derive a stable UUID. Ignored on macOS <14.
   ///- Linux WPE WebKit ([Official API - WebKitNetworkSession](https://wpewebkit.org/reference/stable/wpe-webkit-2.0/class.NetworkSession.html)):
   ///    - Requires WPE WebKit 2.40+. The session's data and cache directories are derived from XDG_DATA_HOME and XDG_CACHE_HOME (`<XDG_DATA_HOME>/drago_inappwebview/containers/<id>/data` and `<XDG_CACHE_HOME>/drago_inappwebview/containers/<id>/cache`). Sessions are cached process-wide by id so multiple WebViews joining the same container share state. Ignored on WPE WebKit <2.40.
+  ///- Windows WebView2 ([Official API - ICoreWebView2ControllerOptions.put_ProfileName](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2controlleroptions#put_profilename)):
+  ///    - A named profile inside the WebViewEnvironment's user data folder (`<userDataFolder>/EBWebView/<id>`). WebViews whose environments share a user data folder and options share one browser process, whatever their profile. Letters, digits and `#@\$()+-_~.` and space only, at most 64 characters.
   ///
   ///Use the [InAppWebViewSettings.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
@@ -5641,6 +5645,7 @@ extension _InAppWebViewSettingsPropertySupported on InAppWebViewSettings {
               TargetPlatform.iOS,
               TargetPlatform.macOS,
               TargetPlatform.linux,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case InAppWebViewSettingsProperty.contentBlockers:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

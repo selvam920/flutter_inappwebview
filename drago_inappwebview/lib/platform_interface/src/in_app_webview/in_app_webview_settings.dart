@@ -485,6 +485,13 @@ because there isn't any way to make the website data store non-persistent for th
         note:
             "Requires WPE WebKit 2.40+. The session's data and cache directories are derived from XDG_DATA_HOME and XDG_CACHE_HOME (`<XDG_DATA_HOME>/drago_inappwebview/containers/<id>/data` and `<XDG_CACHE_HOME>/drago_inappwebview/containers/<id>/cache`). Sessions are cached process-wide by id so multiple WebViews joining the same container share state. Ignored on WPE WebKit <2.40.",
       ),
+      WindowsPlatform(
+        apiName: 'ICoreWebView2ControllerOptions.put_ProfileName',
+        apiUrl:
+            'https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2controlleroptions#put_profilename',
+        note:
+            "A named profile inside the WebViewEnvironment's user data folder (`<userDataFolder>/EBWebView/<id>`). WebViews whose environments share a user data folder and options share one browser process, whatever their profile. Letters, digits and `#@\$()+-_~.` and space only, at most 64 characters.",
+      ),
     ],
   )
   String? containerId;
